@@ -11,12 +11,18 @@ GLib.AddCSLuaPackSystem ("GCAD")
 GLib.AddCSLuaPackFile ("autorun/gcad.lua")
 GLib.AddCSLuaPackFolderRecursive ("gcad")
 
-include ("space/plane3d.lua")
-include ("space/aabb3d.lua")
-include ("space/obb3d.lua")
-include ("space/sphere3d.lua")
-include ("space/frustum3d.lua")
-include ("space/nativesphere3d.lua")
+-- Spatial queries
+include ("space/queries/spatialqueryresult.lua")
+include ("space/queries/ispatialqueryable2d.lua")
+include ("space/queries/ispatialqueryable3d.lua")
+
+-- Spatial primitives
+include ("space/primitives/plane3d.lua")
+include ("space/primitives/aabb3d.lua")
+include ("space/primitives/obb3d.lua")
+include ("space/primitives/sphere3d.lua")
+include ("space/primitives/frustum3d.lua")
+include ("space/primitives/nativesphere3d.lua")
 
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 
