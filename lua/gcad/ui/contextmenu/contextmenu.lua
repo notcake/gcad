@@ -107,16 +107,11 @@ function self:ctor ()
 		end
 	)
 	
-	local queryTime  = 0
-	local smoothedQueryTime  = 0
-	local renderTime = 0
-	local smoothedRenderTime = 0
-	local smoothingRate = 0.95
-	
 	local fillColor = GLib.Color.FromColor (GLib.Colors.CornflowerBlue, 128)
 	hook.Add ("HUDPaint", "GCAD.ContextMenu",
 		function ()
 			if self.MouseDown then
+				-- Box selection rectangle
 				local x1 = math.min (self.MouseDownX, self.MouseMoveX)
 				local x2 = math.max (self.MouseDownX, self.MouseMoveX)
 				local y1 = math.min (self.MouseDownY, self.MouseMoveY)
@@ -125,14 +120,6 @@ function self:ctor ()
 				surface.DrawRect (x1, y1, x2 - x1, y2 - y1)
 				surface.SetDrawColor (GLib.Colors.CornflowerBlue)
 				surface.DrawOutlinedRect (x1, y1, x2 - x1, y2 - y1)
-				
-				draw.SimpleText ("FindInFrustum took " .. GLib.FormatDuration (smoothedQueryTime ), "DermaDefault", ScrW () / 2, 300, GLib.Colors.White, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText ("ents.GetAll took " .. GLib.FormatDuration (entsGetAllTime), "DermaDefault", ScrW () / 2, 316, GLib.Colors.White, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText ("Frustum3d:IntersectsNativeSphere calls took " .. GLib.FormatDuration (frustumIntersectsSphereTime), "DermaDefault", ScrW () / 2, 332, GLib.Colors.White, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-				draw.SimpleText ("Frustum3d:ContainsAnyVertex calls took " .. GLib.FormatDuration (frustumContainsAnyVertexTime), "DermaDefault", ScrW () / 2, 348, GLib.Colors.White, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
-			end
-			if self.MouseDown or next (self.SelectedEntities) then
-				draw.SimpleText ("OBB rendering took " .. GLib.FormatDuration (smoothedRenderTime), "DermaDefault", ScrW () / 2, 364, GLib.Colors.White, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
 			end
 		end
 	)
@@ -141,7 +128,7 @@ function self:ctor ()
 	local v1 = Vector ()
 	local v2 = Vector ()
 	
-	local lastQueryTime = 0
+	local lastQueryFrame = nil
 	local results = {}
 	local Entity_IsValid = debug.getregistry ().Entity.IsValid
 	local whiteMaterial = Material ("debug/debugtranslucentvertexcolor")
@@ -167,17 +154,18 @@ function self:ctor ()
 				local y1 = math.min (self.MouseDownY, self.MouseMoveY)
 				local y2 = math.max (self.MouseDownY, self.MouseMoveY)
 				
-				if SysTime () - lastQueryTime > 0.5 then
-					-- lastQueryTime = SysTime ()
+				if FrameNumber () ~= lastQueryFrame then
+					lastQueryFrame = FrameNumber ()
 					
-					local t0 = SysTime ()
+					GCAD.Profiler:Begin ("FindInFrustum")
 					self:SetSelection (self:FindInFrustum (x1, y1, x2, y2))
-					queryTime = SysTime () - t0
-					smoothedQueryTime = smoothingRate * smoothedQueryTime + (1 - smoothingRate) * queryTime
+					GCAD.Profiler:End ()
 				end
 			end
 			
-			local t0 = SysTime ()
+			if not next (self.SelectedEntities) then return end
+			
+			GCAD.Profiler:Begin ("OBB rendering")
 			render.SetMaterial (whiteMaterial)
 			for _, v in ipairs (self.SelectedEntities) do
 				if Entity_IsValid (v) then
@@ -196,6 +184,7 @@ function self:ctor ()
 						local mesh_AdvanceVertex = mesh.AdvanceVertex
 						local mesh_Color         = mesh.Color
 						local mesh_Position      = mesh.Position
+						cam.IgnoreZ (true)
 						mesh.Begin (MATERIAL_LINES, 3)
 							mesh_Position (pos)                      mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
 							mesh_Position (pos + ang:Forward () * 8) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
@@ -204,6 +193,7 @@ function self:ctor ()
 							mesh_Position (pos)                      mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
 							mesh_Position (pos + ang:Up      () * 8) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
 						mesh.End ()
+						cam.IgnoreZ (false)
 					elseif renderType == 1 then
 						render.DrawLine (pos, pos + ang:Forward () * 8, GLib.Colors.Red  )
 						render.DrawLine (pos, pos - ang:Right   () * 8, GLib.Colors.Green)
@@ -226,8 +216,7 @@ function self:ctor ()
 					render.DrawBox          (pos, ang, obbMins, obbMaxs, selectionColor,        true)
 				end
 			end
-			renderTime = SysTime () - t0
-			smoothedRenderTime = smoothingRate * smoothedRenderTime + (1 - smoothingRate) * renderTime
+			GCAD.Profiler:End ()
 		end
 	)
 	
@@ -265,19 +254,9 @@ function self:GetControl ()
 end
 
 -- Intenral, do not call
-local frustum = GCAD.Frustum3d ()
-local frustumAABB = GCAD.AABB3d ()
-local v1 = Vector ()
-local v2 = Vector ()
+local frustum3d = GCAD.Frustum3d ()
+local spatialQueryResults = GCAD.SpatialQueryResult ()
 
-local boundingSphere = GCAD.NativeSphere3d ()
-local obb            = GCAD.OBB3d ()
-
-local vec1 = GLib.ColumnVector (3)
-
-local Entity_GetOwner       = debug.getregistry ().Entity.GetOwner
-local Entity_IsEffectActive = debug.getregistry ().Entity.IsEffectActive
-local EF_NODRAW = EF_NODRAW
 function self:FindInFrustum (x1, y1, x2, y2, out)
 	out = out or {}
 	
@@ -289,44 +268,13 @@ function self:FindInFrustum (x1, y1, x2, y2, out)
 		return out
 	end
 	
-	frustumIntersectsSphereTime = 0
-	frustumContainsAnyVertexTime = 0
-	
 	local localPlayer = LocalPlayer ()
 	
-	frustum = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2)
+	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2)
 	
-	local t0 = SysTime ()
-	local entities = ents.GetAll ()
-	entsGetAllTime = SysTime () - t0
-	
-	for _, v in ipairs (entities) do
-		if not Entity_IsEffectActive (v, EF_NODRAW) and
-		   v ~= localPlayer and
-		   Entity_GetOwner (v) ~= localPlayer then
-			
-			local t1 = SysTime ()
-			boundingSphere = GCAD.NativeSphere3d.FromEntity (v, boundingSphere)
-			local intersectsSphere, containsSphere = frustum:IntersectsNativeSphere (boundingSphere)
-			frustumIntersectsSphereTime = frustumIntersectsSphereTime + SysTime () - t1
-			
-			if intersectsSphere then
-				local contained = containsSphere
-				if not contained then
-					local t1 = SysTime ()
-					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum:ContainsAnyVertex (obb, vec1)
-					frustumContainsAnyVertexTime = frustumContainsAnyVertexTime + SysTime () - t1
-				end
-				
-				if contained then
-					out [#out + 1] = v
-				end
-			end
-		end
-	end
-	
-	return out
+	spatialQueryResults:Clear ()
+	spatialQueryResults = GCAD.EngineEntitiesSpatialQueryable:FindIntersectingFrustum (frustum3d, spatialQueryResults)
+	return spatialQueryResults:ToArray (out)
 end
 
 function self:SetControl (control)

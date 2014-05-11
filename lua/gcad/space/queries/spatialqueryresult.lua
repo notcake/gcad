@@ -49,3 +49,13 @@ end
 function self:IsResultFullyContained (index)
 	return self.ObjectsFullyContained [index]
 end
+
+function self:ToArray (out)
+	out = out or {}
+	
+	for i = 1, #self.Objects do
+		out [#out + 1] = self.Objects [i]
+	end
+	
+	return out
+end
