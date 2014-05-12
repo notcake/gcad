@@ -5,57 +5,77 @@ local math      = math
 
 local isnumber  = isnumber
 
+function GCAD.Matrix2x2.Clone (self, out)
+	out = out or GCAD.Matrix2x2 ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	out [3] = self [3]
+	out [4] = self [4]
+	
+	return self
+end
+
+function GCAD.Matrix2x2.Copy (self, source)
+	self [1] = source [1]
+	self [2] = source [2]
+	self [3] = source [3]
+	self [4] = source [4]
+	
+	return self
+end
+
 -- Matrix reading
-function GCAD.Matrix2x2.GetColumn (a, column, out)
+function GCAD.Matrix2x2.GetColumn (self, column, out)
 	out = out or GCAD.Vector2d ()
 	
-	out [1] = a [column + 0]
-	out [2] = a [column + 2]
+	out [1] = self [column + 0]
+	out [2] = self [column + 2]
 	
 	return out
 end
 
-function GCAD.Matrix2x2.GetDiagonal (a, out)
+function GCAD.Matrix2x2.GetDiagonal (self, out)
 	out = out or GCAD.Vector2d ()
 	
-	out [1] = a [1]
-	out [2] = a [3]
+	out [1] = self [1]
+	out [2] = self [3]
 	
 	return out
 end
 
-function GCAD.Matrix2x2.GetRow (a, row, out)
+function GCAD.Matrix2x2.GetRow (self, row, out)
 	out = out or GCAD.Vector2d ()
 	
-	out [1] = a [row * 2 - 2 + 1]
-	out [2] = a [row * 2 - 2 + 2]
+	out [1] = self [row * 2 - 2 + 1]
+	out [2] = self [row * 2 - 2 + 2]
 	
 	return out
 end
 
 -- Matrix operations
-function GCAD.Matrix2x2.Determinant (a)
-	return a [1] * a [4] - a [3] * a [2]
+function GCAD.Matrix2x2.Determinant (self)
+	return self [1] * self [4] - self [3] * self [2]
 end
 
 local GCAD_Matrix2x2_Determinant = GCAD.Matrix2x2.Determinant
-function GCAD.Matrix2x2.Invert (a, out)
+function GCAD.Matrix2x2.Invert (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	local determinant = GCAD_Matrix2x2_Determinant (a)
-	out [1], out [4] = a [4] / determinant, a [1] / determinant
-	out [2] = -a [2] / determinant
-	out [3] = -a [3] / determinant
+	local determinant = GCAD_Matrix2x2_Determinant (self)
+	out [1], out [4] = self [4] / determinant, self [1] / determinant
+	out [2] = -self [2] / determinant
+	out [3] = -self [3] / determinant
 	
 	return out
 end
 
-function GCAD.Matrix2x2.Transpose (a, out)
+function GCAD.Matrix2x2.Transpose (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1]
-	out [4] = a [4]
-	out [2], out [3] = a [3], a [2]
+	out [1] = self [1]
+	out [4] = self [4]
+	out [2], out [3] = self [3], self [2]
 	
 	return out
 end
@@ -166,24 +186,24 @@ function GCAD.Matrix2x2.ScalarDivide (a, b, out)
 	return out
 end
 
-function GCAD.Matrix2x2.Negate (a, out)
+function GCAD.Matrix2x2.Negate (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = -a [1]
-	out [2] = -a [2]
-	out [3] = -a [3]
-	out [4] = -a [4]
+	out [1] = -self [1]
+	out [2] = -self [2]
+	out [3] = -self [3]
+	out [4] = -self [4]
 	
 	return out
 end
 
 -- Utility
-function GCAD.Matrix2x2.Unpack (a)
-	return a [1], a [2], a [3], a [4]
+function GCAD.Matrix2x2.Unpack (self)
+	return self [1], self [2], self [3], self [4]
 end
 
-function GCAD.Matrix2x2.ToString (a)
-	return "[" .. tostring (a [1]) .. ", " .. tostring (a [2]) .. "]\n[" .. tostring (a [3]) .. ", " .. tostring (a [4]) .. "]"
+function GCAD.Matrix2x2.ToString (self)
+	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. "]\n[" .. tostring (self [3]) .. ", " .. tostring (self [4]) .. "]"
 end
 
 -- Construction
@@ -247,6 +267,14 @@ function self:Set (m11, m12, m21, m22)
 	self [3] = m21
 	self [4] = m22
 end
+
+self.Clone          = GCAD.Matrix2x2.Clone
+self.Copy           = GCAD.Matrix2x2.Copy
+
+local GCAD_Matrix2x2_Identity = GCAD.Matrix2x2.Identity
+local GCAD_Matrix2x2_Zero     = GCAD.Matrix2x2.Zero
+function self:Identity () return GCAD_Matrix2x2_Identity (self) end
+function self:Zero     () return GCAD_Matrix2x2_Zero     (self) end
 
 -- Matrix reading
 self.GetColumn      = GCAD.Matrix2x2.GetColumn

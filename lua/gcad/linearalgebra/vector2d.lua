@@ -7,6 +7,22 @@ local isnumber  = isnumber
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+function GCAD.Vector2d.Clone (self, out)
+	out = out or GCAD.Vector2d ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	
+	return out
+end
+
+function GCAD.Vector2d.Copy (self, source)
+	self [1] = source [1]
+	self [2] = source [2]
+	
+	return self
+end
+
 -- Vector products
 function GCAD.Vector2d.Cross (a, b)
 	return a [1] * b [2] - a [2] * b [1]
@@ -30,16 +46,16 @@ function GCAD.Vector2d.OuterProduct (a, b, out)
 end
 
 -- Vector norms
-function GCAD.Vector2d.L1Norm (a)
-	return math_abs (a [1]) + math_abs (a [2])
+function GCAD.Vector2d.L1Norm (self)
+	return math_abs (self [1]) + math_abs (self [2])
 end
 
-function GCAD.Vector2d.L2Norm (a)
-	return math_sqrt (a [1] * a [1] + a [2] * a [2])
+function GCAD.Vector2d.L2Norm (self)
+	return math_sqrt (self [1] * self [1] + self [2] * self [2])
 end
 
-function GCAD.Vector2d.L2NormSquared (a)
-	return a [1] * a [1] + a [2] * a [2]
+function GCAD.Vector2d.L2NormSquared (self)
+	return self [1] * self [1] + self [2] * self [2]
 end
 
 GCAD.Vector2d.Length        = GCAD.Vector2d.L2Norm
@@ -106,22 +122,22 @@ function GCAD.Vector2d.ScalarDivide (a, b, out)
 	return out
 end
 
-function GCAD.Vector2d.Negate (a, out)
+function GCAD.Vector2d.Negate (self, out)
 	out = out or GCAD.Vector2d ()
 	
-	out [1] = -a [1]
-	out [2] = -a [2]
+	out [1] = -self [1]
+	out [2] = -self [2]
 	
 	return out
 end
 
 -- Utility
-function GCAD.Vector2d.Unpack (a)
-	return a [1], a [2]
+function GCAD.Vector2d.Unpack (self)
+	return self [1], self [2]
 end
 
-function GCAD.Vector2d.ToString (a)
-	return "(" .. tostring (a [1]) .. ", " .. tostring (a [2]) .. ")"
+function GCAD.Vector2d.ToString (self)
+	return "(" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. ")"
 end
 
 -- Constructor
@@ -133,6 +149,16 @@ end
 function self:Set (x, y)
 	self [1] = x
 	self [2] = y
+end
+
+self.Clone          = GCAD.Vector2d.Clone
+self.Copy           = GCAD.Vector2d.Copy
+
+function self:Zero ()
+	self [1] = 0
+	self [2] = 0
+	
+	return self
 end
 
 -- Vector products

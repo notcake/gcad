@@ -7,6 +7,24 @@ local isnumber  = isnumber
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+function GCAD.Vector3d.Clone (self, out)
+	out = out or GCAD.Vector3d ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	out [3] = self [3]
+	
+	return out
+end
+
+function GCAD.Vector3d.Copy (self, source)
+	self [1] = source [1]
+	self [2] = source [2]
+	self [3] = source [3]
+	
+	return self
+end
+
 -- Vector products
 function GCAD.Vector3d.Cross (a, b, out)
 	out = out or GCAD.Vector3d ()
@@ -41,16 +59,16 @@ function GCAD.Vector3d.OuterProduct (a, b, out)
 end
 
 -- Vector norms
-function GCAD.Vector3d.L1Norm (a)
-	return math_abs (a [1]) + math_abs (a [2]) + math_abs (a [3])
+function GCAD.Vector3d.L1Norm (self)
+	return math_abs (self [1]) + math_abs (self [2]) + math_abs (self [3])
 end
 
-function GCAD.Vector3d.L2Norm (a)
-	return math_sqrt (a [1] * a [1] + a [2] * a [2] + a [3] * a [3])
+function GCAD.Vector3d.L2Norm (self)
+	return math_sqrt (self [1] * self [1] + self [2] * self [2] + self [3] * self [3])
 end
 
-function GCAD.Vector3d.L2NormSquared (a)
-	return a [1] * a [1] + a [2] * a [2] + a [3] * a [3]
+function GCAD.Vector3d.L2NormSquared (self)
+	return self [1] * self [1] + self [2] * self [2] + self [3] * self [3]
 end
 
 GCAD.Vector3d.Length        = GCAD.Vector3d.L2Norm
@@ -122,23 +140,23 @@ function GCAD.Vector3d.ScalarDivide (a, b, out)
 	return out
 end
 
-function GCAD.Vector3d.Negate (a, out)
+function GCAD.Vector3d.Negate (self, out)
 	out = out or GCAD.Vector3d ()
 	
-	out [1] = -a [1]
-	out [2] = -a [2]
-	out [3] = -a [3]
+	out [1] = -self [1]
+	out [2] = -self [2]
+	out [3] = -self [3]
 	
 	return out
 end
 
 -- Utility
-function GCAD.Vector3d.Unpack (a)
-	return a [1], a [2], a[3]
+function GCAD.Vector3d.Unpack (self)
+	return self [1], self [2], self [3]
 end
 
-function GCAD.Vector3d.ToString (a)
-	return "(" .. tostring (a [1]) .. ", " .. tostring (a [2]) .. ", " .. tostring (a [3]) .. ")"
+function GCAD.Vector3d.ToString (self)
+	return "(" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. ", " .. tostring (self [3]) .. ")"
 end
 
 -- Constructor
@@ -152,6 +170,17 @@ function self:Set (x, y, z)
 	self [1] = x
 	self [2] = y
 	self [3] = z
+end
+
+self.Clone          = GCAD.Vector3d.Clone
+self.Copy           = GCAD.Vector3d.Copy
+
+function self:Zero ()
+	self [1] = 0
+	self [2] = 0
+	self [3] = 0
+	
+	return self
 end
 
 -- Vector products

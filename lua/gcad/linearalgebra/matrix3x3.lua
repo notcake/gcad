@@ -5,46 +5,76 @@ local math      = math
 
 local isnumber  = isnumber
 
+function GCAD.Matrix3x3.Clone (self, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	out [3] = self [3]
+	out [4] = self [4]
+	out [5] = self [5]
+	out [6] = self [6]
+	out [7] = self [7]
+	out [8] = self [8]
+	out [9] = self [9]
+	
+	return out
+end
+
+function GCAD.Matrix3x3.Copy (self, source)
+	self [1] = source [1]
+	self [2] = source [2]
+	self [3] = source [3]
+	self [4] = source [4]
+	self [5] = source [5]
+	self [6] = source [6]
+	self [7] = source [7]
+	self [8] = source [8]
+	self [9] = source [9]
+	
+	return self
+end
+
 -- Matrix reading
-function GCAD.Matrix3x3.GetColumn (a, column, out)
+function GCAD.Matrix3x3.GetColumn (self, column, out)
 	out = out or GCAD.Vector3d ()
 	
-	out [1] = a [column + 0]
-	out [2] = a [column + 3]
-	out [3] = a [column + 6]
+	out [1] = self [column + 0]
+	out [2] = self [column + 3]
+	out [3] = self [column + 6]
 	
 	return out
 end
 
-function GCAD.Matrix3x3.Vector3d (a, out)
+function GCAD.Matrix3x3.Vector3d (self, out)
 	out = out or GCAD.Vector3d ()
 	
-	out [1] = a [1]
-	out [2] = a [5]
-	out [3] = a [9]
+	out [1] = self [1]
+	out [2] = self [5]
+	out [3] = self [9]
 	
 	return out
 end
 
-function GCAD.Matrix3x3.GetRow (a, row, out)
+function GCAD.Matrix3x3.GetRow (self, row, out)
 	out = out or GCAD.Vector3d ()
 	
-	out [1] = a [row * 3 - 3 + 1]
-	out [2] = a [row * 3 - 3 + 2]
-	out [3] = a [row * 3 - 3 + 3]
+	out [1] = self [row * 3 - 3 + 1]
+	out [2] = self [row * 3 - 3 + 2]
+	out [3] = self [row * 3 - 3 + 3]
 	
 	return out
 end
 
 -- Matrix operations
-function GCAD.Matrix3x3.Determinant (a)
-	return   a [1] * (a [5] * a [9] - a [8] * a [6])
-	       - a [2] * (a [4] * a [9] - a [7] * a [6])
-		   + a [3] * (a [4] * a [8] - a [7] * a [5])
+function GCAD.Matrix3x3.Determinant (self)
+	return   self [1] * (self [5] * self [9] - self [8] * self [6])
+	       - self [2] * (self [4] * self [9] - self [7] * self [6])
+		   + self [3] * (self [4] * self [8] - self [7] * self [5])
 end
 
 local GCAD_Matrix3x3_Determinant = GCAD.Matrix3x3.Determinant
-function GCAD.Matrix3x3.Invert (a, out)
+function GCAD.Matrix3x3.Invert (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
 	GCAD.Error ("Matrix3x3.Invert : Not implemented.")
@@ -52,15 +82,15 @@ function GCAD.Matrix3x3.Invert (a, out)
 	return out
 end
 
-function GCAD.Matrix3x3.Transpose (a, out)
+function GCAD.Matrix3x3.Transpose (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1]
-	out [5] = a [5]
-	out [9] = a [9]
-	out [2], out [4] = a [4], a [2]
-	out [3], out [7] = a [7], a [3]
-	out [6], out [8] = a [8], a [6]
+	out [1] = self [1]
+	out [5] = self [5]
+	out [9] = self [9]
+	out [2], out [4] = self [4], self [2]
+	out [3], out [7] = self [7], self [3]
+	out [6], out [8] = self [8], self [6]
 	
 	return out
 end
@@ -226,29 +256,29 @@ function GCAD.Matrix3x3.ScalarDivide (a, b, out)
 	return out
 end
 
-function GCAD.Matrix3x3.Negate (a, out)
+function GCAD.Matrix3x3.Negate (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = -a [1]
-	out [2] = -a [2]
-	out [3] = -a [3]
-	out [4] = -a [4]
-	out [5] = -a [5]
-	out [6] = -a [6]
-	out [7] = -a [7]
-	out [8] = -a [8]
-	out [9] = -a [9]
+	out [1] = -self [1]
+	out [2] = -self [2]
+	out [3] = -self [3]
+	out [4] = -self [4]
+	out [5] = -self [5]
+	out [6] = -self [6]
+	out [7] = -self [7]
+	out [8] = -self [8]
+	out [9] = -self [9]
 	
 	return out
 end
 
 -- Utility
-function GCAD.Matrix3x3.Unpack (a)
-	return a [1], a [2], a [3], a [4], a [5], a [6], a [7], a [8], a [9]
+function GCAD.Matrix3x3.Unpack (self)
+	return self [1], self [2], self [3], self [4], self [5], self [6], self [7], self [8], self [9]
 end
 
-function GCAD.Matrix3x3.ToString (a)
-	return "[" .. tostring (a [1]) .. ", " .. tostring (a [2]) .. ", " .. tostring (a [3]) .. "]\n[" .. tostring (a [4]) .. ", " .. tostring (a [5]) .. ", " .. tostring (a [6]) .. "]\n[" .. tostring (a [7]) .. ", " .. tostring (a [8]) .. ", " .. tostring (a [9]) .. "]"
+function GCAD.Matrix3x3.ToString (self)
+	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. ", " .. tostring (self [3]) .. "]\n[" .. tostring (self [4]) .. ", " .. tostring (self [5]) .. ", " .. tostring (self [6]) .. "]\n[" .. tostring (self [7]) .. ", " .. tostring (self [8]) .. ", " .. tostring (self [9]) .. "]"
 end
 
 -- Construction
@@ -324,6 +354,14 @@ function self:Set (m11, m12, m21, m22, m23, m31, m32, m33)
 	self [8] = m32
 	self [9] = m33
 end
+
+self.Clone          = GCAD.Matrix3x3.Clone
+self.Copy           = GCAD.Matrix3x3.Copy
+
+local GCAD_Matrix3x3_Identity = GCAD.Matrix3x3.Identity
+local GCAD_Matrix3x3_Zero     = GCAD.Matrix3x3.Zero
+function self:Identity () return GCAD_Matrix3x3_Identity (self) end
+function self:Zero     () return GCAD_Matrix3x3_Zero     (self) end
 
 -- Matrix reading
 self.GetColumn      = GCAD.Matrix3x3.GetColumn
