@@ -23,6 +23,14 @@ include ("linearalgebra/vector3d.lua")
 include ("linearalgebra/matrix2x2.lua")
 include ("linearalgebra/matrix3x3.lua")
 
+-- Mathematics
+include ("math/range1d.lua")
+include ("math/range2d.lua")
+include ("math/range3d.lua")
+include ("math/unpackedrange1d.lua")
+include ("math/unpackedrange2d.lua")
+include ("math/unpackedrange3d.lua")
+
 -- Spatial queries
 include ("space/queries/spatialqueryresult.lua")
 include ("space/queries/ispatialqueryable2d.lua")

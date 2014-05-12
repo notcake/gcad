@@ -7,6 +7,7 @@ local isnumber  = isnumber
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+-- Copying
 function GCAD.Vector2d.Clone (self, out)
 	out = out or GCAD.Vector2d ()
 	
@@ -131,6 +132,26 @@ function GCAD.Vector2d.Negate (self, out)
 	return out
 end
 
+-- Conversion
+function GCAD.Vector2d.FromVector3d (v3d, out)
+	out = out or GCAD.Vector2d ()
+	
+	out [1] = v3d [1]
+	out [2] = v3d [2]
+	
+	return out, v3d [3]
+end
+
+function GCAD.Vector2d.ToVector3d (self, z, out)
+	out = out or GCAD.Vector3d ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	out [3] = z or 0
+	
+	return out
+end
+
 -- Utility
 function GCAD.Vector2d.Unpack (self)
 	return self [1], self [2]
@@ -146,13 +167,11 @@ function self:ctor (x, y)
 	self [2] = y or 0
 end
 
+-- Initialization
 function self:Set (x, y)
 	self [1] = x
 	self [2] = y
 end
-
-self.Clone          = GCAD.Vector2d.Clone
-self.Copy           = GCAD.Vector2d.Copy
 
 function self:Zero ()
 	self [1] = 0
@@ -160,6 +179,10 @@ function self:Zero ()
 	
 	return self
 end
+
+-- Copying
+self.Clone          = GCAD.Vector2d.Clone
+self.Copy           = GCAD.Vector2d.Copy
 
 -- Vector products
 self.Cross          = GCAD.Vector2d.Cross
@@ -187,6 +210,9 @@ self.__sub          = GCAD.Vector2d.Subtract
 self.__mul          = GCAD.Vector2d.Multiply
 self.__div          = GCAD.Vector2d.ScalarDivide
 self.__unm          = GCAD.Vector2d.Negate
+
+-- Conversion
+self.ToVector3d     = GCAD.Vector2d.ToVector3d
 
 -- Utility
 self.Unpack         = GCAD.Vector2d.Unpack

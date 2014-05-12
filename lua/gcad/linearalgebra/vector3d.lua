@@ -7,6 +7,7 @@ local isnumber  = isnumber
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+-- Copying
 function GCAD.Vector3d.Clone (self, out)
 	out = out or GCAD.Vector3d ()
 	
@@ -150,6 +151,48 @@ function GCAD.Vector3d.Negate (self, out)
 	return out
 end
 
+-- Conversion
+function GCAD.Vector3d.FromVector2d (v2d, z, out)
+	out = out or GCAD.Vector3d ()
+	
+	out [1] = v2d [1]
+	out [2] = v2d [2]
+	out [3] = z or 0
+	
+	return out
+end
+
+function GCAD.Vector3d.ToVector2d (self, out)
+	out = out or GCAD.Vector2d ()
+	
+	out [1] = self [1]
+	out [2] = self [2]
+	
+	return out, self [3]
+end
+
+local Vector___index    = debug.getregistry ().Vector.__index
+local Vector___newindex = debug.getregistry ().Vector.__newindex
+function GCAD.Vector3d.FromNativeVector (v, out)
+	out = out or GCAD.Vector3d ()
+	
+	out [1] = Vector___index (v, "x")
+	out [2] = Vector___index (v, "y")
+	out [3] = Vector___index (v, "z")
+	
+	return out
+end
+
+function GCAD.Vector3d.ToNativeVector (self, out)
+	out = out or Vector ()
+	
+	Vector___newindex (out, "x", self [1])
+	Vector___newindex (out, "y", self [2])
+	Vector___newindex (out, "z", self [3])
+	
+	return out
+end
+
 -- Utility
 function GCAD.Vector3d.Unpack (self)
 	return self [1], self [2], self [3]
@@ -166,14 +209,12 @@ function self:ctor (x, y, z)
 	self [3] = z or 0
 end
 
+-- Initialization
 function self:Set (x, y, z)
 	self [1] = x
 	self [2] = y
 	self [3] = z
 end
-
-self.Clone          = GCAD.Vector3d.Clone
-self.Copy           = GCAD.Vector3d.Copy
 
 function self:Zero ()
 	self [1] = 0
@@ -182,6 +223,10 @@ function self:Zero ()
 	
 	return self
 end
+
+-- Copying
+self.Clone          = GCAD.Vector3d.Clone
+self.Copy           = GCAD.Vector3d.Copy
 
 -- Vector products
 self.Cross          = GCAD.Vector3d.Cross
@@ -209,6 +254,10 @@ self.__sub          = GCAD.Vector3d.Subtract
 self.__mul          = GCAD.Vector3d.Multiply
 self.__div          = GCAD.Vector3d.ScalarDivide
 self.__unm          = GCAD.Vector3d.Negate
+
+-- Conversion
+self.ToVector2d     = GCAD.Vector3d.ToVector2d
+self.ToNativeVector = GCAD.Vector3d.ToNativeVector
 
 -- Utility
 self.Unpack         = GCAD.Vector3d.Unpack

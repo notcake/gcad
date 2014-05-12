@@ -5,6 +5,7 @@ local math      = math
 
 local isnumber  = isnumber
 
+-- Copying
 function GCAD.Matrix3x3.Clone (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
@@ -343,6 +344,7 @@ function self:ctor (m11, m12, m13, m21, m22, m23, m31, m32, m33)
 	self [9] = m33 or 0
 end
 
+-- Initialization
 function self:Set (m11, m12, m21, m22, m23, m31, m32, m33)
 	self [1] = m11
 	self [2] = m12
@@ -355,13 +357,15 @@ function self:Set (m11, m12, m21, m22, m23, m31, m32, m33)
 	self [9] = m33
 end
 
-self.Clone          = GCAD.Matrix3x3.Clone
-self.Copy           = GCAD.Matrix3x3.Copy
-
 local GCAD_Matrix3x3_Identity = GCAD.Matrix3x3.Identity
 local GCAD_Matrix3x3_Zero     = GCAD.Matrix3x3.Zero
+
 function self:Identity () return GCAD_Matrix3x3_Identity (self) end
 function self:Zero     () return GCAD_Matrix3x3_Zero     (self) end
+
+-- Copying
+self.Clone          = GCAD.Matrix3x3.Clone
+self.Copy           = GCAD.Matrix3x3.Copy
 
 -- Matrix reading
 self.GetColumn      = GCAD.Matrix3x3.GetColumn

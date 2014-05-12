@@ -5,6 +5,7 @@ local math      = math
 
 local isnumber  = isnumber
 
+-- Copying
 function GCAD.Matrix2x2.Clone (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
@@ -261,6 +262,7 @@ function self:ctor (m11, m12, m21, m22)
 	self [4] = m22 or 0
 end
 
+-- Initialization
 function self:Set (m11, m12, m21, m22)
 	self [1] = m11
 	self [2] = m12
@@ -268,13 +270,15 @@ function self:Set (m11, m12, m21, m22)
 	self [4] = m22
 end
 
-self.Clone          = GCAD.Matrix2x2.Clone
-self.Copy           = GCAD.Matrix2x2.Copy
-
 local GCAD_Matrix2x2_Identity = GCAD.Matrix2x2.Identity
 local GCAD_Matrix2x2_Zero     = GCAD.Matrix2x2.Zero
+
 function self:Identity () return GCAD_Matrix2x2_Identity (self) end
 function self:Zero     () return GCAD_Matrix2x2_Zero     (self) end
+
+-- Copying
+self.Clone          = GCAD.Matrix2x2.Clone
+self.Copy           = GCAD.Matrix2x2.Copy
 
 -- Matrix reading
 self.GetColumn      = GCAD.Matrix2x2.GetColumn
