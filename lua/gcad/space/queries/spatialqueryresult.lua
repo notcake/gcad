@@ -26,6 +26,18 @@ function self:Clear ()
 	self.ObjectsFullyContained = {}
 end
 
+function self:Filter (f, out)
+	out = out or GCAD.SpatialQueryResult ()
+	
+	for i = 1, #self.Objects [i] do
+		if f (self.Objects [i], self.ObjectsFullyContained [i]) then
+			out:Add (self.Objects [i], self.ObjectsFullyContained [i])
+		end
+	end
+	
+	return out
+end
+
 function self:GetEnumerator ()
 	local i = 0
 	return function ()

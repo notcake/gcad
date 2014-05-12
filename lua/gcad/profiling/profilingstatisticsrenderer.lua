@@ -1,3 +1,5 @@
+if not CLIENT then return end
+
 local self = {}
 GCAD.ProfilingStatisticsRenderer = GCAD.MakeConstructor (self)
 
