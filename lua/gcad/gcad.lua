@@ -15,18 +15,26 @@ GLib.AddCSLuaPackFolderRecursive ("gcad")
 include ("profiling/profiler.lua")
 include ("profiling/profilingstatisticsrenderer.lua")
 
+-- Linear algebra
+include ("linearalgebra/unpackedvector2d.lua")
+include ("linearalgebra/unpackedvector3d.lua")
+include ("linearalgebra/vector2d.lua")
+include ("linearalgebra/vector3d.lua")
+include ("linearalgebra/matrix2x2.lua")
+include ("linearalgebra/matrix3x3.lua")
+
 -- Spatial queries
 include ("space/queries/spatialqueryresult.lua")
 include ("space/queries/ispatialqueryable2d.lua")
 include ("space/queries/ispatialqueryable3d.lua")
 
--- Spatial primitives
-include ("space/primitives/plane3d.lua")
-include ("space/primitives/aabb3d.lua")
-include ("space/primitives/obb3d.lua")
-include ("space/primitives/sphere3d.lua")
-include ("space/primitives/frustum3d.lua")
-include ("space/primitives/nativesphere3d.lua")
+-- Solids
+include ("space/shapes/plane3d.lua")
+include ("space/shapes/aabb3d.lua")
+include ("space/shapes/obb3d.lua")
+include ("space/shapes/sphere3d.lua")
+include ("space/shapes/frustum3d.lua")
+include ("space/shapes/nativesphere3d.lua")
 
 -- Spatial queryables
 include ("space/engineentitiesspatialqueryable.lua")

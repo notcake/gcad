@@ -46,7 +46,7 @@ function self:SetEnabled (enabled)
 				surface_SetFont ("DermaDefault")
 				surface_SetTextColor (GLib.Colors.White)
 				
-				local _, lineHeight = surface.GetTextSize ("")
+				local _, lineHeight = surface_GetTextSize ("")
 				lineHeight = lineHeight + 6
 				
 				local x = ScrW () / 2
