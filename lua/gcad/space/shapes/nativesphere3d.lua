@@ -8,12 +8,15 @@ local Vector___add          = debug.getregistry ().Vector.__add
 local Vector_Set            = debug.getregistry ().Vector.Set
 
 function GCAD.NativeSphere3d.FromEntity (ent, out)
+	GCAD.Profiler:Begin ("NativeSphere3d.FromEntity")
+	
 	out = out or GCAD.NativeSphere3d ()
 	
 	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
 	Vector_Set (out.Position, pos)
 	out [4] = Entity_BoundingRadius (ent)
 	
+	GCAD.Profiler:End ()
 	return out
 end
 

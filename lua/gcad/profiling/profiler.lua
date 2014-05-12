@@ -100,6 +100,16 @@ function self:GetSectionStackLevel (sectionName)
 	return self.SectionStackLevels [sectionName] or 0
 end
 
+function self:Wrap (f, sectionName)
+	return function (...)
+		self:Begin (sectionName)
+		local r1, r2, r3, r4 = f (...)
+		self:End ()
+		
+		return r1, r2, r3, r4
+	end
+end
+
 -- Internal, do not call
 function self:AdvanceFrame ()
 	self.LastFrameNumber     = self.FrameNumber

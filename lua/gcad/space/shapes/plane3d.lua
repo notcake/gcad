@@ -100,6 +100,7 @@ end
 
 function self:ContainsAnyVertex (vertexEnumerable, tmp)
 	tmp = tmp or GLib.ColumnVector (3)
+	
 	for vertex in vertexEnumerable:GetVertexEnumerator (tmp) do
 		if self:ContainsPoint (vertex) then return true end
 	end

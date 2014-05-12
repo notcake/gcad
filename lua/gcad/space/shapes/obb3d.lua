@@ -1,10 +1,15 @@
 local self = {}
 GCAD.OBB3d = GCAD.MakeConstructor (self)
 
+local Angle_Forward  = debug.getregistry ().Angle.Forward
 local Angle_Set      = debug.getregistry ().Angle.Set
+local Angle_Right    = debug.getregistry ().Angle.Right
+local Angle_Up       = debug.getregistry ().Angle.Up
 local Vector___index = debug.getregistry ().Vector.__index
 
 function GCAD.OBB3d.FromEntity (ent, out)
+	GCAD.Profiler:Begin ("OBB3d.FromEntity")
+	
 	out = out or GCAD.OBB3d ()
 	
 	local v
@@ -14,6 +19,7 @@ function GCAD.OBB3d.FromEntity (ent, out)
 	
 	out:SetAngle (ent:GetAngles ())
 	
+	GCAD.Profiler:End ()
 	return out
 end
 
@@ -136,27 +142,42 @@ end
 function self:ComputeCorners ()
 	self.CornersValid = true
 	
-	local x      = self.Angle:Forward ()
-	local minusY = self.Angle:Right ()
-	local z      = self.Angle:Up ()
-	
 	for i = 1, 8 do
 		self.Corners [i] = self.Corners [i] or GLib.ColumnVector (3)
 	end
 	
-	self.Corners [1] [1] = self.Min [1] self.Corners [1] [2] = self.Min [2] self.Corners [1] [3] = self.Min [3]
-	self.Corners [2] [1] = self.Max [1] self.Corners [2] [2] = self.Min [2] self.Corners [2] [3] = self.Min [3]
-	self.Corners [3] [1] = self.Max [1] self.Corners [3] [2] = self.Max [2] self.Corners [3] [3] = self.Min [3]
-	self.Corners [4] [1] = self.Min [1] self.Corners [4] [2] = self.Max [2] self.Corners [4] [3] = self.Min [3]
-	self.Corners [5] [1] = self.Min [1] self.Corners [5] [2] = self.Min [2] self.Corners [5] [3] = self.Max [3]
-	self.Corners [6] [1] = self.Max [1] self.Corners [6] [2] = self.Min [2] self.Corners [6] [3] = self.Max [3]
-	self.Corners [7] [1] = self.Max [1] self.Corners [7] [2] = self.Max [2] self.Corners [7] [3] = self.Max [3]
-	self.Corners [8] [1] = self.Min [1] self.Corners [8] [2] = self.Max [2] self.Corners [8] [3] = self.Max [3]
+	GCAD.Profiler:Begin ("OBB3d:ComputeCorners : Generate corners")
+	local x1, y1, z1 = self.Min [1], self.Min [2], self.Min [3]
+	local x2, y2, z2 = self.Max [1], self.Max [2], self.Max [3]
+	local c
+	c = self.Corners [1] c [1] = x1 c [2] = y1 c [3] = z1
+	c = self.Corners [2] c [1] = x2 c [2] = y1 c [3] = z1
+	c = self.Corners [3] c [1] = x2 c [2] = y2 c [3] = z1
+	c = self.Corners [4] c [1] = x1 c [2] = y2 c [3] = z1
+	c = self.Corners [5] c [1] = x1 c [2] = y1 c [3] = z2
+	c = self.Corners [6] c [1] = x2 c [2] = y1 c [3] = z2
+	c = self.Corners [7] c [1] = x2 c [2] = y2 c [3] = z2
+	c = self.Corners [8] c [1] = x1 c [2] = y2 c [3] = z2
+	GCAD.Profiler:End ()
+	
+	GCAD.Profiler:Begin ("OBB3d:ComputeCorners : Rotate corners")
+	local x      = Angle_Forward (self.Angle)
+	local minusY = Angle_Right   (self.Angle)
+	local z      = Angle_Up      (self.Angle)
+	
+	local x1, x2, x3 =  Vector___index (     x, "x"),  Vector___index (     x, "y"),  Vector___index (     x, "z")
+	local y1, y2, y3 = -Vector___index (minusY, "x"), -Vector___index (minusY, "y"), -Vector___index (minusY, "z")
+	local z1, z2, z3 =  Vector___index (     z, "x"),  Vector___index (     z, "y"),  Vector___index (     z, "z")
+	
+	local cx, cy, cz = self.Center [1], self.Center [2], self.Center [3]
 	
 	for i = 1, 8 do
-		local cx, cy, cz = self.Corners [i] [1], self.Corners [i] [2], self.Corners [i] [3]
-		self.Corners [i] [1] = self.Center [1] + cx * x [1] - cy * minusY [1] + cz * z [1]
-		self.Corners [i] [2] = self.Center [2] + cx * x [2] - cy * minusY [2] + cz * z [2]
-		self.Corners [i] [3] = self.Center [3] + cx * x [3] - cy * minusY [3] + cz * z [3]
+		local c = self.Corners [i]
+		local x, y, z = c [1], c [2], c [3]
+		self.Corners [i] [1] = cx + x * x1 + y * y1 + z * z1
+		self.Corners [i] [2] = cy + x * x2 + y * y2 + z * z2
+		self.Corners [i] [3] = cz + x * x3 + y * y3 + z * z3
 	end
+	GCAD.Profiler:End ()
 end
+self.ComputeCorners = GCAD.Profiler:Wrap (self.ComputeCorners, "OBB3d:ComputeCorners")

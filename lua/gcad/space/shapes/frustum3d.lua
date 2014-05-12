@@ -3,6 +3,8 @@ GCAD.Frustum3d = GCAD.MakeConstructor (self)
 
 if CLIENT then
 	function GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, out)
+		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB")
+		
 		out = out or GCAD.Frustum3d ()
 		
 		local pos = LocalPlayer ():EyePos ()
@@ -23,6 +25,7 @@ if CLIENT then
 		out.TopPlane   :Normalize (out.TopPlane   )
 		out.BottomPlane:Normalize (out.BottomPlane)
 		
+		GCAD.Profiler:End ()
 		return out
 	end
 end
@@ -44,9 +47,11 @@ end
 function self:ContainsAnyVertex (vertexEnumerable, tmp)
 	return self:ContainsAnyVertexLiberal (vertexEnumerable, tmp)
 end
+self.ContainsAnyVertex = GCAD.Profiler:Wrap (self.ContainsAnyVertex, "Frustum3d:ContainsAnyVertex")
 
 function self:ContainsAnyVertexConservative (vertexEnumerable, tmp)
 	tmp = tmp or GLib.ColumnVector (3)
+	
 	for vertex in vertexEnumerable:GetVertexEnumerator (tmp) do
 		if self:ContainsPoint (vertex) then return true end
 	end
@@ -71,6 +76,7 @@ function self:ContainsVertices (vertexEnumerable, tmp)
 	
 	return true
 end
+self.ContainsVertices = GCAD.Profiler:Wrap (self.ContainsVertices, "Frustum3d:ContainsVertices")
 
 function self:ContainsNativeSphere (nativeSphere)
 	return self.LeftPlane  :ContainsNativeSphere (nativeSphere) and
@@ -98,6 +104,7 @@ function self:IntersectsNativeSphere (nativeSphere)
 	
 	return true, (contains1 and contains2 and contains3 and contains4)
 end
+self.IntersectsNativeSphere = GCAD.Profiler:Wrap (self.IntersectsNativeSphere, "Frustum3d:IntersectsNativeSphere")
 
 function self:IntersectsSphere (sphere)
 	local intersects1, contains1 = self.LeftPlane  :IntersectsSphere (sphere)
@@ -111,3 +118,4 @@ function self:IntersectsSphere (sphere)
 	
 	return true, (contains1 and contains2 and contains3 and contains4)
 end
+self.IntersectsSphere = GCAD.Profiler:Wrap (self.IntersectsSphere, "Frustum3d:IntersectsSphere")

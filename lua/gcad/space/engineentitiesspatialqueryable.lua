@@ -28,18 +28,14 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   Entity_GetOwner (v) ~= localPlayer then
 			
-			GCAD.Profiler:Begin ("Frustum3d:IntersectsNativeSphere")
 			boundingSphere = GCAD.NativeSphere3d.FromEntity (v, boundingSphere)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
-			GCAD.Profiler:End ()
 			
 			if intersectsSphere then
 				local contained = containsSphere
 				if not contained then
-					GCAD.Profiler:Begin ("Frustum3d:ContainsVertices")
 					obb = GCAD.OBB3d.FromEntity (v, obb)
 					contained = frustum3d:ContainsVertices (obb, vec1)
-					GCAD.Profiler:End ()
 				end
 				
 				if contained then
@@ -69,18 +65,14 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   Entity_GetOwner (v) ~= localPlayer then
 			
-			GCAD.Profiler:Begin ("Frustum3d:IntersectsNativeSphere")
 			boundingSphere = GCAD.NativeSphere3d.FromEntity (v, boundingSphere)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
-			GCAD.Profiler:End ()
 			
 			if intersectsSphere then
 				local contained = containsSphere
 				if not contained then
-					GCAD.Profiler:Begin ("Frustum3d:ContainsAnyVertex")
 					obb = GCAD.OBB3d.FromEntity (v, obb)
 					contained = frustum3d:ContainsAnyVertex (obb, vec1)
-					GCAD.Profiler:End ()
 				end
 				
 				if contained then
