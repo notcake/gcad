@@ -29,6 +29,10 @@ function GCAD.UnpackedRange1d.Intersect (ax1, ax2, bx1, bx2)
 	return math_max (ax1, bx1), math_min (ax2, bx2)
 end
 
+function GCAD.UnpackedRange1d.IntersectTriple (ax1, ax2, bx1, bx2, cx1, cx2)
+	return math_max (ax1, bx1, cx1), math_min (ax2, bx2, cx2)
+end
+
 function GCAD.UnpackedRange1d.Union (ax1, ax2, bx1, bx2)
 	return math_min (ax1, bx1), math_max (ax2, bx2)
 end

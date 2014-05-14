@@ -62,6 +62,15 @@ function GCAD.Range1d.Intersect (a, b, out)
 	return out
 end
 
+function GCAD.Range1d.IntersectTriple (a, b, c, out)
+	out = out or GCAD.Range1d ()
+	
+	out [1] = math_max (a [1], b [1], c [1])
+	out [2] = math_min (a [2], b [2], c [2])
+	
+	return out
+end
+
 function GCAD.Range1d.Union (a, b, out)
 	out = out or GCAD.Range1d ()
 	
@@ -159,6 +168,7 @@ self.Length                = GCAD.Range1d.Length
 self.Expand                = GCAD.Range1d.Expand
 self.ExpandUnpacked        = GCAD.Range1d.ExpandUnpacked
 self.Intersect             = GCAD.Range1d.Intersect
+self.IntersectTriple       = GCAD.Range1d.IntersectTriple
 self.Union                 = GCAD.Range1d.Union
 
 -- Range tests
