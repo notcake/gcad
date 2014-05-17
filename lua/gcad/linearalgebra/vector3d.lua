@@ -7,6 +7,11 @@ local isnumber  = isnumber
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+local Vector            = Vector
+
+local Vector___index    = debug.getregistry ().Vector.__index
+local Vector___newindex = debug.getregistry ().Vector.__newindex
+
 -- Copying
 function GCAD.Vector3d.Clone (self, out)
 	out = out or GCAD.Vector3d ()
@@ -185,8 +190,6 @@ function GCAD.Vector3d.ToVector2d (self, out)
 	return out, self [3]
 end
 
-local Vector___index    = debug.getregistry ().Vector.__index
-local Vector___newindex = debug.getregistry ().Vector.__newindex
 function GCAD.Vector3d.FromNativeVector (v, out)
 	out = out or GCAD.Vector3d ()
 	

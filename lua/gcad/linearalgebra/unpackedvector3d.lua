@@ -6,6 +6,11 @@ local math      = math
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+local Vector            = Vector
+
+local Vector___index    = debug.getregistry ().Vector.__index
+local Vector___newindex = debug.getregistry ().Vector.__newindex
+
 -- Vector products
 function GCAD.UnpackedVector3d.Cross (x1, y1, z1, x2, y2, z2)
 	return y1 * z2 - z1 * y2,
@@ -82,6 +87,21 @@ end
 
 function GCAD.UnpackedVector3d.Negate (x, y, z)
 	return -x, -y, -z
+end
+
+-- Conversion
+function GCAD.UnpackedVector3d.FromNativeVector (v)
+	return Vector___index (v, "x"), Vector___index (v, "y"), Vector___index (v, "z")
+end
+
+function GCAD.UnpackedVector3d.ToNativeVector (x, y, z, out)
+	out = out or Vector ()
+	
+	Vector___newindex (out, "x", x)
+	Vector___newindex (out, "y", y)
+	Vector___newindex (out, "z", z)
+	
+	return out
 end
 
 -- Utility

@@ -37,7 +37,20 @@ include ("space/queries/ispatialqueryable2d.lua")
 include ("space/queries/ispatialqueryable3d.lua")
 
 -- Solids
-include ("space/shapes/plane3d.lua")
+-- Planes
+include ("space/shapes/planes/plane2d.lua")
+include ("space/shapes/planes/plane3d.lua")
+include ("space/shapes/planes/normalizedplane2d.lua")
+include ("space/shapes/planes/normalizedplane3d.lua")
+include ("space/shapes/planes/unpackedplane2d.lua")
+include ("space/shapes/planes/unpackedplane3d.lua")
+include ("space/shapes/planes/unpackednormalizedplane2d.lua")
+include ("space/shapes/planes/unpackednormalizedplane3d.lua")
+include ("space/shapes/planes/nativeplane3d.lua")
+include ("space/shapes/planes/nativenormalizedplane3d.lua")
+
+include ("space/shapes/planes/legacyplane3d.lua")
+
 include ("space/shapes/aabb3d.lua")
 include ("space/shapes/obb3d.lua")
 include ("space/shapes/sphere3d.lua")
