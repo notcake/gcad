@@ -51,6 +51,14 @@ end
 GCAD.UnpackedVector3d.Length        = GCAD.UnpackedVector3d.L2Norm
 GCAD.UnpackedVector3d.LengthSquared = GCAD.UnpackedVector3d.L2NormSquared
 
+-- Vector operations
+local GCAD_UnpackedVector3d_Length = GCAD.UnpackedVector3d.Length
+
+function GCAD.UnpackedVector3d.Normalize (x, y, z)
+	local length = GCAD_UnpackedVector3d_Length (x, y, z)
+	return x / length, y / length, z / length
+end
+
 -- Vector arithmetic
 function GCAD.UnpackedVector3d.Add (x1, y1, z1, x2, y2, z2)
 	return x1 + x2, y1 + y2, z1 + z2

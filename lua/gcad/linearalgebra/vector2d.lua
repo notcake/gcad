@@ -62,6 +62,19 @@ end
 GCAD.Vector2d.Length        = GCAD.Vector2d.L2Norm
 GCAD.Vector2d.LengthSquared = GCAD.Vector2d.L2NormSquared
 
+-- Vector operations
+local GCAD_Vector2d_Length = GCAD.Vector2d.Length
+
+function GCAD.Vector2d.Normalize (self, out)
+	out = out or GCAD.Vector2d ()
+	
+	local length = GCAD_Vector2d_Length (self)
+	out [1] = self [1] / length
+	out [2] = self [2] / length
+	
+	return out
+end
+
 -- Vector arithmetic
 function GCAD.Vector2d.Add (a, b, out)
 	out = out or GCAD.Vector2d ()
@@ -196,6 +209,9 @@ self.L2Norm         = GCAD.Vector2d.L2Norm
 self.L2NormSquared  = GCAD.Vector2d.L2NormSquared
 self.Length         = GCAD.Vector2d.Length
 self.LengthSquared  = GCAD.Vector2d.LengthSquared
+
+-- Vector operations
+self.Normalize      = GCAD.Vector2d.Normalize
 
 -- Vector arithmetic
 self.Add            = GCAD.Vector2d.Add
