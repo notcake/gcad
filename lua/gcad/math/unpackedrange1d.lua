@@ -53,3 +53,12 @@ end
 function GCAD.UnpackedRange1d.IntersectsRange (ax1, ax2, bx1, bx2)
 	return math_max (ax1, bx1) <= math_min (ax2, bx2)
 end
+
+-- Construction
+function GCAD.UnpackedRange1d.Minimum ()
+	return math.huge, -math.huge
+end
+
+function GCAD.UnpackedRange1d.Maximum ()
+	return -math.huge, math.huge
+end
