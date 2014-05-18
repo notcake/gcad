@@ -8,7 +8,6 @@ local Vector_Length                          = debug.getregistry ().Vector.Lengt
 local Vector_Normalize                       = debug.getregistry ().Vector.Normalize
 local Vector_Set                             = debug.getregistry ().Vector.Set
 local Vector___index                         = debug.getregistry ().Vector.__index
-local Vector___newindex                      = debug.getregistry ().Vector.__newindex
 local Vector___unm                           = debug.getregistry ().Vector.__unm
 
 local GCAD_Vector3d_Dot                      = GCAD.Vector3d.Dot
@@ -60,7 +59,7 @@ function GCAD.NativePlane3d.GetNormalNative (self, out)
 end
 
 function GCAD.NativePlane3d.GetNormalUnpacked (self)
-	return Vector___index (self.Normal, "x"), Vector___index (self.Normal, "y"), Vector___index (self.Normal, "z")
+	return GCAD_UnpackedVector3d_FromNativeVector (self.Normal)
 end
 
 function GCAD.NativePlane3d.GetNormalLength (self)
