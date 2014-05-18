@@ -64,6 +64,21 @@ function GCAD.UnpackedVector3d.Normalize (x, y, z)
 	return x / length, y / length, z / length
 end
 
+-- Vector queries
+function GCAD.UnpackedVector3d.DistanceTo (x1, y1, z1, x2, y2, z2)
+	local dx = x1 - x2
+	local dy = y1 - y2
+	local dz = z1 - z2
+	return math_sqrt (dx * dx + dy * dy + dz * dz)
+end
+
+function GCAD.UnpackedVector3d.DistanceToSquared (x1, y1, z1, x2, y2, z2)
+	local dx = x1 - x2
+	local dy = y1 - y2
+	local dz = z1 - z2
+	return dx * dx + dy * dy + dz * dz
+end
+
 -- Vector arithmetic
 function GCAD.UnpackedVector3d.Add (x1, y1, z1, x2, y2, z2)
 	return x1 + x2, y1 + y2, z1 + z2

@@ -94,6 +94,21 @@ function GCAD.Vector3d.Normalize (self, out)
 	return out
 end
 
+-- Vector queries
+function GCAD.Vector2d.DistanceTo (a, b)
+	local dx = a [1] - b [1]
+	local dy = a [2] - b [2]
+	local dz = a [3] - b [3]
+	return math_sqrt (dx * dx + dy * dy + dz * dz)
+end
+
+function GCAD.Vector2d.DistanceToSquared (a, b)
+	local dx = a [1] - b [1]
+	local dy = a [2] - b [2]
+	local dz = a [3] - b [3]
+	return dx * dx + dy * dy + dz * dz
+end
+
 -- Vector arithmetic
 function GCAD.Vector3d.Add (a, b, out)
 	out = out or GCAD.Vector3d ()
@@ -242,47 +257,51 @@ function self:Zero ()
 end
 
 -- Copying
-self.Clone          = GCAD.Vector3d.Clone
-self.Copy           = GCAD.Vector3d.Copy
+self.Clone             = GCAD.Vector3d.Clone
+self.Copy              = GCAD.Vector3d.Copy
 
 -- Vector products
-self.Cross          = GCAD.Vector3d.Cross
-self.Dot            = GCAD.Vector3d.Dot
-self.InnerProduct   = GCAD.Vector3d.InnerProduct
-self.OuterProduct   = GCAD.Vector3d.OuterProduct
+self.Cross             = GCAD.Vector3d.Cross
+self.Dot               = GCAD.Vector3d.Dot
+self.InnerProduct      = GCAD.Vector3d.InnerProduct
+self.OuterProduct      = GCAD.Vector3d.OuterProduct
 
 -- Vector norms
-self.L1Norm         = GCAD.Vector3d.L1Norm
-self.L2Norm         = GCAD.Vector3d.L2Norm
-self.L2NormSquared  = GCAD.Vector3d.L2NormSquared
-self.Length         = GCAD.Vector3d.Length
-self.LengthSquared  = GCAD.Vector3d.LengthSquared
+self.L1Norm            = GCAD.Vector3d.L1Norm
+self.L2Norm            = GCAD.Vector3d.L2Norm
+self.L2NormSquared     = GCAD.Vector3d.L2NormSquared
+self.Length            = GCAD.Vector3d.Length
+self.LengthSquared     = GCAD.Vector3d.LengthSquared
 
 -- Vector operations
-self.Normalize      = GCAD.Vector3d.Normalize
+self.Normalize         = GCAD.Vector3d.Normalize
+
+-- Vector queries
+self.DistanceTo        = GCAD.Vector3d.DistanceTo
+self.DistanceToSquared = GCAD.Vector3d.DistanceToSquared
 
 -- Vector arithmetic
-self.Add            = GCAD.Vector3d.Add
-self.Subtract       = GCAD.Vector3d.Subtract
-self.Multiply       = GCAD.Vector3d.Multiply
-self.ScalarMultiply = GCAD.Vector3d.VectorScalarMultiply
-self.ScalarDivide   = GCAD.Vector3d.ScalarDivide
-self.Negate         = GCAD.Vector3d.Negate
+self.Add               = GCAD.Vector3d.Add
+self.Subtract          = GCAD.Vector3d.Subtract
+self.Multiply          = GCAD.Vector3d.Multiply
+self.ScalarMultiply    = GCAD.Vector3d.VectorScalarMultiply
+self.ScalarDivide      = GCAD.Vector3d.ScalarDivide
+self.Negate            = GCAD.Vector3d.Negate
 
-self.__add          = GCAD.Vector3d.Add
-self.__sub          = GCAD.Vector3d.Subtract
-self.__mul          = GCAD.Vector3d.Multiply
-self.__div          = GCAD.Vector3d.ScalarDivide
-self.__unm          = GCAD.Vector3d.Negate
+self.__add             = GCAD.Vector3d.Add
+self.__sub             = GCAD.Vector3d.Subtract
+self.__mul             = GCAD.Vector3d.Multiply
+self.__div             = GCAD.Vector3d.ScalarDivide
+self.__unm             = GCAD.Vector3d.Negate
 
 -- Conversion
-self.ToVector2d     = GCAD.Vector3d.ToVector2d
-self.ToNativeVector = GCAD.Vector3d.ToNativeVector
+self.ToVector2d        = GCAD.Vector3d.ToVector2d
+self.ToNativeVector    = GCAD.Vector3d.ToNativeVector
 
 -- Utility
-self.Unpack         = GCAD.Vector3d.Unpack
-self.ToString       = GCAD.Vector3d.ToString
-self.__tostring     = GCAD.Vector3d.ToString
+self.Unpack            = GCAD.Vector3d.Unpack
+self.ToString          = GCAD.Vector3d.ToString
+self.__tostring        = GCAD.Vector3d.ToString
 
-GCAD.Vector3d.Origin = GCAD.Vector3d (0, 0, 0)
-GCAD.Vector3d.Zero   = GCAD.Vector3d (0, 0, 0)
+GCAD.Vector3d.Origin   = GCAD.Vector3d (0, 0, 0)
+GCAD.Vector3d.Zero     = GCAD.Vector3d (0, 0, 0)
