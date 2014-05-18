@@ -5,9 +5,9 @@ local Entity_BoundingRadius = debug.getregistry ().Entity.BoundingRadius
 local Entity_GetPos         = debug.getregistry ().Entity.GetPos
 local Entity_OBBCenter      = debug.getregistry ().Entity.OBBCenter
 local Vector___add          = debug.getregistry ().Vector.__add
-local Vector___index = debug.getregistry ().Vector.__index
+local Vector___index        = debug.getregistry ().Vector.__index
 
-function GCAD.Sphere3d.FromEntity (ent, out)
+function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
 	out = out or GCAD.Sphere3d ()
 	
 	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))

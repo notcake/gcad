@@ -1,8 +1,26 @@
 local self = {}
 GCAD.Sphere3d = GCAD.MakeConstructor (self)
 
+local Entity_BoundingRadius            = debug.getregistry ().Entity.BoundingRadius
+local Entity_GetPos                    = debug.getregistry ().Entity.GetPos
+local Entity_OBBCenter                 = debug.getregistry ().Entity.OBBCenter
+local Vector___add                     = debug.getregistry ().Vector.__add
+local Vector___index                   = debug.getregistry ().Vector.__index
+
 local GCAD_Vector3d_DistanceTo         = GCAD.Vector3d.DistanceTo
 local GCAD_UnpackedVector3d_DistanceTo = GCAD.UnpackedVector3d.DistanceTo
+
+function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
+	out = out or GCAD.Sphere3d ()
+	
+	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
+	out [1] = Vector___index (pos, "x")
+	out [2] = Vector___index (pos, "y")
+	out [3] = Vector___index (pos, "z")
+	out [4] = Entity_BoundingRadius (ent)
+	
+	return out
+end
 
 function GCAD.Sphere3d.FromPositionAndRadius (position, radius, out)
 	out = out or GCAD.Sphere3d ()

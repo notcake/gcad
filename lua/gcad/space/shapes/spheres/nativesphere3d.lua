@@ -1,14 +1,31 @@
 local self = {}
 GCAD.NativeSphere3d = GCAD.MakeConstructor (self)
 
+local Entity_BoundingRadius                  = debug.getregistry ().Entity.BoundingRadius
+local Entity_GetPos                          = debug.getregistry ().Entity.GetPos
+local Entity_OBBCenter                       = debug.getregistry ().Entity.OBBCenter
 local Vector_Distance                        = debug.getregistry ().Vector.Distance
 local Vector_Set                             = debug.getregistry ().Vector.Set
+local Vector___add                           = debug.getregistry ().Vector.__add
+local Vector___index                         = debug.getregistry ().Vector.__index
 
 local GCAD_Vector3d_DistanceTo               = GCAD.Vector3d.DistanceTo
 local GCAD_Vector3d_ToNativeVector           = GCAD.Vector3d.ToNativeVector
 local GCAD_UnpackedVector3d_DistanceTo       = GCAD.UnpackedVector3d.DistanceTo
 local GCAD_UnpackedVector3d_FromNativeVector = GCAD.UnpackedVector3d.FromNativeVector
 local GCAD_UnpackedVector3d_ToNativeVector   = GCAD.UnpackedVector3d.ToNativeVector
+
+function GCAD.NativeSphere3d.FromEntityBoundingSphere (ent, out)
+	GCAD.Profiler:Begin ("NativeSphere3d.FromEntity")
+	out = out or GCAD.NativeSphere3d ()
+	
+	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
+	Vector_Set (out.Position, pos)
+	out [4] = Entity_BoundingRadius (ent)
+	
+	GCAD.Profiler:End ()
+	return out
+end
 
 function GCAD.NativeSphere3d.FromPositionAndRadius (position, radius, out)
 	out = out or GCAD.NativeSphere3d ()

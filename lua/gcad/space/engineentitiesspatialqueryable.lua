@@ -28,7 +28,7 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			boundingSphere = GCAD.NativeSphere3d.FromEntity (v, boundingSphere)
+			boundingSphere = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, boundingSphere)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
 			
 			if intersectsSphere then
@@ -65,7 +65,7 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			boundingSphere = GCAD.NativeSphere3d.FromEntity (v, boundingSphere)
+			boundingSphere = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, boundingSphere)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
 			
 			if intersectsSphere then

@@ -7,7 +7,7 @@ local Entity_OBBCenter      = debug.getregistry ().Entity.OBBCenter
 local Vector___add          = debug.getregistry ().Vector.__add
 local Vector_Set            = debug.getregistry ().Vector.Set
 
-function GCAD.NativeSphere3d.FromEntity (ent, out)
+function GCAD.NativeSphere3d.FromEntityBoundingSphere (ent, out)
 	GCAD.Profiler:Begin ("NativeSphere3d.FromEntity")
 	
 	out = out or GCAD.NativeSphere3d ()

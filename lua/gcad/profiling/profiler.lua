@@ -103,10 +103,10 @@ end
 function self:Wrap (f, sectionName)
 	return function (...)
 		self:Begin (sectionName)
-		local r1, r2, r3, r4 = f (...)
+		local r1, r2, r3, r4, r5, r6 = f (...)
 		self:End ()
 		
-		return r1, r2, r3, r4
+		return r1, r2, r3, r4, r5, r6
 	end
 end
 
