@@ -58,9 +58,6 @@ include ("space/shapes/spheres/unpackedcircle2d.lua")
 include ("space/shapes/spheres/unpackedsphere3d.lua")
 include ("space/shapes/spheres/nativesphere3d.lua")
 
-include ("space/shapes/spheres/legacysphere3d.lua")
-include ("space/shapes/spheres/legacynativesphere3d.lua")
-
 -- Boxes
 -- include ("space/shapes/boxes/aabb2d.lua")
 -- include ("space/shapes/boxes/aabb3d.lua")
