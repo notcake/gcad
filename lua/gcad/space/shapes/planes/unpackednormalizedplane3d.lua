@@ -1,6 +1,7 @@
 GCAD.UnpackedNormalizedPlane3d = {}
 
 local Vector_Length                   = debug.getregistry ().Vector.Length
+local Vector___index                  = debug.getregistry ().Vector.__index
 
 local GCAD_Vector3d_Dot               = GCAD.Vector3d.Dot
 local GCAD_Vector3d_Length            = GCAD.Vector3d.Length

@@ -1,13 +1,11 @@
 GCAD.UnpackedPlane3d = {}
 
-local Vector                    = Vector
+local Vector___index                       = debug.getregistry ().Vector.__index
 
-local Vector___index            = debug.getregistry ().Vector.__index
-local Vector___newindex         = debug.getregistry ().Vector.__newindex
-
-local GCAD_Vector3d_Dot            = GCAD.Vector3d.Dot
-local GCAD_UnpackedVector3d_Dot    = GCAD.UnpackedVector3d.Dot
-local GCAD_UnpackedVector3d_Length = GCAD.UnpackedVector3d.Length
+local GCAD_Vector3d_Dot                    = GCAD.Vector3d.Dot
+local GCAD_UnpackedVector3d_Dot            = GCAD.UnpackedVector3d.Dot
+local GCAD_UnpackedVector3d_Length         = GCAD.UnpackedVector3d.Length
+local GCAD_UnpackedVector3d_ToNativeVector = GCAD.UnpackedVector3d.ToNativeVector
 
 function GCAD.UnpackedPlane3d.FromPositionAndNormal (position, normal)
 	-- ax + by + cz + d = 0
@@ -27,13 +25,7 @@ function GCAD.UnpackedPlane3d.GetNormal (a, b, c, d, out)
 end
 
 function GCAD.UnpackedPlane3d.GetNormalNative (a, b, c, d, out)
-	out = out or Vector ()
-	
-	Vector___newindex (out, "x", a)
-	Vector___newindex (out, "y", b)
-	Vector___newindex (out, "z", c)
-	
-	return out
+	return GCAD_UnpackedVector3d_ToNativeVector (a, b, c, out)
 end
 
 function GCAD.UnpackedPlane3d.GetNormalUnpacked (a, b, c, d)

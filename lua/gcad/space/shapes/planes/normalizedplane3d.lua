@@ -1,12 +1,12 @@
 local self = {}
 GCAD.NormalizedPlane3d = GCAD.MakeConstructor (self)
 
-local Vector_Length                   = debug.getregistry ().Vector.Length
+local Vector_Length                = debug.getregistry ().Vector.Length
+local Vector___index               = debug.getregistry ().Vector.__index
 
-local GCAD_Vector3d_Dot               = GCAD.Vector3d.Dot
-local GCAD_Vector3d_Length            = GCAD.Vector3d.Length
-local GCAD_UnpackedVector3d_Length    = GCAD.UnpackedVector3d.Length
-local GCAD_UnpackedVector3d_Normalize = GCAD.UnpackedVector3d.Normalize
+local GCAD_Vector3d_Dot            = GCAD.Vector3d.Dot
+local GCAD_Vector3d_Length         = GCAD.Vector3d.Length
+local GCAD_UnpackedVector3d_Length = GCAD.UnpackedVector3d.Length
 
 function GCAD.NormalizedPlane3d.FromPositionAndNormal (position, normal, out)
 	out = out or GCAD.NormalizedPlane3d ()

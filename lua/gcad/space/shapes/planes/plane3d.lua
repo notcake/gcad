@@ -1,14 +1,12 @@
 local self = {}
 GCAD.Plane3d = GCAD.MakeConstructor (self)
 
-local Vector                    = Vector
+local Vector___index               = debug.getregistry ().Vector.__index
 
-local Vector___index            = debug.getregistry ().Vector.__index
-local Vector___newindex         = debug.getregistry ().Vector.__newindex
-
-local GCAD_Vector3d_Dot         = GCAD.Vector3d.Dot
-local GCAD_Vector3d_Length      = GCAD.Vector3d.Length
-local GCAD_UnpackedVector3d_Dot = GCAD.UnpackedVector3d.Dot
+local GCAD_Vector3d_Dot            = GCAD.Vector3d.Dot
+local GCAD_Vector3d_Length         = GCAD.Vector3d.Length
+local GCAD_Vector3d_ToNativeVector = GCAD.Vector3d.ToNativeVector
+local GCAD_UnpackedVector3d_Dot    = GCAD.UnpackedVector3d.Dot
 
 function GCAD.Plane3d.FromPositionAndNormal (position, normal, out)
 	out = out or GCAD.Plane3d ()
@@ -56,13 +54,7 @@ function GCAD.Plane3d.GetNormal (self, out)
 end
 
 function GCAD.Plane3d.GetNormalNative (self, out)
-	out = out or Vector ()
-	
-	Vector___newindex (out, "x", self [1])
-	Vector___newindex (out, "y", self [2])
-	Vector___newindex (out, "z", self [3])
-	
-	return out
+	return GCAD_Vector3d_ToNativeVector (self, out)
 end
 
 function GCAD.Plane3d.GetNormalUnpacked (self)
