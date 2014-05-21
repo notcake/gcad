@@ -2,8 +2,8 @@ GCAD.UnpackedEulerAngle = {}
 
 local Angle                                = Angle
 
-local Angle___index                        = debug.getregistry ().__index
-local Angle___newindex                     = debug.getregistry ().__newindex
+local Angle___index                        = debug.getregistry ().Angle.__index
+local Angle___newindex                     = debug.getregistry ().Angle.__newindex
 
 local math_cos                             = math.cos
 local math_rad                             = math.rad

@@ -53,6 +53,8 @@ function self:GetCorner (n, out)
 	return out
 end
 
+local edgeCornerIds1 = { 1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8 }
+local edgeCornerIds2 = { 2, 3, 4, 1, 5, 6, 7, 8, 6, 7, 8, 5 }
 function self:GetEdgeEnumerator (out1, out2)
 	local i = 0
 	
@@ -60,19 +62,7 @@ function self:GetEdgeEnumerator (out1, out2)
 		i = i + 1
 		if i > 12 then return nil, nil end
 		
-		if     i ==  1 then return self:GetCorner (1, out1), self:GetCorner (2, out2)
-		elseif i ==  2 then return self:GetCorner (2, out1), self:GetCorner (3, out2)
-		elseif i ==  3 then return self:GetCorner (3, out1), self:GetCorner (4, out2)
-		elseif i ==  4 then return self:GetCorner (4, out1), self:GetCorner (1, out2)
-		elseif i ==  5 then return self:GetCorner (1, out1), self:GetCorner (5, out2)
-		elseif i ==  6 then return self:GetCorner (2, out1), self:GetCorner (6, out2)
-		elseif i ==  7 then return self:GetCorner (3, out1), self:GetCorner (7, out2)
-		elseif i ==  8 then return self:GetCorner (4, out1), self:GetCorner (8, out2)
-		elseif i ==  9 then return self:GetCorner (5, out1), self:GetCorner (6, out2)
-		elseif i == 10 then return self:GetCorner (6, out1), self:GetCorner (7, out2)
-		elseif i == 11 then return self:GetCorner (7, out1), self:GetCorner (8, out2)
-		elseif i == 12 then return self:GetCorner (8, out1), self:GetCorner (5, out2)
-		end
+		return self:GetCorner (edgeCornerIds1 [i], out1), self:GetCorner (edgeCornerIds2 [i], out1)
 	end
 end
 
@@ -175,9 +165,9 @@ function self:ComputeCorners ()
 	for i = 1, 8 do
 		local c = self.Corners [i]
 		local x, y, z = c [1], c [2], c [3]
-		self.Corners [i] [1] = cx + x * x1 + y * y1 + z * z1
-		self.Corners [i] [2] = cy + x * x2 + y * y2 + z * z2
-		self.Corners [i] [3] = cz + x * x3 + y * y3 + z * z3
+		c [1] = cx + x * x1 + y * y1 + z * z1
+		c [2] = cy + x * x2 + y * y2 + z * z2
+		c [3] = cz + x * x3 + y * y3 + z * z3
 	end
 	GCAD.Profiler:End ()
 end

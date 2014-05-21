@@ -487,7 +487,7 @@ function self:ctor (m11, m12, m13, m21, m22, m23, m31, m32, m33)
 end
 
 -- Initialization
-function self:Set (m11, m12, m21, m22, m23, m31, m32, m33)
+function self:Set (m11, m12, m13, m21, m22, m23, m31, m32, m33)
 	self [1] = m11
 	self [2] = m12
 	self [3] = m13
@@ -543,6 +543,7 @@ self.Multiply               = GCAD.Matrix3x3.Multiply
 self.ScalarMultiply         = GCAD.Matrix3x3.MatrixScalarMultiply
 self.ScalarDivide           = GCAD.Matrix3x3.ScalarDivide
 self.MatrixMultiply         = GCAD.Matrix3x3.MatrixMatrixMultiply
+self.VectorMultiply         = GCAD.Matrix3x3.MatrixVectorMultiply
 self.UnpackedVectorMultiply = GCAD.Matrix3x3.MatrixUnpackedVectorMultiply
 self.Negate                 = GCAD.Matrix3x3.Negate
 

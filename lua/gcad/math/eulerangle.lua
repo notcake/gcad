@@ -3,8 +3,8 @@ GCAD.EulerAngle = GCAD.MakeConstructor (self)
 
 local Angle                                = Angle
 
-local Angle___index                        = debug.getregistry ().__index
-local Angle___newindex                     = debug.getregistry ().__newindex
+local Angle___index                        = debug.getregistry ().Angle.__index
+local Angle___newindex                     = debug.getregistry ().Angle.__newindex
 
 local math_cos                             = math.cos
 local math_rad                             = math.rad
@@ -151,9 +151,9 @@ end
 function GCAD.EulerAngle.FromNativeAngle (angle, out)
 	out = out or GCAD.EulerAngle ()
 	
-	self [1] = Angle___index (out, "p")
-	self [2] = Angle___index (out, "y")
-	self [3] = Angle___index (out, "r")
+	out [1] = Angle___index (angle, "p")
+	out [2] = Angle___index (angle, "y")
+	out [3] = Angle___index (angle, "r")
 	
 	return out
 end
