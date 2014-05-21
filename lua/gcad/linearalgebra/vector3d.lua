@@ -246,6 +246,8 @@ function self:Set (x, y, z)
 	self [1] = x
 	self [2] = y
 	self [3] = z
+	
+	return self
 end
 
 function self:Zero ()

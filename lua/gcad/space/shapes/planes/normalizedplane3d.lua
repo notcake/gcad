@@ -157,6 +157,8 @@ function self:Set (a, b, c, d)
 	self [2] = b
 	self [3] = c
 	self [4] = d
+	
+	return self
 end
 
 local GCAD_NormalizedPlane3d_Minimum = GCAD.NormalizedPlane3d.Minimum

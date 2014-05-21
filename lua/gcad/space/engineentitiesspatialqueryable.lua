@@ -8,7 +8,7 @@ local EF_NODRAW = EF_NODRAW
 function self:ctor ()
 end
 
-local boundingSphere = GCAD.NativeSphere3d ()
+local nativeSphere3d = GCAD.NativeSphere3d ()
 local obb            = GCAD.OBB3d ()
 
 local vec1 = GLib.ColumnVector (3)
@@ -28,8 +28,8 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			boundingSphere = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, boundingSphere)
-			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
+			nativeSphere3d = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, nativeSphere3d)
+			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (nativeSphere3d)
 			
 			if intersectsSphere then
 				local contained = containsSphere
@@ -65,8 +65,8 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			boundingSphere = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, boundingSphere)
-			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (boundingSphere)
+			nativeSphere3d = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, nativeSphere3d)
+			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (nativeSphere3d)
 			
 			if intersectsSphere then
 				local contained = containsSphere

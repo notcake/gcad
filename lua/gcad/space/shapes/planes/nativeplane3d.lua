@@ -244,6 +244,8 @@ end
 function self:Set (a, b, c, d)
 	self.Normal = GCAD_UnpackedVector3d_ToNativeVector (a, b, c, self.Normal)
 	self [4] = d
+	
+	return self
 end
 
 local GCAD_NativePlane3d_Minimum = GCAD.NativePlane3d.Minimum

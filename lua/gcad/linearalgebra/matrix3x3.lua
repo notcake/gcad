@@ -299,18 +299,30 @@ function GCAD.Matrix3x3.Identity (out)
 	return out
 end
 
-function GCAD.Matrix3x3.Scale (x, y, z, out)
+function GCAD.Matrix3x3.Rotate (angle, out)
+	return GCAD.EulerAngle.ToMatrix3x3 (angle, out)
+end
+
+function GCAD.Matrix3x3.RotateUnpacked (p, y, r, out)
+	return GCAD.UnpackedEulerAngle.ToMatrix3x3 (p, y, r, out)
+end
+
+function GCAD.Matrix3x3.Scale (v3d, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = x
-	out [2] = 0
-	out [3] = 0
-	out [4] = 0
-	out [5] = y
-	out [6] = 0
-	out [7] = 0
-	out [8] = 0
-	out [9] = z
+	out [1], out [2], out [3] = v3d [1],       0,       0
+	out [4], out [5], out [6] =       0, v3d [2],       0
+	out [7], out [8], out [9] =       0,       0, v3d [3]
+	
+	return out
+end
+
+function GCAD.Matrix3x3.ScaleUnpacked (x, y, z, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = x, 0, 0
+	out [4], out [5], out [6] = 0, y, 0
+	out [7], out [8], out [9] = 0, 0, z
 	
 	return out
 end
@@ -355,6 +367,8 @@ function self:Set (m11, m12, m21, m22, m23, m31, m32, m33)
 	self [7] = m31
 	self [8] = m32
 	self [9] = m33
+	
+	return self
 end
 
 local GCAD_Matrix3x3_Identity = GCAD.Matrix3x3.Identity

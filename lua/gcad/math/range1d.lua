@@ -148,6 +148,8 @@ end
 function self:Set (x1, x2)
 	self [1] = x1
 	self [2] = x2
+	
+	return self
 end
 
 local GCAD_Range1d_Minimum = GCAD.Range1d.Minimum

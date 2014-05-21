@@ -7,15 +7,16 @@ local Angle_Right    = debug.getregistry ().Angle.Right
 local Angle_Up       = debug.getregistry ().Angle.Up
 local Vector___index = debug.getregistry ().Vector.__index
 
+local GCAD_Vector3d_FromNativeVector = GCAD.Vector3d.FromNativeVector
+
 function GCAD.OBB3d.FromEntity (ent, out)
 	GCAD.Profiler:Begin ("OBB3d.FromEntity")
 	
 	out = out or GCAD.OBB3d ()
 	
-	local v
-	v = ent:GetPos  () out.Center [1] = Vector___index (v, "x") out.Center [2] = Vector___index (v, "y") out.Center [3] = Vector___index (v, "z")
-	v = ent:OBBMins () out.Min    [1] = Vector___index (v, "x") out.Min    [2] = Vector___index (v, "y") out.Min    [3] = Vector___index (v, "z")
-	v = ent:OBBMaxs () out.Max    [1] = Vector___index (v, "x") out.Max    [2] = Vector___index (v, "y") out.Max    [3] = Vector___index (v, "z")
+	out.Center = GCAD_Vector3d_FromNativeVector (ent:GetPos  (), out.Center)
+	out.Min    = GCAD_Vector3d_FromNativeVector (ent:OBBMins (), out.Min   )
+	out.Max    = GCAD_Vector3d_FromNativeVector (ent:OBBMaxs (), out.Max   )
 	
 	out:SetAngle (ent:GetAngles ())
 	
@@ -24,9 +25,9 @@ function GCAD.OBB3d.FromEntity (ent, out)
 end
 
 function self:ctor (center, min, max, angle)
-	self.Center = GLib.ColumnVector (3)
-	self.Min    = GLib.ColumnVector (3)
-	self.Max    = GLib.ColumnVector (3)
+	self.Center = GCAD.Vector3d ()
+	self.Min    = GCAD.Vector3d ()
+	self.Max    = GCAD.Vector3d ()
 	self.Angle  = Angle ()
 	
 	self.Corners = {}
@@ -39,7 +40,7 @@ function self:ctor (center, min, max, angle)
 end
 
 function self:GetCorner (n, out)
-	out = out or GLib.ColumnVector (3)
+	out = out or GCAD.Vector3d ()
 	
 	if not self.CornersValid then
 		self:ComputeCorners ()
@@ -143,7 +144,7 @@ function self:ComputeCorners ()
 	self.CornersValid = true
 	
 	for i = 1, 8 do
-		self.Corners [i] = self.Corners [i] or GLib.ColumnVector (3)
+		self.Corners [i] = self.Corners [i] or GCAD.Vector3d ()
 	end
 	
 	GCAD.Profiler:Begin ("OBB3d:ComputeCorners : Generate corners")

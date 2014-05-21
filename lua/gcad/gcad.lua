@@ -24,6 +24,9 @@ include ("linearalgebra/matrix2x2.lua")
 include ("linearalgebra/matrix3x3.lua")
 
 -- Mathematics
+include ("math/eulerangle.lua")
+include ("math/unpackedeulerangle.lua")
+
 include ("math/range1d.lua")
 include ("math/range2d.lua")
 include ("math/range3d.lua")
@@ -85,10 +88,16 @@ include ("space/shapes/boxes/legacyobb3d.lua")
 -- include ("space/shapes/frustums/nativefrustum3d.lua")
 
 -- Legacy
-include ("space/shapes/frustum3d.lua")
+include ("space/shapes/frustums/legacyfrustum3d.lua")
 
 -- Spatial queryables
 include ("space/engineentitiesspatialqueryable.lua")
+
+-- Signal Processing
+include ("signalprocessing/digitalfilters/realfirfilter.lua")
+include ("signalprocessing/digitalfilters/realiirfilter.lua")
+-- include ("signalprocessing/digitalfilters/complexfirfilter.lua")
+-- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 

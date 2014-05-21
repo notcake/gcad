@@ -197,6 +197,8 @@ end
 function self:Set (x, y)
 	self [1] = x
 	self [2] = y
+	
+	return self
 end
 
 function self:Zero ()

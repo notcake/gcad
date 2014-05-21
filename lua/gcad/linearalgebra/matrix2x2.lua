@@ -268,6 +268,8 @@ function self:Set (m11, m12, m21, m22)
 	self [2] = m12
 	self [3] = m21
 	self [4] = m22
+	
+	return self
 end
 
 local GCAD_Matrix2x2_Identity = GCAD.Matrix2x2.Identity

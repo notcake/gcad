@@ -156,6 +156,8 @@ function self:Set (x, y, r)
 	self [1] = x
 	self [2] = y
 	self [3] = r
+	
+	return self
 end
 
 local GCAD_Circle2d_Minimum = GCAD.Circle2d.Minimum

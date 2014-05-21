@@ -208,6 +208,8 @@ function self:Set (a, b, c)
 	self [1] = a
 	self [2] = b
 	self [3] = c
+	
+	return self
 end
 
 local GCAD_Plane2d_Minimum = GCAD.Plane2d.Minimum

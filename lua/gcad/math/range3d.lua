@@ -189,6 +189,8 @@ function self:Set (x1, y1, z1, x2, y2, z3)
 	self [4] = y2
 	self [5] = z1
 	self [6] = z2
+	
+	return self
 end
 
 local GCAD_Range3d_Minimum = GCAD.Range3d.Minimum
