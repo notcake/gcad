@@ -36,6 +36,10 @@ function GCAD.Matrix2x2.GetColumn (self, column, out)
 	return out
 end
 
+function GCAD.Matrix2x2.GetColumnUnpacked (self, column)	
+	return self [column + 0], self [column + 2]
+end
+
 function GCAD.Matrix2x2.GetDiagonal (self, out)
 	out = out or GCAD.Vector2d ()
 	
@@ -45,6 +49,10 @@ function GCAD.Matrix2x2.GetDiagonal (self, out)
 	return out
 end
 
+function GCAD.Matrix2x2.GetDiagonalUnpacked (self)
+	return self [1], self [3]
+end
+
 function GCAD.Matrix2x2.GetRow (self, row, out)
 	out = out or GCAD.Vector2d ()
 	
@@ -52,6 +60,52 @@ function GCAD.Matrix2x2.GetRow (self, row, out)
 	out [2] = self [row * 2 - 2 + 2]
 	
 	return out
+end
+
+function GCAD.Matrix2x2.GetRowUnpacked (self, row)
+	return self [row * 2 - 2 + 1], self [row * 2 - 2 + 2]
+end
+
+function GCAD.Matrix2x2.SetColumn (self, column, v2d)
+	self [column + 0] = v2d [1]
+	self [column + 2] = v2d [2]
+	
+	return self
+end
+
+function GCAD.Matrix2x2.SetColumnUnpacked (self, column, x, y)
+	self [column + 0] = x
+	self [column + 2] = y
+	
+	return self
+end
+
+function GCAD.Matrix2x2.SetDiagonal (self, v2d)
+	self [1] = v2d [1]
+	self [3] = v2d [2]
+	
+	return self
+end
+
+function GCAD.Matrix2x2.SetDiagonalUnpacked (self, x, y)
+	self [1] = x
+	self [3] = y
+	
+	return self
+end
+
+function GCAD.Matrix2x2.SetRow (self, row, v2d)
+	self [row * 2 - 2 + 1] = v2d [1]
+	self [row * 2 - 2 + 2] = v2d [2]
+	
+	return self
+end
+
+function GCAD.Matrix2x2.SetRowUnpacked (self, row, x, y)
+	self [row * 2 - 2 + 1] = x
+	self [row * 2 - 2 + 2] = y
+	
+	return self
 end
 
 -- Matrix operations
@@ -130,6 +184,11 @@ function GCAD.Matrix2x2.MatrixVectorMultiply (a, b, out)
 	return out
 end
 
+function GCAD.Matrix2x2.MatrixUnpackedVectorMultiply (a, x, y)
+	return a [1] * x + a [2] * y,
+	       a [3] * x + a [4] * y
+end
+
 function GCAD.Matrix2x2.VectorMatrixMultiply (a, b, out)
 	out = out or GCAD.Vector2d ()
 	
@@ -138,6 +197,11 @@ function GCAD.Matrix2x2.VectorMatrixMultiply (a, b, out)
 	out [2] = x * b [2] + y * b [4]
 	
 	return out
+end
+
+function GCAD.Matrix2x2.UnpackedVectorMatrixMultiply (x, y, b)
+	return x * b [1] + y * b [3],
+	       x * b [2] + y * b [4]
 end
 
 function GCAD.Matrix2x2.MatrixMatrixMultiply (a, b, out)
@@ -279,36 +343,46 @@ function self:Identity () return GCAD_Matrix2x2_Identity (self) end
 function self:Zero     () return GCAD_Matrix2x2_Zero     (self) end
 
 -- Copying
-self.Clone          = GCAD.Matrix2x2.Clone
-self.Copy           = GCAD.Matrix2x2.Copy
+self.Clone                  = GCAD.Matrix2x2.Clone
+self.Copy                   = GCAD.Matrix2x2.Copy
 
 -- Matrix reading
-self.GetColumn      = GCAD.Matrix2x2.GetColumn
-self.GetDiagonal    = GCAD.Matrix2x2.GetDiagonal
-self.GetRow         = GCAD.Matrix2x2.GetRow
+self.GetColumn              = GCAD.Matrix2x2.GetColumn
+self.GetColumnUnpacked      = GCAD.Matrix2x2.GetColumnUnpacked
+self.GetDiagonal            = GCAD.Matrix2x2.GetDiagonal
+self.GetDiagonalUnpacked    = GCAD.Matrix2x2.GetDiagonalUnpacked
+self.GetRow                 = GCAD.Matrix2x2.GetRow
+self.GetRowUnpacked         = GCAD.Matrix2x2.GetRowUnpacked
+self.SetColumn              = GCAD.Matrix2x2.SetColumn
+self.SetColumnUnpacked      = GCAD.Matrix2x2.SetColumnUnpacked
+self.SetDiagonal            = GCAD.Matrix2x2.SetDiagonal
+self.SetDiagonalUnpacked    = GCAD.Matrix2x2.SetDiagonalUnpacked
+self.SetRow                 = GCAD.Matrix2x2.SetRow
+self.SetRowUnpacked         = GCAD.Matrix2x2.SetRowUnpacked
 
 -- Matrix operations
-self.Determinant    = GCAD.Matrix2x2.Determinant
-self.Invert         = GCAD.Matrix2x2.Invert
-self.Transpose      = GCAD.Matrix2x2.Transpose
+self.Determinant            = GCAD.Matrix2x2.Determinant
+self.Invert                 = GCAD.Matrix2x2.Invert
+self.Transpose              = GCAD.Matrix2x2.Transpose
 
 -- Matrix arithmetic
-self.Add            = GCAD.Matrix2x2.Add
-self.Subtract       = GCAD.Matrix2x2.Subtract
-self.Multiply       = GCAD.Matrix2x2.Multiply
-self.ScalarMultiply = GCAD.Matrix2x2.MatrixScalarMultiply
-self.ScalarDivide   = GCAD.Matrix2x2.ScalarDivide
-self.MatrixMultiply = GCAD.Matrix2x2.MatrixMatrixMultiply
-self.VectorMultiply = GCAD.Matrix2x2.MatrixVectorMultiply
-self.Negate         = GCAD.Matrix2x2.Negate
+self.Add                    = GCAD.Matrix2x2.Add
+self.Subtract               = GCAD.Matrix2x2.Subtract
+self.Multiply               = GCAD.Matrix2x2.Multiply
+self.ScalarMultiply         = GCAD.Matrix2x2.MatrixScalarMultiply
+self.ScalarDivide           = GCAD.Matrix2x2.ScalarDivide
+self.MatrixMultiply         = GCAD.Matrix2x2.MatrixMatrixMultiply
+self.VectorMultiply         = GCAD.Matrix2x2.MatrixVectorMultiply
+self.UnpackedVectorMultiply = GCAD.Matrix2x2.MatrixUnpackedVectorMultiply
+self.Negate                 = GCAD.Matrix2x2.Negate
 
-self.__add          = GCAD.Matrix2x2.Add
-self.__sub          = GCAD.Matrix2x2.Subtract
-self.__mul          = GCAD.Matrix2x2.Multiply
-self.__div          = GCAD.Matrix2x2.ScalarDivide
-self.__unm          = GCAD.Matrix2x2.Negate
+self.__add                  = GCAD.Matrix2x2.Add
+self.__sub                  = GCAD.Matrix2x2.Subtract
+self.__mul                  = GCAD.Matrix2x2.Multiply
+self.__div                  = GCAD.Matrix2x2.ScalarDivide
+self.__unm                  = GCAD.Matrix2x2.Negate
 
 -- Utility
-self.Unpack         = GCAD.Matrix2x2.Unpack
-self.ToString       = GCAD.Matrix2x2.ToString
-self.__tostring     = GCAD.Matrix2x2.ToString
+self.Unpack                 = GCAD.Matrix2x2.Unpack
+self.ToString               = GCAD.Matrix2x2.ToString
+self.__tostring             = GCAD.Matrix2x2.ToString

@@ -7,6 +7,7 @@ local Entity_OBBCenter                 = debug.getregistry ().Entity.OBBCenter
 local Vector___add                     = debug.getregistry ().Vector.__add
 local Vector___index                   = debug.getregistry ().Vector.__index
 
+local GCAD_Vector3d_Clone              = GCAD.Vector3d.Clone
 local GCAD_Vector3d_DistanceTo         = GCAD.Vector3d.DistanceTo
 local GCAD_UnpackedVector3d_DistanceTo = GCAD.UnpackedVector3d.DistanceTo
 
@@ -58,13 +59,7 @@ end
 
 -- Circle properties
 function GCAD.Sphere3d.GetPosition (self, out)
-	out = out or GCAD.Vector3d ()
-	
-	out [1] = self [1]
-	out [2] = self [2]
-	out [3] = self [3]
-	
-	return out
+	return GCAD_Vector3d_Clone (self, out)
 end
 
 function GCAD.Sphere3d.GetPositionNative (self, out)

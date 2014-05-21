@@ -3,6 +3,7 @@ GCAD.Plane3d = GCAD.MakeConstructor (self)
 
 local Vector___index               = debug.getregistry ().Vector.__index
 
+local GCAD_Vector3d_Clone          = GCAD.Vector3d.Clone
 local GCAD_Vector3d_Dot            = GCAD.Vector3d.Dot
 local GCAD_Vector3d_Length         = GCAD.Vector3d.Length
 local GCAD_Vector3d_ToNativeVector = GCAD.Vector3d.ToNativeVector
@@ -44,13 +45,7 @@ end
 
 -- Plane properties
 function GCAD.Plane3d.GetNormal (self, out)
-	out = out or GCAD.Vector3d ()
-	
-	out [1] = self [1]
-	out [2] = self [2]
-	out [3] = self [3]
-	
-	return out
+	return GCAD_Vector3d_Clone (self, out)
 end
 
 function GCAD.Plane3d.GetNormalNative (self, out)

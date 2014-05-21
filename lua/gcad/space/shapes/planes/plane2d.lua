@@ -1,6 +1,7 @@
 local self = {}
 GCAD.Plane2d = GCAD.MakeConstructor (self)
 
+local GCAD_Vector2d_Clone       = GCAD.Vector2d.Clone
 local GCAD_Vector2d_Dot         = GCAD.Vector2d.Dot
 local GCAD_Vector2d_Length      = GCAD.Vector2d.Length
 local GCAD_UnpackedVector2d_Dot = GCAD.UnpackedVector2d.Dot
@@ -38,12 +39,7 @@ end
 
 -- Plane properties
 function GCAD.Plane2d.GetNormal (self, out)
-	out = out or GCAD.Vector2d ()
-	
-	out [1] = self [1]
-	out [2] = self [2]
-	
-	return out
+	return GCAD_Vector2d_Clone (self, out)
 end
 
 function GCAD.Plane2d.GetNormalUnpacked (self)

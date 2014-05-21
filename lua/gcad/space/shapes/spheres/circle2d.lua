@@ -1,6 +1,7 @@
 local self = {}
 GCAD.Circle2d = GCAD.MakeConstructor (self)
 
+local GCAD_Vector2d_Clone              = GCAD.Vector2d.Clone
 local GCAD_Vector2d_DistanceTo         = GCAD.Vector2d.DistanceTo
 local GCAD_UnpackedVector2d_DistanceTo = GCAD.UnpackedVector2d.DistanceTo
 
@@ -35,12 +36,7 @@ end
 
 -- Circle properties
 function GCAD.Circle2d.GetPosition (self, out)
-	out = out or GCAD.Vector2d ()
-	
-	out [1] = self [1]
-	out [2] = self [2]
-	
-	return out
+	return GCAD_Vector2d_Clone (self, out)
 end
 
 function GCAD.Circle2d.GetPositionUnpacked (self)
