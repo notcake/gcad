@@ -86,6 +86,11 @@ function GCAD.NormalizedPlane2d.IntersectsUnpackedCircle (self, x, y, r)
 	return false, false
 end
 
+GCAD.NormalizedPlane2d.ContainsAABB                  = GCAD.Plane2d.ContainsAABB
+GCAD.NormalizedPlane2d.IntersectsAABB                = GCAD.Plane2d.IntersectsAABB
+GCAD.NormalizedPlane2d.ContainsOBB                   = GCAD.Plane2d.ContainsOBB
+GCAD.NormalizedPlane2d.IntersectsOBB                 = GCAD.Plane2d.IntersectsOBB
+
 -- Conversion
 function GCAD.NormalizedPlane2d.FromLine2d (line, out)
 	out = out or GCAD.NormalizedPlane2d ()
@@ -159,6 +164,10 @@ self.ContainsCircle                = GCAD.NormalizedPlane2d.ContainsCircle
 self.ContainsUnpackedCircle        = GCAD.NormalizedPlane2d.ContainsUnpackedCircle
 self.IntersectsCircle              = GCAD.NormalizedPlane2d.IntersectsCircle
 self.IntersectsUnpackedCircle      = GCAD.NormalizedPlane2d.IntersectsUnpackedCircle
+self.ContainsAABB                  = GCAD.NormalizedPlane2d.ContainsAABB
+self.IntersectsAABB                = GCAD.NormalizedPlane2d.IntersectsAABB
+self.ContainsOBB                   = GCAD.NormalizedPlane2d.ContainsOBB
+self.IntersectsOBB                 = GCAD.NormalizedPlane2d.IntersectsOBB
 
 -- Conversion
 self.ToLine2d                      = GCAD.NormalizedPlane2d.ToLine2d

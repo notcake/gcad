@@ -16,14 +16,12 @@ local GCAD_UnpackedVector3d_FromNativeVector = GCAD.UnpackedVector3d.FromNativeV
 local GCAD_UnpackedVector3d_ToNativeVector   = GCAD.UnpackedVector3d.ToNativeVector
 
 function GCAD.NativeSphere3d.FromEntityBoundingSphere (ent, out)
-	GCAD.Profiler:Begin ("NativeSphere3d.FromEntityBoundingSphere")
 	out = out or GCAD.NativeSphere3d ()
 	
 	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
 	Vector_Set (out.Position, pos)
 	out [4] = Entity_BoundingRadius (ent)
 	
-	GCAD.Profiler:End ()
 	return out
 end
 

@@ -104,6 +104,23 @@ function GCAD.UnpackedPlane2d.IntersectsUnpackedCircle (a, b, c, x, y, r)
 	return false, false
 end
 
+local GCAD_UnpackedPlane2d_ContainsUnpackedPoint = GCAD.UnpackedPlane2d.ContainsUnpackedPoint
+
+function GCAD.UnpackedPlane2d.ContainsAABB (a, b, c, aabb2d)
+	local farCornerId, nearCornerId = aabb2d:GetExtremeCornerIdsUnpacked (a, b)
+	
+	return GCAD_UnpackedPlane2d_ContainsUnpackedPoint (a, b, c, aabb2d:GetCornerUnpacked (farCornerId))
+end
+
+function GCAD.UnpackedPlane2d.IntersectsAABB (a, b, c, aabb2d)
+	local farCornerId, nearCornerId = aabb2d:GetExtremeCornerIdsUnpacked (a, b)
+	
+	return GCAD_UnpackedPlane2d_ContainsUnpackedPoint (a, b, c, aabb2d:GetCornerUnpacked (nearCornerId))
+end
+
+GCAD.UnpackedPlane2d.ContainsOBB   = GCAD.UnpackedPlane2d.ContainsAABB
+GCAD.UnpackedPlane2d.IntersectsOBB = GCAD.UnpackedPlane2d.IntersectsAABB
+
 -- Conversion
 function GCAD.UnpackedPlane2d.FromLine2d (line)
 	local a, b = line:GetDirectionUnpacked ()

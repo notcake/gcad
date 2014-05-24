@@ -147,8 +147,8 @@ function GCAD.NativePlane3d.ContainsNativePoint (self, v)
 	return GCAD_NativePlane3d_ScaledDistanceToNativePoint (self, v) < 0
 end
 
-function GCAD.NativePlane3d.ContainsUnpackedPoint (self, x, y)
-	return GCAD_NativePlane3d_ScaledDistanceToUnpackedPoint (self, x, y) < 0
+function GCAD.NativePlane3d.ContainsUnpackedPoint (self, x, y, z)
+	return GCAD_NativePlane3d_ScaledDistanceToUnpackedPoint (self, x, y, z) < 0
 end
 
 function GCAD.NativePlane3d.ContainsSphere (self, sphere3d)
@@ -188,6 +188,23 @@ function GCAD.NativePlane3d.IntersectsUnpackedSphere (self, x, y, z, r)
 	if distance - r < 0 then return true, false end -- sphere centre lies outside, but surface intersects this plane
 	return false, false
 end
+
+local GCAD_NativePlane3d_ContainsUnpackedPoint = GCAD.NativePlane3d.ContainsUnpackedPoint
+
+function GCAD.NativePlane3d.ContainsAABB (self, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIds (self)
+	
+	return GCAD_NativePlane3d_ContainsUnpackedPoint (self, aabb3d:GetCornerUnpacked (farCornerId))
+end
+
+function GCAD.NativePlane3d.IntersectsAABB (self, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIds (self)
+	
+	return GCAD_NativePlane3d_ContainsUnpackedPoint (self, aabb3d:GetCornerUnpacked (nearCornerId))
+end
+
+GCAD.NativePlane3d.ContainsOBB   = GCAD.NativePlane3d.ContainsAABB
+GCAD.NativePlane3d.IntersectsOBB = GCAD.NativePlane3d.IntersectsAABB
 
 -- Conversion
 local GCAD_NativePlane3d_SetNormal = GCAD.NativePlane3d.SetNormal
@@ -287,6 +304,10 @@ self.ContainsUnpackedSphere        = GCAD.NativePlane3d.ContainsUnpackedSphere
 self.IntersectsSphere              = GCAD.NativePlane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.NativePlane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.NativePlane3d.IntersectsUnpackedSphere
+self.ContainsAABB                  = GCAD.NativePlane3d.ContainsAABB
+self.IntersectsAABB                = GCAD.NativePlane3d.IntersectsAABB
+self.ContainsOBB                   = GCAD.NativePlane3d.ContainsOBB
+self.IntersectsOBB                 = GCAD.NativePlane3d.IntersectsOBB
 
 -- Conversion
 self.ToPlane3d                     = GCAD.NativePlane3d.ToPlane3d

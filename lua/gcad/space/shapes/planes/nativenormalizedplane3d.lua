@@ -4,8 +4,9 @@ GCAD.NativeNormalizedPlane3d = GCAD.MakeConstructor (self)
 local Vector_Length        = debug.getregistry ().Vector.Length
 local Vector_Normalize     = debug.getregistry ().Vector.Normalize
 
-local GCAD_Vector3d_Dot    = GCAD.Vector3d.Dot
-local GCAD_Vector3d_Length = GCAD.Vector3d.Length
+local GCAD_Vector3d_Dot            = GCAD.Vector3d.Dot
+local GCAD_Vector3d_Length         = GCAD.Vector3d.Length
+local GCAD_Vector3d_ToNativeVector = GCAD.Vector3d.ToNativeVector
 
 function GCAD.NativeNormalizedPlane3d.FromPositionAndNormal (position, normal, out)
 	out = out or GCAD.NativeNormalizedPlane3d ()
@@ -110,12 +111,17 @@ function GCAD.NativeNormalizedPlane3d.IntersectsUnpackedSphere (self, x, y, z, r
 	return false, false
 end
 
+GCAD.NativeNormalizedPlane3d.ContainsAABB                  = GCAD.NativePlane3d.ContainsAABB
+GCAD.NativeNormalizedPlane3d.IntersectsAABB                = GCAD.NativePlane3d.IntersectsAABB
+GCAD.NativeNormalizedPlane3d.ContainsOBB                   = GCAD.NativePlane3d.ContainsOBB
+GCAD.NativeNormalizedPlane3d.IntersectsOBB                 = GCAD.NativePlane3d.IntersectsOBB
+
 -- Conversion
 local GCAD_NativeNormalizedPlane3d_SetNormal = GCAD.NativeNormalizedPlane3d.SetNormal
 function GCAD.NativeNormalizedPlane3d.FromNormalizedPlane3d (normalizedPlane3d, out)
 	out = out or GCAD.NativeNormalizedPlane3d ()
 	
-	GCAD_NativePlane3d_SetNormal (out, normalizedPlane3d)
+	GCAD_NativeNormalizedPlane3d_SetNormal (out, normalizedPlane3d)
 	out [4] = normalizedPlane3d [4]
 	
 	return out
@@ -190,6 +196,10 @@ self.ContainsUnpackedSphere        = GCAD.NativeNormalizedPlane3d.ContainsUnpack
 self.IntersectsSphere              = GCAD.NativeNormalizedPlane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.NativeNormalizedPlane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.NativeNormalizedPlane3d.IntersectsUnpackedSphere
+self.ContainsAABB                  = GCAD.NativeNormalizedPlane3d.ContainsAABB
+self.IntersectsAABB                = GCAD.NativeNormalizedPlane3d.IntersectsAABB
+self.ContainsOBB                   = GCAD.NativeNormalizedPlane3d.ContainsOBB
+self.IntersectsOBB                 = GCAD.NativeNormalizedPlane3d.IntersectsOBB
 
 -- Conversion
 self.ToNormalizedPlane3d           = GCAD.NativeNormalizedPlane3d.ToNormalizedPlane3d

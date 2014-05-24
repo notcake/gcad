@@ -52,8 +52,6 @@ include ("space/shapes/planes/unpackednormalizedplane3d.lua")
 include ("space/shapes/planes/nativeplane3d.lua")
 include ("space/shapes/planes/nativenormalizedplane3d.lua")
 
-include ("space/shapes/planes/legacyplane3d.lua")
-
 -- Spheres
 include ("space/shapes/spheres/circle2d.lua")
 include ("space/shapes/spheres/sphere3d.lua")
@@ -63,7 +61,7 @@ include ("space/shapes/spheres/nativesphere3d.lua")
 
 -- Boxes
 -- include ("space/shapes/boxes/aabb2d.lua")
--- include ("space/shapes/boxes/aabb3d.lua")
+include ("space/shapes/boxes/aabb3d.lua")
 -- include ("space/shapes/boxes/obb2d.lua")
 include ("space/shapes/boxes/obb3d.lua")
 
@@ -83,11 +81,8 @@ include ("space/shapes/boxes/legacyaabb3d.lua")
 -- include ("space/shapes/lines/nativelinesegment3d.lua")
 
 -- Frustums
--- include ("space/shapes/frustums/frustum3d.lua")
--- include ("space/shapes/frustums/nativefrustum3d.lua")
-
--- Legacy
-include ("space/shapes/frustums/legacyfrustum3d.lua")
+include ("space/shapes/frustums/frustum3d.lua")
+include ("space/shapes/frustums/nativefrustum3d.lua")
 
 -- Spatial queryables
 include ("space/engineentitiesspatialqueryable.lua")

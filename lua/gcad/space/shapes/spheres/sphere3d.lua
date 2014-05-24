@@ -12,7 +12,6 @@ local GCAD_Vector3d_DistanceTo         = GCAD.Vector3d.DistanceTo
 local GCAD_UnpackedVector3d_DistanceTo = GCAD.UnpackedVector3d.DistanceTo
 
 function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
-	GCAD.Profiler:Begin ("Sphere3d.FromEntityBoundingSphere")
 	out = out or GCAD.Sphere3d ()
 	
 	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
@@ -21,7 +20,6 @@ function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
 	out [3] = Vector___index (pos, "z")
 	out [4] = Entity_BoundingRadius (ent)
 	
-	GCAD.Profiler:End ()
 	return out
 end
 

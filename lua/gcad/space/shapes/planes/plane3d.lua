@@ -146,8 +146,8 @@ function GCAD.Plane3d.ContainsNativePoint (self, v)
 	return GCAD_Plane3d_ScaledDistanceToNativePoint (self, v) < 0
 end
 
-function GCAD.Plane3d.ContainsUnpackedPoint (self, x, y)
-	return GCAD_Plane3d_ScaledDistanceToUnpackedPoint (self, x, y) < 0
+function GCAD.Plane3d.ContainsUnpackedPoint (self, x, y, z)
+	return GCAD_Plane3d_ScaledDistanceToUnpackedPoint (self, x, y, z) < 0
 end
 
 function GCAD.Plane3d.ContainsSphere (self, sphere3d)
@@ -187,6 +187,23 @@ function GCAD.Plane3d.IntersectsUnpackedSphere (self, x, y, z, r)
 	if distance - r < 0 then return true, false end -- sphere centre lies outside, but surface intersects this plane
 	return false, false
 end
+
+local GCAD_Plane3d_ContainsUnpackedPoint = GCAD.Plane3d.ContainsUnpackedPoint
+
+function GCAD.Plane3d.ContainsAABB (self, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIds (self)
+	
+	return GCAD_Plane3d_ContainsUnpackedPoint (self, aabb3d:GetCornerUnpacked (farCornerId))
+end
+
+function GCAD.Plane3d.IntersectsAABB (self, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIds (self)
+	
+	return GCAD_Plane3d_ContainsUnpackedPoint (self, aabb3d:GetCornerUnpacked (nearCornerId))
+end
+
+GCAD.Plane3d.ContainsOBB   = GCAD.Plane3d.ContainsAABB
+GCAD.Plane3d.IntersectsOBB = GCAD.Plane3d.IntersectsAABB
 
 -- Conversion
 function GCAD.Plane3d.FromNativePlane3d (nativePlane3d, out)
@@ -289,6 +306,10 @@ self.ContainsUnpackedSphere        = GCAD.Plane3d.ContainsUnpackedSphere
 self.IntersectsSphere              = GCAD.Plane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.Plane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.Plane3d.IntersectsUnpackedSphere
+self.ContainsAABB                  = GCAD.Plane3d.ContainsAABB
+self.IntersectsAABB                = GCAD.Plane3d.IntersectsAABB
+self.ContainsOBB                   = GCAD.Plane3d.ContainsOBB
+self.IntersectsOBB                 = GCAD.Plane3d.IntersectsOBB
 
 -- Conversion
 self.ToNativePlane3d               = GCAD.Plane3d.ToNativePlane3d

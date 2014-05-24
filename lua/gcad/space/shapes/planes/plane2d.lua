@@ -144,6 +144,23 @@ function GCAD.Plane2d.IntersectsUnpackedCircle (self, x, y, r)
 	return false, false
 end
 
+local GCAD_Plane2d_ContainsUnpackedPoint = GCAD.Plane2d.ContainsUnpackedPoint
+
+function GCAD.Plane2d.ContainsAABB (self, aabb2d)
+	local farCornerId, nearCornerId = aabb2d:GetExtremeCornerIds (self)
+	
+	return GCAD_Plane2d_ContainsUnpackedPoint (self, aabb2d:GetCornerUnpacked (farCornerId))
+end
+
+function GCAD.Plane2d.IntersectsAABB (self, aabb2d)
+	local farCornerId, nearCornerId = aabb2d:GetExtremeCornerIds (self)
+	
+	return GCAD_Plane2d_ContainsUnpackedPoint (self, aabb2d:GetCornerUnpacked (nearCornerId))
+end
+
+GCAD.Plane2d.ContainsOBB   = GCAD.Plane2d.ContainsAABB
+GCAD.Plane2d.IntersectsOBB = GCAD.Plane2d.IntersectsAABB
+
 -- Conversion
 function GCAD.Plane2d.FromLine2d (line, out)
 	out = out or GCAD.Plane2d ()
@@ -242,6 +259,10 @@ self.ContainsCircle                = GCAD.Plane2d.ContainsCircle
 self.ContainsUnpackedCircle        = GCAD.Plane2d.ContainsUnpackedCircle
 self.IntersectsCircle              = GCAD.Plane2d.IntersectsCircle
 self.IntersectsUnpackedCircle      = GCAD.Plane2d.IntersectsUnpackedCircle
+self.ContainsAABB                  = GCAD.Plane2d.ContainsAABB
+self.IntersectsAABB                = GCAD.Plane2d.IntersectsAABB
+self.ContainsOBB                   = GCAD.Plane2d.ContainsOBB
+self.IntersectsOBB                 = GCAD.Plane2d.IntersectsOBB
 
 -- Conversion
 self.ToLine2d                      = GCAD.Plane2d.ToLine2d

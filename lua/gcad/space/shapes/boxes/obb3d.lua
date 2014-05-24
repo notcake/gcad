@@ -1,27 +1,34 @@
 local self = {}
 GCAD.OBB3d = GCAD.MakeConstructor (self)
 
-local GCAD_EulerAngle_Clone           = GCAD.EulerAngle.Clone
-local GCAD_EulerAngle_Copy            = GCAD.EulerAngle.Copy
-local GCAD_EulerAngle_FromNativeAngle = GCAD.EulerAngle.FromNativeAngle
-local GCAD_EulerAngle_ToNativeAngle   = GCAD.EulerAngle.ToNativeAngle
-local GCAD_EulerAngle_Unpack          = GCAD.EulerAngle.Unpack
-local GCAD_Vector3d_Add               = GCAD.Vector3d.Add
-local GCAD_Vector3d_Clone             = GCAD.Vector3d.Clone
-local GCAD_Vector3d_Copy              = GCAD.Vector3d.Copy
-local GCAD_Vector3d_FromNativeVector  = GCAD.Vector3d.FromNativeVector
-local GCAD_Vector3d_ToNativeVector    = GCAD.Vector3d.ToNativeVector
-local GCAD_Vector3d_Unpack            = GCAD.Vector3d.Unpack
+local Entity_GetAngles                    = debug.getregistry ().Entity.GetAngles
+local Entity_GetPos                       = debug.getregistry ().Entity.GetPos
+local Entity_OBBMaxs                      = debug.getregistry ().Entity.OBBMaxs
+local Entity_OBBMins                      = debug.getregistry ().Entity.OBBMins
+
+local GCAD_AABB3d_GetExtremeCornerIds     = GCAD.AABB3d.GetExtremeCornerIds
+local GCAD_EulerAngle_Clone               = GCAD.EulerAngle.Clone
+local GCAD_EulerAngle_Copy                = GCAD.EulerAngle.Copy
+local GCAD_EulerAngle_FromNativeAngle     = GCAD.EulerAngle.FromNativeAngle
+local GCAD_EulerAngle_ToNativeAngle       = GCAD.EulerAngle.ToNativeAngle
+local GCAD_EulerAngle_Unpack              = GCAD.EulerAngle.Unpack
+local GCAD_Matrix3x3_VectorMatrixMultiply = GCAD.Matrix3x3.VectorMatrixMultiply
+local GCAD_Vector3d_Add                   = GCAD.Vector3d.Add
+local GCAD_Vector3d_Clone                 = GCAD.Vector3d.Clone
+local GCAD_Vector3d_Copy                  = GCAD.Vector3d.Copy
+local GCAD_Vector3d_FromNativeVector      = GCAD.Vector3d.FromNativeVector
+local GCAD_Vector3d_ToNativeVector        = GCAD.Vector3d.ToNativeVector
+local GCAD_Vector3d_Unpack                = GCAD.Vector3d.Unpack
 
 function GCAD.OBB3d.FromEntity (ent, out)
 	GCAD.Profiler:Begin ("OBB3d.FromEntity")
 	
 	out = out or GCAD.OBB3d ()
 	
-	out.Position = GCAD_Vector3d_FromNativeVector  (ent:GetPos    (), out.Position)
-	out.Min      = GCAD_Vector3d_FromNativeVector  (ent:OBBMins   (), out.Min     )
-	out.Max      = GCAD_Vector3d_FromNativeVector  (ent:OBBMaxs   (), out.Max     )
-	out.Angle    = GCAD_EulerAngle_FromNativeAngle (ent:GetAngles (), out.Angle   )
+	out.Position = GCAD_Vector3d_FromNativeVector  (Entity_GetPos    (ent), out.Position)
+	out.Min      = GCAD_Vector3d_FromNativeVector  (Entity_OBBMins   (ent), out.Min     )
+	out.Max      = GCAD_Vector3d_FromNativeVector  (Entity_OBBMaxs   (ent), out.Max     )
+	out.Angle    = GCAD_EulerAngle_FromNativeAngle (Entity_GetAngles (ent), out.Angle   )
 	
 	out.CornersValid        = false
 	out.RotationMatrixValid = false
@@ -101,6 +108,12 @@ function GCAD.OBB3d.GetCorner (self, cornerId, out)
 	return out
 end
 
+function GCAD.OBB3d.GetCornerUnpacked (self, cornerId)
+	if not self.CornersValid then self:ComputeCorners () end
+	
+	return self.Corners [cornerId] [1], self.Corners [cornerId] [2], self.Corners [cornerId] [3]
+end
+
 local GCAD_OBB3d_GetCorner = GCAD.OBB3d.GetCorner
 
 function GCAD.OBB3d.GetCornerEnumerator (self, out)
@@ -114,6 +127,7 @@ function GCAD.OBB3d.GetCornerEnumerator (self, out)
 end
 
 GCAD.OBB3d.GetVertex           = GCAD.OBB3d.GetCorner
+GCAD.OBB3d.GetVertexUnpacked   = GCAD.OBB3d.GetCornerUnpacked
 GCAD.OBB3d.GetVertexEnumerator = GCAD.OBB3d.GetCornerEnumerator
 
 local edgeCornerIds1 = { 1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8 }
@@ -125,7 +139,7 @@ function GCAD.OBB3d.GetEdgeEnumerator (self, out1, out2)
 		i = i + 1
 		if i > 12 then return nil, nil end
 		
-		return GCAD_OBB3d_GetCorner (self, edgeCornerIds1 [i], out1), GCAD_OBB3d_GetCorner (self, edgeCornerIds2 [i], out1)
+		return GCAD_OBB3d_GetCorner (self, edgeCornerIds1 [i], out1), GCAD_OBB3d_GetCorner (self, edgeCornerIds2 [i], out2)
 	end
 end
 
@@ -147,6 +161,33 @@ end
 
 function GCAD.OBB3d.GetOppositeCornerId (self, cornerId)
 	return oppositeCornerIds [cornerId]
+end
+
+local temp = GCAD.Vector3d ()
+function GCAD.OBB3d.GetExtremeCornerIds (self, direction)
+	if not self.RotationMatrixValid then
+		self:ComputeRotationMatrix ()
+	end
+	
+	return GCAD_AABB3d_GetExtremeCornerIds (self, GCAD_Matrix3x3_VectorMatrixMultiply (direction, self.RotationMatrix, temp))
+end
+
+function GCAD.OBB3d.GetExtremeCornerIdsUnpacked (self, x, y, z)
+	if not self.RotationMatrixValid then
+		self:ComputeRotationMatrix ()
+	end
+	
+	return GCAD_AABB3d_GetExtremeCornerIdsUnpacked (self, GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (x, y, z, self.RotationMatrix))
+end
+
+GCAD.OBB3d.GetExtremeCornerId         = GCAD.OBB3d.GetExtremeCornerIds
+GCAD.OBB3d.GetExtremeCornerIdUnpacked = GCAD.OBB3d.GetExtremeCornerIdsUnpacked
+
+local GCAD_OBB3d_GetCorner          = GCAD.OBB3d.GetCorner
+local GCAD_OBB3d_GetExtremeCornerId = GCAD.OBB3d.GetExtremeCornerId
+
+function GCAD.OBB3d.GetExtremeCorner (self, direction, out)
+	return GCAD_OBB3d_GetCorner (GCAD_OBB3d_GetExtremeCornerId (self, direction), out)
 end
 
 -- Conversion
@@ -175,8 +216,6 @@ function GCAD.OBB3d.ToNativeOBB3d (self, out)
 	return out
 end
 
--- Utility
-
 -- Construction
 function self:ctor (position, min, max, angle)
 	self.Position = GCAD.Vector3d ()
@@ -196,6 +235,7 @@ function self:ctor (position, min, max, angle)
 	self.RotationMatrixValid = false
 end
 
+-- Initialization
 function self:Set (position, min, max, angle)
 	self:SetPosition (position)
 	self:SetMin      (min)
@@ -206,54 +246,59 @@ function self:Set (position, min, max, angle)
 	self.RotationMatrixValid = false
 end
 
--- Initialization
-
 -- Copying
-self.Clone                    = GCAD.OBB3d.Clone
-self.Copy                     = GCAD.OBB3d.Copy
+self.Clone                       = GCAD.OBB3d.Clone
+self.Copy                        = GCAD.OBB3d.Copy
 
 -- OBB properties
-self.GetPosition              = GCAD.OBB3d.GetPosition
-self.GetMin                   = GCAD.OBB3d.GetMin
-self.GetMax                   = GCAD.OBB3d.GetMax
-self.GetAngle                 = GCAD.OBB3d.GetAngle
+self.GetPosition                 = GCAD.OBB3d.GetPosition
+self.GetMin                      = GCAD.OBB3d.GetMin
+self.GetMax                      = GCAD.OBB3d.GetMax
+self.GetAngle                    = GCAD.OBB3d.GetAngle
 
-self.GetPositionNative        = GCAD.OBB3d.GetPositionNative
-self.GetMinNative             = GCAD.OBB3d.GetMinNative
-self.GetMaxNative             = GCAD.OBB3d.GetMaxNative
-self.GetAngleNative           = GCAD.OBB3d.GetAngleNative
+self.GetPositionNative           = GCAD.OBB3d.GetPositionNative
+self.GetMinNative                = GCAD.OBB3d.GetMinNative
+self.GetMaxNative                = GCAD.OBB3d.GetMaxNative
+self.GetAngleNative              = GCAD.OBB3d.GetAngleNative
 
-self.GetPositionUnpacked      = GCAD.OBB3d.GetPositionUnpacked
-self.GetMinUnpacked           = GCAD.OBB3d.GetMinUnpacked
-self.GetMaxUnpacked           = GCAD.OBB3d.GetMaxUnpacked
-self.GetAngleUnpacked         = GCAD.OBB3d.GetAngleUnpacked
+self.GetPositionUnpacked         = GCAD.OBB3d.GetPositionUnpacked
+self.GetMinUnpacked              = GCAD.OBB3d.GetMinUnpacked
+self.GetMaxUnpacked              = GCAD.OBB3d.GetMaxUnpacked
+self.GetAngleUnpacked            = GCAD.OBB3d.GetAngleUnpacked
 
-self.SetPosition              = GCAD.OBB3d.SetPosition
-self.SetMin                   = GCAD.OBB3d.SetMin
-self.SetMax                   = GCAD.OBB3d.SetMax
-self.SetAngle                 = GCAD.OBB3d.SetAngle
+self.SetPosition                 = GCAD.OBB3d.SetPosition
+self.SetMin                      = GCAD.OBB3d.SetMin
+self.SetMax                      = GCAD.OBB3d.SetMax
+self.SetAngle                    = GCAD.OBB3d.SetAngle
 
-self.SetPositionNative        = GCAD.OBB3d.SetPositionNative
-self.SetMinNative             = GCAD.OBB3d.SetMinNative
-self.SetMaxNative             = GCAD.OBB3d.SetMaxNative
-self.SetAngleNative           = GCAD.OBB3d.SetAngleNative
+self.SetPositionNative           = GCAD.OBB3d.SetPositionNative
+self.SetMinNative                = GCAD.OBB3d.SetMinNative
+self.SetMaxNative                = GCAD.OBB3d.SetMaxNative
+self.SetAngleNative              = GCAD.OBB3d.SetAngleNative
 
-self.SetPositionUnpacked      = GCAD.OBB3d.SetPositionUnpacked
-self.SetMinUnpacked           = GCAD.OBB3d.SetMinUnpacked
-self.SetMaxUnpacked           = GCAD.OBB3d.SetMaxUnpacked
-self.SetAngleUnpacked         = GCAD.OBB3d.SetAngleUnpacked
+self.SetPositionUnpacked         = GCAD.OBB3d.SetPositionUnpacked
+self.SetMinUnpacked              = GCAD.OBB3d.SetMinUnpacked
+self.SetMaxUnpacked              = GCAD.OBB3d.SetMaxUnpacked
+self.SetAngleUnpacked            = GCAD.OBB3d.SetAngleUnpacked
 
 -- OBB corner queries
-self.GetCorner                = GCAD.OBB3d.GetCorner
-self.GetCornerEnumerator      = GCAD.OBB3d.GetCornerEnumerator
-self.GetVertex                = GCAD.OBB3d.GetVertex
-self.GetVertexEnumerator      = GCAD.OBB3d.GetVertexEnumerator
-self.GetEdgeEnumerator        = GCAD.OBB3d.GetEdgeEnumerator
-self.GetOppositeCorner        = GCAD.OBB3d.GetOppositeCorner
-self.GetOppositeCornerId      = GCAD.OBB3d.GetOppositeCornerId
+self.GetCorner                   = GCAD.OBB3d.GetCorner
+self.GetCornerUnpacked           = GCAD.OBB3d.GetCornerUnpacked
+self.GetCornerEnumerator         = GCAD.OBB3d.GetCornerEnumerator
+self.GetVertex                   = GCAD.OBB3d.GetVertex
+self.GetVertexUnpacked           = GCAD.OBB3d.GetVertexUnpacked
+self.GetVertexEnumerator         = GCAD.OBB3d.GetVertexEnumerator
+self.GetEdgeEnumerator           = GCAD.OBB3d.GetEdgeEnumerator
+self.GetOppositeCorner           = GCAD.OBB3d.GetOppositeCorner
+self.GetOppositeCornerId         = GCAD.OBB3d.GetOppositeCornerId
+self.GetExtremeCorner            = GCAD.OBB3d.GetExtremeCorner
+self.GetExtremeCornerId          = GCAD.OBB3d.GetExtremeCornerId
+self.GetExtremeCornerIdUnpacked  = GCAD.OBB3d.GetExtremeCornerIdUnpacked
+self.GetExtremeCornerIds         = GCAD.OBB3d.GetExtremeCornerIds
+self.GetExtremeCornerIdsUnpacked = GCAD.OBB3d.GetExtremeCornerIdsUnpacked
 
 -- Conversion
-self.ToNativeOBB3d            = GCAD.OBB3d.ToNativeOBB3d
+self.ToNativeOBB3d               = GCAD.OBB3d.ToNativeOBB3d
 
 -- Utility
 
@@ -282,7 +327,9 @@ function self:ComputeCorners ()
 	GCAD.Profiler:End ()
 	
 	GCAD.Profiler:Begin ("OBB3d:ComputeCorners : Rotate corners")
-	self:ComputeRotationMatrix ()
+	if not self.RotationMatrixValid then
+		self:ComputeRotationMatrix ()
+	end
 	
 	for i = 1, 8 do
 		self.Corners [i] = GCAD_Vector3d_Add (self.RotationMatrix:VectorMultiply (self.Corners [i], self.Corners [i]), self.Position, self.Corners [i])

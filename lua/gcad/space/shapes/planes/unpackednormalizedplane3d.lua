@@ -94,6 +94,11 @@ function GCAD.UnpackedNormalizedPlane3d.IntersectsUnpackedSphere (a, b, c, d, x,
 	return false, false
 end
 
+GCAD.UnpackedNormalizedPlane3d.ContainsAABB                  = GCAD.UnpackedPlane3d.ContainsAABB
+GCAD.UnpackedNormalizedPlane3d.IntersectsAABB                = GCAD.UnpackedPlane3d.IntersectsAABB
+GCAD.UnpackedNormalizedPlane3d.ContainsOBB                   = GCAD.UnpackedPlane3d.ContainsOBB
+GCAD.UnpackedNormalizedPlane3d.IntersectsOBB                 = GCAD.UnpackedPlane3d.IntersectsOBB
+
 -- Conversion
 function GCAD.Plane3d.FromNativeNormalizedPlane3d (nativeNormalizedPlane3d)
 	local a, b, c = nativeNormalizedPlane3d:GetNormalUnpacked ()

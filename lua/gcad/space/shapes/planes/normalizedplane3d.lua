@@ -117,6 +117,11 @@ function GCAD.NormalizedPlane3d.IntersectsUnpackedSphere (self, x, y, z, r)
 	return false, false
 end
 
+GCAD.NormalizedPlane3d.ContainsOBB                   = GCAD.Plane3d.ContainsOBB
+GCAD.NormalizedPlane3d.IntersectsOBB                 = GCAD.Plane3d.IntersectsOBB
+GCAD.NormalizedPlane3d.ContainsAABB                  = GCAD.Plane3d.ContainsAABB
+GCAD.NormalizedPlane3d.IntersectsAABB                = GCAD.Plane3d.IntersectsAABB
+
 -- Conversion
 function GCAD.NormalizedPlane3d.FromNativeNormalizedPlane3d (nativeNormalizedPlane3d, out)
 	out = out or GCAD.NormalizedPlane3d ()
@@ -200,6 +205,10 @@ self.ContainsUnpackedSphere        = GCAD.NormalizedPlane3d.ContainsUnpackedSphe
 self.IntersectsSphere              = GCAD.NormalizedPlane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.NormalizedPlane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.NormalizedPlane3d.IntersectsUnpackedSphere
+self.ContainsAABB                  = GCAD.NormalizedPlane3d.ContainsAABB
+self.IntersectsAABB                = GCAD.NormalizedPlane3d.IntersectsAABB
+self.ContainsOBB                   = GCAD.NormalizedPlane3d.ContainsOBB
+self.IntersectsOBB                 = GCAD.NormalizedPlane3d.IntersectsOBB
 
 -- Conversion
 self.ToNativeNormalizedPlane3d     = GCAD.NormalizedPlane3d.ToNativeNormalizedPlane3d

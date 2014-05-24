@@ -138,6 +138,23 @@ function GCAD.UnpackedPlane3d.IntersectsUnpackedSphere (a, b, c, d, x, y, z, r)
 	return false, false
 end
 
+local GCAD_UnpackedPlane3d_ContainsUnpackedPoint = GCAD.UnpackedPlane3d.ContainsUnpackedPoint
+
+function GCAD.UnpackedPlane3d.ContainsAABB (a, b, c, d, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIdsUnpacked (a, b, c)
+	
+	return GCAD_UnpackedPlane3d_ContainsUnpackedPoint (a, b, c, d, aabb3d:GetCornerUnpacked (farCornerId))
+end
+
+function GCAD.UnpackedPlane3d.IntersectsAABB (a, b, c, d, aabb3d)
+	local farCornerId, nearCornerId = aabb3d:GetExtremeCornerIdsUnpacked (a, b, c)
+	
+	return GCAD_UnpackedPlane3d_ContainsUnpackedPoint (a, b, c, d, aabb3d:GetCornerUnpacked (nearCornerId))
+end
+
+GCAD.UnpackedPlane3d.ContainsOBB   = GCAD.UnpackedPlane3d.ContainsAABB
+GCAD.UnpackedPlane3d.IntersectsOBB = GCAD.UnpackedPlane3d.IntersectsAABB
+
 -- Conversion
 function GCAD.Plane3d.FromNativePlane3d (nativePlane3d)
 	local a, b, c = nativePlane3d:GetNormalUnpacked ()

@@ -8,8 +8,8 @@ local EF_NODRAW = EF_NODRAW
 function self:ctor ()
 end
 
-local nativeSphere3d = GCAD.NativeSphere3d ()
-local obb            = GCAD.OBB3d ()
+local sphere3d        = GCAD.Sphere3d ()
+local obb             = GCAD.OBB3d ()
 
 local vec1 = GLib.ColumnVector (3)
 
@@ -28,14 +28,16 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			nativeSphere3d = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, nativeSphere3d)
-			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (nativeSphere3d)
+			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum : Sphere cull")
+			sphere3d = GCAD.Sphere3d.FromEntityBoundingSphere (v, sphere3d)
+			local intersectsSphere, containsSphere = frustum3d:IntersectsSphere (sphere3d)
+			GCAD.Profiler:End ()
 			
 			if intersectsSphere then
 				local contained = containsSphere
 				if not contained then
 					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:ContainsVertices (obb, vec1)
+					contained = frustum3d:ContainsOBB (obb, vec1)
 				end
 				
 				if contained then
@@ -65,14 +67,16 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			
-			nativeSphere3d = GCAD.NativeSphere3d.FromEntityBoundingSphere (v, nativeSphere3d)
-			local intersectsSphere, containsSphere = frustum3d:IntersectsNativeSphere (nativeSphere3d)
+			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum : Sphere cull")
+			sphere3d = GCAD.Sphere3d.FromEntityBoundingSphere (v, sphere3d)
+			local intersectsSphere, containsSphere = frustum3d:IntersectsSphere (sphere3d)
+			GCAD.Profiler:End ()
 			
 			if intersectsSphere then
 				local contained = containsSphere
 				if not contained then
 					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:ContainsAnyVertex (obb, vec1)
+					contained = frustum3d:IntersectsOBB (obb, vec1)
 				end
 				
 				if contained then
