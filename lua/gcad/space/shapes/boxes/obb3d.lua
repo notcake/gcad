@@ -1,24 +1,28 @@
 local self = {}
 GCAD.OBB3d = GCAD.MakeConstructor (self)
 
-local Entity_GetAngles                    = debug.getregistry ().Entity.GetAngles
-local Entity_GetPos                       = debug.getregistry ().Entity.GetPos
-local Entity_OBBMaxs                      = debug.getregistry ().Entity.OBBMaxs
-local Entity_OBBMins                      = debug.getregistry ().Entity.OBBMins
+local Entity_GetAngles                            = debug.getregistry ().Entity.GetAngles
+local Entity_GetPos                               = debug.getregistry ().Entity.GetPos
+local Entity_OBBMaxs                              = debug.getregistry ().Entity.OBBMaxs
+local Entity_OBBMins                              = debug.getregistry ().Entity.OBBMins
 
-local GCAD_AABB3d_GetExtremeCornerIds     = GCAD.AABB3d.GetExtremeCornerIds
-local GCAD_EulerAngle_Clone               = GCAD.EulerAngle.Clone
-local GCAD_EulerAngle_Copy                = GCAD.EulerAngle.Copy
-local GCAD_EulerAngle_FromNativeAngle     = GCAD.EulerAngle.FromNativeAngle
-local GCAD_EulerAngle_ToNativeAngle       = GCAD.EulerAngle.ToNativeAngle
-local GCAD_EulerAngle_Unpack              = GCAD.EulerAngle.Unpack
-local GCAD_Matrix3x3_VectorMatrixMultiply = GCAD.Matrix3x3.VectorMatrixMultiply
-local GCAD_Vector3d_Add                   = GCAD.Vector3d.Add
-local GCAD_Vector3d_Clone                 = GCAD.Vector3d.Clone
-local GCAD_Vector3d_Copy                  = GCAD.Vector3d.Copy
-local GCAD_Vector3d_FromNativeVector      = GCAD.Vector3d.FromNativeVector
-local GCAD_Vector3d_ToNativeVector        = GCAD.Vector3d.ToNativeVector
-local GCAD_Vector3d_Unpack                = GCAD.Vector3d.Unpack
+local GCAD_AABB3d_GetExtremeCornerIdsUnpacked     = GCAD.AABB3d.GetExtremeCornerIdsUnpacked
+local GCAD_EulerAngle_Clone                       = GCAD.EulerAngle.Clone
+local GCAD_EulerAngle_Copy                        = GCAD.EulerAngle.Copy
+local GCAD_EulerAngle_FromNativeAngle             = GCAD.EulerAngle.FromNativeAngle
+local GCAD_EulerAngle_ToNativeAngle               = GCAD.EulerAngle.ToNativeAngle
+local GCAD_EulerAngle_Unpack                      = GCAD.EulerAngle.Unpack
+local GCAD_Matrix3x3_UnpackedVectorMatrixMultiply = GCAD.Matrix3x3.UnpackedVectorMatrixMultiply
+local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
+local GCAD_Vector3d_Add                           = GCAD.Vector3d.Add
+local GCAD_Vector3d_Clone                         = GCAD.Vector3d.Clone
+local GCAD_Vector3d_Copy                          = GCAD.Vector3d.Copy
+local GCAD_Vector3d_FromNativeVector              = GCAD.Vector3d.FromNativeVector
+local GCAD_Vector3d_ToNativeVector                = GCAD.Vector3d.ToNativeVector
+local GCAD_Vector3d_Unpack                        = GCAD.Vector3d.Unpack
+local GCAD_UnpackedRange1d_IntersectTriple        = GCAD.UnpackedRange1d.IntersectTriple
+local GCAD_UnpackedRange1d_IsEmpty                = GCAD.UnpackedRange1d.IsEmpty
+local GCAD_UnpackedVector3d_Subtract              = GCAD.UnpackedVector3d.Subtract
 
 function GCAD.OBB3d.FromEntity (ent, out)
 	GCAD.Profiler:Begin ("OBB3d.FromEntity")
@@ -163,21 +167,17 @@ function GCAD.OBB3d.GetOppositeCornerId (self, cornerId)
 	return oppositeCornerIds [cornerId]
 end
 
-local temp = GCAD.Vector3d ()
-function GCAD.OBB3d.GetExtremeCornerIds (self, direction)
-	if not self.RotationMatrixValid then
-		self:ComputeRotationMatrix ()
-	end
-	
-	return GCAD_AABB3d_GetExtremeCornerIds (self, GCAD_Matrix3x3_VectorMatrixMultiply (direction, self.RotationMatrix, temp))
-end
-
 function GCAD.OBB3d.GetExtremeCornerIdsUnpacked (self, x, y, z)
 	if not self.RotationMatrixValid then
 		self:ComputeRotationMatrix ()
 	end
 	
 	return GCAD_AABB3d_GetExtremeCornerIdsUnpacked (self, GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (x, y, z, self.RotationMatrix))
+end
+
+local GCAD_OBB3d_GetExtremeCornerIdsUnpacked = GCAD.OBB3d.GetExtremeCornerIdsUnpacked
+function GCAD.OBB3d.GetExtremeCornerIds (self, direction)
+	return GCAD_OBB3d_GetExtremeCornerIdsUnpacked (self, direction [1], direction [2], direction [3])
 end
 
 GCAD.OBB3d.GetExtremeCornerId         = GCAD.OBB3d.GetExtremeCornerIds
@@ -188,6 +188,58 @@ local GCAD_OBB3d_GetExtremeCornerId = GCAD.OBB3d.GetExtremeCornerId
 
 function GCAD.OBB3d.GetExtremeCorner (self, direction, out)
 	return GCAD_OBB3d_GetCorner (GCAD_OBB3d_GetExtremeCornerId (self, direction), out)
+end
+
+-- Intersection tests
+-- Point
+function GCAD.OBB3d.ContainsUnpackedPoint (self, x, y, z)
+	if not self.RotationMatrixValid then
+		self:ComputeRotationMatrix ()
+	end
+	
+	local x, y, z = GCAD_UnpackedVector3d_Subtract (x, y, z, GCAD_Vector3d_Unpack (self.Position))
+	x, y, z = GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (x, y, z, self.RotationMatrix)
+	return GCAD_UnpackedRange3d_ContainsUnpackedPoint (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], x, y, z)
+end
+
+local GCAD_OBB3d_ContainsPointUnpacked = GCAD.OBB3d.ContainsPointUnpacked
+function GCAD.OBB3d.ContainsPoint (self, v3d)
+	return GCAD_OBB3d_ContainsPointUnpacked (self, v3d [1], v3d [2], v3d [3])
+end
+
+function GCAD.OBB3d.ContainsNativePoint (self, v)
+	return GCAD_OBB3d_ContainsPointUnpacked (self, GCAD_UnpackedVector3d_FromNativeVector (v))
+end
+
+-- Line
+function GCAD.OBB3d.IntersectLine (self, line3d)
+	if not self.RotationMatrixValid then
+		self:ComputeRotationMatrix ()
+	end
+	
+	local dx, dy, dz = line3d:GetDirectionUnpacked ()
+	dx, dy, dz = GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (dx, dy, dz, self.RotationMatrix)
+	
+	local px, py, pz = line3d:GetPositionUnpacked ()
+	px, py, pz = GCAD_UnpackedVector3d_Subtract (px, py, pz, GCAD_Vector3d_Unpack (self.Position))
+	px, py, pz = GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (px, py, pz, self.RotationMatrix)
+	
+	print ((self.Min [1] - px) / dx, (self.Max [1] - px) / dx)
+	print ((self.Min [2] - py) / dy, (self.Max [2] - py) / dy)
+	print ((self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz)
+	local t1, t2 = GCAD_UnpackedRange1d_IntersectTriple (
+		(self.Min [1] - px) / dx, (self.Max [1] - px) / dx,
+		(self.Min [2] - py) / dy, (self.Max [2] - py) / dy,
+		(self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz
+	)
+	
+	if GCAD_UnpackedRange1d_IsEmpty (t1, t2) then return nil end
+	return t1, t2
+end
+
+local GCAD_OBB3d_IntersectLine = GCAD.OBB3d.IntersectLine
+function GCAD.OBB3d.IntersectsLine (self, line3d)
+	return GCAD_OBB3d_IntersectLine (self, line3d) ~= nil
 end
 
 -- Conversion
@@ -296,6 +348,16 @@ self.GetExtremeCornerId          = GCAD.OBB3d.GetExtremeCornerId
 self.GetExtremeCornerIdUnpacked  = GCAD.OBB3d.GetExtremeCornerIdUnpacked
 self.GetExtremeCornerIds         = GCAD.OBB3d.GetExtremeCornerIds
 self.GetExtremeCornerIdsUnpacked = GCAD.OBB3d.GetExtremeCornerIdsUnpacked
+
+-- Intersection tests
+-- Point
+self.ContainsPoint               = GCAD.OBB3d.ContainsPoint
+self.ContainsNativePoint         = GCAD.OBB3d.ContainsNativePoint
+self.ContainsUnpackedPoint       = GCAD.OBB3d.ContainsUnpackedPoint
+
+-- Line
+self.IntersectsLine              = GCAD.OBB3d.IntersectsLine
+self.IntersectLine               = GCAD.OBB3d.IntersectLine
 
 -- Conversion
 self.ToNativeOBB3d               = GCAD.OBB3d.ToNativeOBB3d

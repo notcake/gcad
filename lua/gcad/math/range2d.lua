@@ -193,7 +193,6 @@ self.ContainsPoint         = GCAD.Range2d.ContainsPoint
 self.ContainsUnpackedPoint = GCAD.Range2d.ContainsUnpackedPoint
 self.ContainsRange         = GCAD.Range2d.ContainsRange
 self.Contains              = GCAD.Range2d.Contains
-self.Intersects            = GCAD.Range2d.IntersectsRange
 self.IntersectsRange       = GCAD.Range2d.IntersectsRange
 
 -- Utility

@@ -11,10 +11,10 @@ end
 local sphere3d        = GCAD.Sphere3d ()
 local obb             = GCAD.OBB3d ()
 
-function self:FindInFrustum (frustum3d, spatialQueryResults)
+function self:FindInFrustum (frustum3d, spatialQueryResult)
 	GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindInFrustum")
 	
-	spatialQueryResults = spatialQueryResults or GCAD.SpatialQueryResults ()
+	spatialQueryResult = spatialQueryResult or GCAD.SpatialQueryResult ()
 	GCAD.Profiler:Begin ("ents.GetAll")
 	local entities = ents.GetAll ()
 	GCAD.Profiler:End ()
@@ -39,20 +39,20 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 				end
 				
 				if contained then
-					spatialQueryResults:Add (v)
+					spatialQueryResult:Add (v)
 				end
 			end
 		end
 	end
 	
 	GCAD.Profiler:End ()
-	return spatialQueryResults
+	return spatialQueryResult
 end
 
-function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
+function self:FindIntersectingFrustum (frustum3d, spatialQueryResult)
 	GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum")
 	
-	spatialQueryResults = spatialQueryResults or GCAD.SpatialQueryResults ()
+	spatialQueryResult = spatialQueryResult or GCAD.SpatialQueryResult ()
 	
 	GCAD.Profiler:Begin ("ents.GetAll")
 	local entities = ents.GetAll ()
@@ -78,14 +78,14 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 				end
 				
 				if contained then
-					spatialQueryResults:Add (v)
+					spatialQueryResult:Add (v)
 				end
 			end
 		end
 	end
 	
 	GCAD.Profiler:End ()
-	return spatialQueryResults
+	return spatialQueryResult
 end
 
 GCAD.EngineEntitiesSpatialQueryable = GCAD.EngineEntitiesSpatialQueryable ()

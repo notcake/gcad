@@ -61,24 +61,6 @@ function GCAD.AABB3d.GetOppositeCornerId (self, cornerId)
 	return oppositeCornerIds [cornerId]
 end
 
-function GCAD.AABB3d.GetExtremeCornerIds (self, direction)
-	if direction [3] < 0 then
-		if direction [2] < 0 then
-			extremeCornerId = direction [1] < 0 and 1 or 2
-		else
-			extremeCornerId = direction [1] < 0 and 4 or 3
-		end
-	else
-		if direction [2] < 0 then
-			extremeCornerId = direction [1] < 0 and 5 or 6
-		else
-			extremeCornerId = direction [1] < 0 and 8 or 7
-		end
-	end
-	
-	return extremeCornerId, oppositeCornerIds [extremeCornerId]
-end
-
 function GCAD.AABB3d.GetExtremeCornerIdsUnpacked (self, x, y, z)
 	if z < 0 then
 		if y < 0 then
@@ -94,7 +76,12 @@ function GCAD.AABB3d.GetExtremeCornerIdsUnpacked (self, x, y, z)
 		end
 	end
 	
-	return extremeCornerId, opposideCornerIds [extremeCornerId]
+	return extremeCornerId, oppositeCornerIds [extremeCornerId]
+end
+
+local GCAD_AABB3d_GetExtremeCornerIdsUnpacked = GCAD.AABB3d.GetExtremeCornerIdsUnpacked
+function GCAD.AABB3d.GetExtremeCornerIds (self, direction)
+	return GCAD_AABB3d_GetExtremeCornerIdsUnpacked (self, direction [1], direction [2], direction [3])
 end
 
 GCAD.AABB3d.GetExtremeCornerId         = GCAD.AABB3d.GetExtremeCornerIds

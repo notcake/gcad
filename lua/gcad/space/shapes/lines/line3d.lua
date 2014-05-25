@@ -19,6 +19,15 @@ local GCAD_UnpackedVector3d_ScalarVectorMultiply = GCAD.UnpackedVector3d.ScalarV
 local GCAD_UnpackedVector3d_Subtract             = GCAD.UnpackedVector3d.Subtract
 local GCAD_UnpackedVector3d_ToNativeVector       = GCAD.UnpackedVector3d.ToNativeVector
 
+function GCAD.Line3d.FromPositionAndDirection (position, direction, out)
+	out = out or GCAD.Line3d ()
+	
+	out:SetPosition (position)
+	out:SetDirection (direction)
+	
+	return out
+end
+
 -- Copying
 function GCAD.Line3d.Clone (self, out)
 	out = out or GCAD.Line3d ()
@@ -188,18 +197,32 @@ function GCAD.Line3d.EvaluateNative (self, t, out)
 end
 
 -- Utility
+function GCAD.Line3d.Unpack ()
+	return self [1], self [2], self [3], self [4], self [5], self [6]
+end
+
 function GCAD.Line3d.ToString (self)
 	return "Line [" .. GCAD_Vector3d_ToString (self) .. " + t * " .. GCAD_UnpackedVector3d_ToString (self [4], self [5], self [6]) .. "]"
 end
 
 -- Constructor
-function self:ctor ()
-	self [1] = 0
-	self [2] = 0
-	self [3] = 0
-	self [4] = 0
-	self [5] = 0
-	self [6] = 0
+function self:ctor (px, py, pz, dx, dy, dz)
+	self [1] = px or 0
+	self [2] = py or 0
+	self [3] = pz or 0
+	self [4] = dx or 0
+	self [5] = dy or 0
+	self [6] = dz or 0
+end
+
+-- Initialization
+function self:Set (px, py, pz, dx, dy, dz)
+	self [1] = px
+	self [2] = py
+	self [3] = pz
+	self [4] = dx
+	self [5] = dy
+	self [6] = dz
 end
 
 -- Copying
@@ -234,5 +257,6 @@ self.EvaluateNative                          = GCAD.Line3d.EvaluateNative
 self.EvaluateUnpacked                        = GCAD.Line3d.EvaluateUnpacked
 
 -- Utility
+self.Unpack                                  = GCAD.Line3d.Unpack
 self.ToString                                = GCAD.Line3d.ToString
 self.__tostring                              = GCAD.Line3d.ToString

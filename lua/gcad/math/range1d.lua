@@ -111,6 +111,10 @@ function GCAD.Range1d.IntersectsRange (a, b)
 	return math_max (a [1], b [1]) <= math_min (a [2], b [2])
 end
 
+function GCAD.Range1d.IntersectsRangeTriple (a, b, c)
+	return math_max (a [1], b [1], c [1]) <= math_min (a [2], b [2], c [2])
+end
+
 -- Utility
 function GCAD.Range1d.Unpack (self)
 	return self [1], self [2]
@@ -178,8 +182,8 @@ self.ContainsPoint         = GCAD.Range1d.ContainsPoint
 self.ContainsUnpackedPoint = GCAD.Range1d.ContainsUnpackedPoint
 self.ContainsRange         = GCAD.Range1d.ContainsRange
 self.Contains              = GCAD.Range1d.Contains
-self.Intersects            = GCAD.Range1d.IntersectsRange
 self.IntersectsRange       = GCAD.Range1d.IntersectsRange
+self.IntersectsRangeTriple = GCAD.Range1d.IntersectsRangeTriple
 
 -- Utility
 self.Unpack                = GCAD.Range1d.Unpack
