@@ -71,6 +71,7 @@ local GCAD_UnpackedPlane2d_DistanceToUnpackedPoint       = GCAD.UnpackedPlane2d.
 local GCAD_UnpackedPlane2d_ScaledDistanceToPoint         = GCAD.UnpackedPlane2d.ScaledDistanceToPoint
 local GCAD_UnpackedPlane2d_ScaledDistanceToUnpackedPoint = GCAD.UnpackedPlane2d.ScaledDistanceToUnpackedPoint
 
+-- Point
 function GCAD.UnpackedPlane2d.ContainsPoint (a, b, c, v2d)
 	return GCAD_UnpackedPlane2d_ScaledDistanceToPoint (a, b, c, v2d) < 0
 end
@@ -89,6 +90,7 @@ function GCAD.UnpackedPlane2d.ContainsUnpackedCircle (a, b, c, x, y, r)
 	return distance + r < 0
 end
 
+-- Circle
 function GCAD.UnpackedPlane2d.IntersectsCircle (a, b, c, circle2d)
 	local distance = GCAD_UnpackedPlane2d_DistanceToPoint (a, b, c, circle2d)
 	local circleRadius = circle2d [3]
@@ -104,6 +106,7 @@ function GCAD.UnpackedPlane2d.IntersectsUnpackedCircle (a, b, c, x, y, r)
 	return false, false
 end
 
+-- Box
 local GCAD_UnpackedPlane2d_ContainsUnpackedPoint = GCAD.UnpackedPlane2d.ContainsUnpackedPoint
 
 function GCAD.UnpackedPlane2d.ContainsAABB (a, b, c, aabb2d)

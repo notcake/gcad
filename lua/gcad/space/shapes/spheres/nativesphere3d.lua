@@ -110,6 +110,7 @@ function GCAD.NativeSphere3d.DistanceToUnpackedPoint (self, x, y, z)
 end
 
 -- Intersection tests
+-- Point
 local GCAD_NativeSphere3d_DistanceToPoint         = GCAD.NativeSphere3d.DistanceToPoint
 local GCAD_NativeSphere3d_DistanceToNativePoint   = GCAD.NativeSphere3d.DistanceToNativePoint
 local GCAD_NativeSphere3d_DistanceToUnpackedPoint = GCAD.NativeSphere3d.DistanceToUnpackedPoint
@@ -126,6 +127,7 @@ function GCAD.NativeSphere3d.ContainsUnpackedPoint (self, x, y, z)
 	return GCAD_NativeSphere3d_DistanceToUnpackedPoint (self, x, y, z) < 0
 end
 
+-- Sphere
 function GCAD.NativeSphere3d.ContainsSphere (self, sphere3d)
 	local distance = GCAD_Vector3d_DistanceTo (self.Position, sphere3d)
 	return distance + sphere3d [4] < self [4]
@@ -252,9 +254,12 @@ self.DistanceToNativePoint    = GCAD.NativeSphere3d.DistanceToNativePoint
 self.DistanceToUnpackedPoint  = GCAD.NativeSphere3d.DistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint            = GCAD.NativeSphere3d.ContainsPoint
 self.ContainsNativePoint      = GCAD.NativeSphere3d.ContainsNativePoint
 self.ContainsUnpackedPoint    = GCAD.NativeSphere3d.ContainsUnpackedPoint
+
+-- Sphere
 self.ContainsSphere           = GCAD.NativeSphere3d.ContainsSphere
 self.ContainsNativeSphere     = GCAD.NativeSphere3d.ContainsNativeSphere
 self.ContainsUnpackedSphere   = GCAD.NativeSphere3d.ContainsUnpackedSphere

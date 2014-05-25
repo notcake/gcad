@@ -58,9 +58,11 @@ GCAD.NormalizedPlane2d.ScaledDistanceToUnpackedPoint = GCAD.Plane2d.ScaledDistan
 local GCAD_NormalizedPlane2d_DistanceToPoint         = GCAD.NormalizedPlane2d.DistanceToPoint
 local GCAD_NormalizedPlane2d_DistanceToUnpackedPoint = GCAD.NormalizedPlane2d.DistanceToUnpackedPoint
 
+-- Point
 GCAD.NormalizedPlane2d.ContainsPoint                 = GCAD.Plane2d.ContainsPoint
 GCAD.NormalizedPlane2d.ContainsUnpackedPoint         = GCAD.Plane2d.ContainsUnpackedPoint
 
+-- Circle
 function GCAD.NormalizedPlane2d.ContainsCircle (self, circle2d)
 	local distance = GCAD_NormalizedPlane2d_DistanceToPoint (self, circle2d)
 	return distance + circle2d [3] < 0
@@ -86,6 +88,7 @@ function GCAD.NormalizedPlane2d.IntersectsUnpackedCircle (self, x, y, r)
 	return false, false
 end
 
+-- Box
 GCAD.NormalizedPlane2d.ContainsAABB                  = GCAD.Plane2d.ContainsAABB
 GCAD.NormalizedPlane2d.IntersectsAABB                = GCAD.Plane2d.IntersectsAABB
 GCAD.NormalizedPlane2d.ContainsOBB                   = GCAD.Plane2d.ContainsOBB
@@ -158,12 +161,17 @@ self.ScaledDistanceToPoint         = GCAD.NormalizedPlane2d.ScaledDistanceToPoin
 self.ScaledDistanceToUnpackedPoint = GCAD.NormalizedPlane2d.ScaledDistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint                 = GCAD.NormalizedPlane2d.ContainsPoint
 self.ContainsUnpackedPoint         = GCAD.NormalizedPlane2d.ContainsUnpackedPoint
+
+-- Circle
 self.ContainsCircle                = GCAD.NormalizedPlane2d.ContainsCircle
 self.ContainsUnpackedCircle        = GCAD.NormalizedPlane2d.ContainsUnpackedCircle
 self.IntersectsCircle              = GCAD.NormalizedPlane2d.IntersectsCircle
 self.IntersectsUnpackedCircle      = GCAD.NormalizedPlane2d.IntersectsUnpackedCircle
+
+-- Box
 self.ContainsAABB                  = GCAD.NormalizedPlane2d.ContainsAABB
 self.IntersectsAABB                = GCAD.NormalizedPlane2d.IntersectsAABB
 self.ContainsOBB                   = GCAD.NormalizedPlane2d.ContainsOBB

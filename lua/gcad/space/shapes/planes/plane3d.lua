@@ -138,6 +138,7 @@ local GCAD_Plane3d_ScaledDistanceToPoint         = GCAD.Plane3d.ScaledDistanceTo
 local GCAD_Plane3d_ScaledDistanceToNativePoint   = GCAD.Plane3d.ScaledDistanceToNativePoint
 local GCAD_Plane3d_ScaledDistanceToUnpackedPoint = GCAD.Plane3d.ScaledDistanceToUnpackedPoint
 
+-- Point
 function GCAD.Plane3d.ContainsPoint (self, v3d)
 	return GCAD_Plane3d_ScaledDistanceToPoint (self, v3d) < 0
 end
@@ -150,6 +151,7 @@ function GCAD.Plane3d.ContainsUnpackedPoint (self, x, y, z)
 	return GCAD_Plane3d_ScaledDistanceToUnpackedPoint (self, x, y, z) < 0
 end
 
+-- Sphere
 function GCAD.Plane3d.ContainsSphere (self, sphere3d)
 	local distance = GCAD_Plane3d_DistanceToPoint (self, sphere3d)
 	return distance + sphere3d [4] < 0
@@ -188,6 +190,7 @@ function GCAD.Plane3d.IntersectsUnpackedSphere (self, x, y, z, r)
 	return false, false
 end
 
+-- Box
 local GCAD_Plane3d_ContainsUnpackedPoint = GCAD.Plane3d.ContainsUnpackedPoint
 
 function GCAD.Plane3d.ContainsAABB (self, aabb3d)
@@ -297,15 +300,20 @@ self.ScaledDistanceToNativePoint   = GCAD.Plane3d.ScaledDistanceToNativePoint
 self.ScaledDistanceToUnpackedPoint = GCAD.Plane3d.ScaledDistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint                 = GCAD.Plane3d.ContainsPoint
 self.ContainsNativePoint           = GCAD.Plane3d.ContainsNativePoint
 self.ContainsUnpackedPoint         = GCAD.Plane3d.ContainsUnpackedPoint
+
+-- Sphere
 self.ContainsSphere                = GCAD.Plane3d.ContainsSphere
 self.ContainsNativeSphere          = GCAD.Plane3d.ContainsNativeSphere
 self.ContainsUnpackedSphere        = GCAD.Plane3d.ContainsUnpackedSphere
 self.IntersectsSphere              = GCAD.Plane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.Plane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.Plane3d.IntersectsUnpackedSphere
+
+-- Box
 self.ContainsAABB                  = GCAD.Plane3d.ContainsAABB
 self.IntersectsAABB                = GCAD.Plane3d.IntersectsAABB
 self.ContainsOBB                   = GCAD.Plane3d.ContainsOBB

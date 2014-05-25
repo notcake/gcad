@@ -88,6 +88,7 @@ local GCAD_UnpackedPlane3d_ScaledDistanceToPoint         = GCAD.UnpackedPlane3d.
 local GCAD_UnpackedPlane3d_ScaledDistanceToNativePoint   = GCAD.UnpackedPlane3d.ScaledDistanceToNativePoint
 local GCAD_UnpackedPlane3d_ScaledDistanceToUnpackedPoint = GCAD.UnpackedPlane3d.ScaledDistanceToUnpackedPoint
 
+-- Point
 function GCAD.UnpackedPlane3d.ContainsPoint (a, b, c, d, v3d)
 	return GCAD_UnpackedPlane3d_ScaledDistanceToPoint (a, b, c, d, v3d) < 0
 end
@@ -100,6 +101,7 @@ function GCAD.UnpackedPlane3d.ContainsUnpackedPoint (a, b, c, d, x, y, z)
 	return GCAD_UnpackedPlane3d_ScaledDistanceToUnpackedPoint (a, b, c, d, x, y, z) < 0
 end
 
+-- Sphere
 function GCAD.UnpackedPlane3d.ContainsSphere (a, b, c, d, sphere3d)
 	local distance = GCAD_UnpackedPlane3d_DistanceToPoint (a, b, c, d, sphere3d)
 	return distance + sphere3d [4] < 0
@@ -138,6 +140,7 @@ function GCAD.UnpackedPlane3d.IntersectsUnpackedSphere (a, b, c, d, x, y, z, r)
 	return false, false
 end
 
+-- Box
 local GCAD_UnpackedPlane3d_ContainsUnpackedPoint = GCAD.UnpackedPlane3d.ContainsUnpackedPoint
 
 function GCAD.UnpackedPlane3d.ContainsAABB (a, b, c, d, aabb3d)

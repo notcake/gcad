@@ -69,7 +69,7 @@ include ("space/shapes/boxes/legacyaabb3d.lua")
 
 -- Lines
 -- include ("space/shapes/lines/line2d.lua")
--- include ("space/shapes/lines/line3d.lua")
+include ("space/shapes/lines/line3d.lua")
 -- include ("space/shapes/lines/nativeline3d.lua")
 
 -- include ("space/shapes/lines/ray2d.lua")

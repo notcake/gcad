@@ -11,8 +11,6 @@ end
 local sphere3d        = GCAD.Sphere3d ()
 local obb             = GCAD.OBB3d ()
 
-local vec1 = GLib.ColumnVector (3)
-
 function self:FindInFrustum (frustum3d, spatialQueryResults)
 	GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindInFrustum")
 	
@@ -37,7 +35,7 @@ function self:FindInFrustum (frustum3d, spatialQueryResults)
 				local contained = containsSphere
 				if not contained then
 					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:ContainsOBB (obb, vec1)
+					contained = frustum3d:ContainsOBB (obb)
 				end
 				
 				if contained then
@@ -76,7 +74,7 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResults)
 				local contained = containsSphere
 				if not contained then
 					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:IntersectsOBB (obb, vec1)
+					contained = frustum3d:IntersectsOBB (obb)
 				end
 				
 				if contained then

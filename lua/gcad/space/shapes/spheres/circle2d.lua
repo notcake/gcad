@@ -77,6 +77,7 @@ function GCAD.Circle2d.DistanceToUnpackedPoint (self, x, y)
 end
 
 -- Intersection tests
+-- Point
 local GCAD_Circle2d_DistanceToPoint         = GCAD.Circle2d.DistanceToPoint
 local GCAD_Circle2d_DistanceToUnpackedPoint = GCAD.Circle2d.DistanceToUnpackedPoint
 
@@ -88,6 +89,7 @@ function GCAD.Circle2d.ContainsUnpackedPoint (self, x, y)
 	return GCAD_Circle2d_DistanceToUnpackedPoint (self, x, y) < 0
 end
 
+-- Circle
 function GCAD.Circle2d.ContainsCircle (self, circle2d)
 	local distance = GCAD_Vector2d_DistanceTo (self, circle2d)
 	return distance + circle2d [3] < self [3]
@@ -179,8 +181,11 @@ self.DistanceToPoint          = GCAD.Circle2d.DistanceToPoint
 self.DistanceToUnpackedPoint  = GCAD.Circle2d.DistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint            = GCAD.Circle2d.ContainsPoint
 self.ContainsUnpackedPoint    = GCAD.Circle2d.ContainsUnpackedPoint
+
+-- Circle
 self.ContainsCircle           = GCAD.Circle2d.ContainsCircle
 self.ContainsUnpackedCircle   = GCAD.Circle2d.ContainsUnpackedCircle
 self.IntersectsCircle         = GCAD.Circle2d.IntersectsCircle

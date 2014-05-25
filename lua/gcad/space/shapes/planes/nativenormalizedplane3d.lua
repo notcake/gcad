@@ -69,10 +69,12 @@ local GCAD_NativeNormalizedPlane3d_DistanceToPoint         = GCAD.NativeNormaliz
 local GCAD_NativeNormalizedPlane3d_DistanceToNativePoint   = GCAD.NativeNormalizedPlane3d.DistanceToNativePoint
 local GCAD_NativeNormalizedPlane3d_DistanceToUnpackedPoint = GCAD.NativeNormalizedPlane3d.DistanceToUnpackedPoint
 
+-- Point
 GCAD.NativeNormalizedPlane3d.ContainsPoint                 = GCAD.NativePlane3d.ContainsPoint
 GCAD.NativeNormalizedPlane3d.ContainsNativePoint           = GCAD.NativePlane3d.ContainsNativePoint
 GCAD.NativeNormalizedPlane3d.ContainsUnpackedPoint         = GCAD.NativePlane3d.ContainsUnpackedPoint
 
+-- Sphere
 function GCAD.NativeNormalizedPlane3d.ContainsSphere (self, sphere3d)
 	local distance = GCAD_NativeNormalizedPlane3d_DistanceToPoint (self, sphere3d)
 	return distance + sphere3d [4] < 0
@@ -111,6 +113,7 @@ function GCAD.NativeNormalizedPlane3d.IntersectsUnpackedSphere (self, x, y, z, r
 	return false, false
 end
 
+-- Box
 GCAD.NativeNormalizedPlane3d.ContainsAABB                  = GCAD.NativePlane3d.ContainsAABB
 GCAD.NativeNormalizedPlane3d.IntersectsAABB                = GCAD.NativePlane3d.IntersectsAABB
 GCAD.NativeNormalizedPlane3d.ContainsOBB                   = GCAD.NativePlane3d.ContainsOBB
@@ -187,15 +190,20 @@ self.ScaledDistanceToNativePoint   = GCAD.NativeNormalizedPlane3d.ScaledDistance
 self.ScaledDistanceToUnpackedPoint = GCAD.NativeNormalizedPlane3d.ScaledDistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint                 = GCAD.NativeNormalizedPlane3d.ContainsPoint
 self.ContainsNativePoint           = GCAD.NativeNormalizedPlane3d.ContainsNativePoint
 self.ContainsUnpackedPoint         = GCAD.NativeNormalizedPlane3d.ContainsUnpackedPoint
+
+-- Sphere
 self.ContainsSphere                = GCAD.NativeNormalizedPlane3d.ContainsSphere
 self.ContainsNativeSphere          = GCAD.NativeNormalizedPlane3d.ContainsNativeSphere
 self.ContainsUnpackedSphere        = GCAD.NativeNormalizedPlane3d.ContainsUnpackedSphere
 self.IntersectsSphere              = GCAD.NativeNormalizedPlane3d.IntersectsSphere
 self.IntersectsNativeSphere        = GCAD.NativeNormalizedPlane3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere      = GCAD.NativeNormalizedPlane3d.IntersectsUnpackedSphere
+
+-- Box
 self.ContainsAABB                  = GCAD.NativeNormalizedPlane3d.ContainsAABB
 self.IntersectsAABB                = GCAD.NativeNormalizedPlane3d.IntersectsAABB
 self.ContainsOBB                   = GCAD.NativeNormalizedPlane3d.ContainsOBB

@@ -9,6 +9,7 @@ local Vector___index                   = debug.getregistry ().Vector.__index
 
 local GCAD_Vector3d_Clone              = GCAD.Vector3d.Clone
 local GCAD_Vector3d_DistanceTo         = GCAD.Vector3d.DistanceTo
+local GCAD_Vector3d_ToNativeVector     = GCAD.Vector3d.ToNativeVector
 local GCAD_UnpackedVector3d_DistanceTo = GCAD.UnpackedVector3d.DistanceTo
 
 function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
@@ -114,6 +115,7 @@ function GCAD.Sphere3d.DistanceToUnpackedPoint (self, x, y, z)
 end
 
 -- Intersection tests
+-- Point
 local GCAD_Sphere3d_DistanceToPoint         = GCAD.Sphere3d.DistanceToPoint
 local GCAD_Sphere3d_DistanceToNativePoint   = GCAD.Sphere3d.DistanceToNativePoint
 local GCAD_Sphere3d_DistanceToUnpackedPoint = GCAD.Sphere3d.DistanceToUnpackedPoint
@@ -130,6 +132,7 @@ function GCAD.Sphere3d.ContainsUnpackedPoint (self, x, y, z)
 	return GCAD_Sphere3d_DistanceToUnpackedPoint (self, x, y, z) < 0
 end
 
+-- Sphere
 function GCAD.Sphere3d.ContainsSphere (self, sphere3d)
 	local distance = GCAD_Vector3d_DistanceTo (self, sphere3d)
 	return distance + sphere3d [4] < self [4]
@@ -259,9 +262,12 @@ self.DistanceToNativePoint    = GCAD.Sphere3d.DistanceToNativePoint
 self.DistanceToUnpackedPoint  = GCAD.Sphere3d.DistanceToUnpackedPoint
 
 -- Intersection tests
+-- Point
 self.ContainsPoint            = GCAD.Sphere3d.ContainsPoint
 self.ContainsNativePoint      = GCAD.Sphere3d.ContainsNativePoint
 self.ContainsUnpackedPoint    = GCAD.Sphere3d.ContainsUnpackedPoint
+
+-- Sphere
 self.ContainsSphere           = GCAD.Sphere3d.ContainsSphere
 self.ContainsNativeSphere     = GCAD.Sphere3d.ContainsNativeSphere
 self.ContainsUnpackedSphere   = GCAD.Sphere3d.ContainsUnpackedSphere

@@ -80,14 +80,14 @@ function GCAD.OBB3d.GetMinUnpacked      (self)          return GCAD_Vector3d_Unp
 function GCAD.OBB3d.GetMaxUnpacked      (self)          return GCAD_Vector3d_Unpack           (self.Max          ) end
 function GCAD.OBB3d.GetAngleUnpacked    (self)          return GCAD_EulerAngle_Unpack         (self.Angle        ) end
 
-function GCAD.OBB3d.SetPosition         (self, v3d)     self.Position = GCAD_Vector3d_Copy   (self.Position, v3d  )            self.CornersValid = false return self end
-function GCAD.OBB3d.SetMin              (self, v3d)     self.Min      = GCAD_Vector3d_Copy   (self.Min,      v3d  )            self.CornersValid = false return self end
-function GCAD.OBB3d.SetMax              (self, v3d)     self.Max      = GCAD_Vector3d_Copy   (self.Max,      v3d  )            self.CornersValid = false return self end
+function GCAD.OBB3d.SetPosition         (self, pos)     self.Position = GCAD_Vector3d_Copy   (self.Position, pos  )            self.CornersValid = false return self end
+function GCAD.OBB3d.SetMin              (self, pos)     self.Min      = GCAD_Vector3d_Copy   (self.Min,      pos  )            self.CornersValid = false return self end
+function GCAD.OBB3d.SetMax              (self, pos)     self.Max      = GCAD_Vector3d_Copy   (self.Max,      pos  )            self.CornersValid = false return self end
 function GCAD.OBB3d.SetAngle            (self, angle)   self.Angle    = GCAD_EulerAngle_Copy (self.Angle,    angle)            self.CornersValid = false self.RotationMatrixValid = false return self end
 
-function GCAD.OBB3d.SetPositionNative   (self, v)       self.Position = GCAD_Vector3d_FromNativeVector  (v,     self.Position) self.CornersValid = false return self end
-function GCAD.OBB3d.SetMinNative        (self, v)       self.Min      = GCAD_Vector3d_FromNativeVector  (v,     self.Min     ) self.CornersValid = false return self end
-function GCAD.OBB3d.SetMaxNative        (self, v)       self.Max      = GCAD_Vector3d_FromNativeVector  (v,     self.Max     ) self.CornersValid = false return self end
+function GCAD.OBB3d.SetPositionNative   (self, pos)     self.Position = GCAD_Vector3d_FromNativeVector  (pos,   self.Position) self.CornersValid = false return self end
+function GCAD.OBB3d.SetMinNative        (self, pos)     self.Min      = GCAD_Vector3d_FromNativeVector  (pos,   self.Min     ) self.CornersValid = false return self end
+function GCAD.OBB3d.SetMaxNative        (self, pos)     self.Max      = GCAD_Vector3d_FromNativeVector  (pos,   self.Max     ) self.CornersValid = false return self end
 function GCAD.OBB3d.SetAngleNative      (self, angle)   self.Angle    = GCAD_EulerAngle_FromNativeAngle (angle, self.Angle   ) self.CornersValid = false self.RotationMatrixValid = false return self end
 
 function GCAD.OBB3d.SetPositionUnpacked (self, x, y, z) self.Position:Set (x, y, z)                                            self.CornersValid = false return self end

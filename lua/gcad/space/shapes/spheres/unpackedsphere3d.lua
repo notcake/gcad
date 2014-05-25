@@ -74,6 +74,7 @@ function GCAD.UnpackedSphere3d.DistanceToUnpackedPoint (x, y, z, r, x1, y1, z1)
 end
 
 -- Intersection tests
+-- Point
 local GCAD_UnpackedSphere3d_DistanceToPoint         = GCAD.UnpackedSphere3d.DistanceToPoint
 local GCAD_UnpackedSphere3d_DistanceToNativePoint   = GCAD.UnpackedSphere3d.DistanceToNativePoint
 local GCAD_UnpackedSphere3d_DistanceToUnpackedPoint = GCAD.UnpackedSphere3d.DistanceToUnpackedPoint
@@ -90,6 +91,7 @@ function GCAD.UnpackedSphere3d.ContainsUnpackedPoint (x, y, z, r, x, y, z)
 	return GCAD_UnpackedSphere3d_DistanceToUnpackedPoint (x, y, z, r, x, y, z) < 0
 end
 
+-- Sphere
 function GCAD.UnpackedSphere3d.ContainsSphere (x, y, z, r, sphere3d)
 	local distance = GCAD_UnpackedVector3d_DistanceTo (x, y, z, sphere3d:GetPositionUnpacked ())
 	return distance + sphere3d [4] < r
