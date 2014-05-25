@@ -1,16 +1,21 @@
 local self = {}
 GCAD.Sphere3d = GCAD.MakeConstructor (self)
 
-local Entity_BoundingRadius            = debug.getregistry ().Entity.BoundingRadius
-local Entity_GetPos                    = debug.getregistry ().Entity.GetPos
-local Entity_OBBCenter                 = debug.getregistry ().Entity.OBBCenter
-local Vector___add                     = debug.getregistry ().Vector.__add
-local Vector___index                   = debug.getregistry ().Vector.__index
+local math_sqrt                           = math.sqrt
 
-local GCAD_Vector3d_Clone              = GCAD.Vector3d.Clone
-local GCAD_Vector3d_DistanceTo         = GCAD.Vector3d.DistanceTo
-local GCAD_Vector3d_ToNativeVector     = GCAD.Vector3d.ToNativeVector
-local GCAD_UnpackedVector3d_DistanceTo = GCAD.UnpackedVector3d.DistanceTo
+local Entity_BoundingRadius               = debug.getregistry ().Entity.BoundingRadius
+local Entity_GetPos                       = debug.getregistry ().Entity.GetPos
+local Entity_OBBCenter                    = debug.getregistry ().Entity.OBBCenter
+local Vector___add                        = debug.getregistry ().Vector.__add
+local Vector___index                      = debug.getregistry ().Vector.__index
+
+local GCAD_Vector3d_Clone                 = GCAD.Vector3d.Clone
+local GCAD_Vector3d_DistanceTo            = GCAD.Vector3d.DistanceTo
+local GCAD_Vector3d_ToNativeVector        = GCAD.Vector3d.ToNativeVector
+local GCAD_UnpackedVector3d_DistanceTo    = GCAD.UnpackedVector3d.DistanceTo
+local GCAD_UnpackedVector3d_Dot           = GCAD.UnpackedVector3d.Dot
+local GCAD_UnpackedVector3d_LengthSquared = GCAD.UnpackedVector3d.LengthSquared
+local GCAD_UnpackedVector3d_Subtract      = GCAD.UnpackedVector3d.Subtract
 
 function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
 	out = out or GCAD.Sphere3d ()
@@ -174,6 +179,27 @@ function GCAD.Sphere3d.IntersectsUnpackedSphere (self, x, y, z, r)
 	return false, false
 end
 
+-- Line
+function GCAD.Sphere3d.IntersectsLine (self, line3d)
+	return line3d:DistanceToPoint (self) <= self [4]
+end
+
+function GCAD.Sphere3d.IntersectLine (self, line3d)
+	local directionLength = line3d:GetDirectionLength ()
+	local x, y, z = GCAD_UnpackedVector3d_Subtract (self [1], self [2], self [3], line3d:GetPositionUnpacked ())
+	
+	local parallelDistance      = GCAD_UnpackedVector3d_Dot (x, y, z, line3d:GetDirectionUnpacked ()) / directionLength
+	local perpendicularDistance = math_sqrt (GCAD_UnpackedVector3d_LengthSquared (x, y, z) - parallelDistance * parallelDistance)
+	
+	local thisRadius = self [4]
+	if perpendicularDistance > thisRadius then return nil end
+	
+	local t  = parallelDistance / directionLength
+	local dt = math_sqrt (thisRadius * thisRadius - perpendicularDistance * perpendicularDistance) / directionLength
+	
+	return t - dt, t + dt
+end
+
 -- Conversion
 function GCAD.Sphere3d.FromNativeSphere3d (nativeSphere3d, out)
 	out = out or GCAD.Sphere3d ()
@@ -274,6 +300,10 @@ self.ContainsUnpackedSphere   = GCAD.Sphere3d.ContainsUnpackedSphere
 self.IntersectsSphere         = GCAD.Sphere3d.IntersectsSphere
 self.IntersectsNativeSphere   = GCAD.Sphere3d.IntersectsNativeSphere
 self.IntersectsUnpackedSphere = GCAD.Sphere3d.IntersectsUnpackedSphere
+
+-- Line
+self.IntersectsLine           = GCAD.Sphere3d.IntersectsLine
+self.IntersectLine            = GCAD.Sphere3d.IntersectLine
 
 -- Conversion
 self.ToNativeSphere3d         = GCAD.Sphere3d.ToNativeSphere3d

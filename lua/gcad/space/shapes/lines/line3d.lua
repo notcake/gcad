@@ -11,10 +11,12 @@ local GCAD_Vector3d_Clone                        = GCAD.Vector3d.Clone
 local GCAD_Vector3d_ToNativeVector               = GCAD.Vector3d.ToNativeVector
 local GCAD_Vector3d_Unpack                       = GCAD.Vector3d.Unpack
 local GCAD_UnpackedVector3d_Add                  = GCAD.UnpackedVector3d.Add
+local GCAD_UnpackedVector3d_Dot                  = GCAD.UnpackedVector3d.Dot
 local GCAD_UnpackedVector3d_FromNativeVector     = GCAD.UnpackedVector3d.FromNativeVector
 local GCAD_UnpackedVector3d_Length               = GCAD.UnpackedVector3d.Length
 local GCAD_UnpackedVector3d_LengthSquared        = GCAD.UnpackedVector3d.LengthSquared
 local GCAD_UnpackedVector3d_ScalarVectorMultiply = GCAD.UnpackedVector3d.ScalarVectorMultiply
+local GCAD_UnpackedVector3d_Subtract             = GCAD.UnpackedVector3d.Subtract
 local GCAD_UnpackedVector3d_ToNativeVector       = GCAD.UnpackedVector3d.ToNativeVector
 
 -- Copying
@@ -134,9 +136,9 @@ local GCAD_Line3d_GetDirectionLengthSquared = GCAD.Line3d.GetDirectionLengthSqua
 
 function GCAD.Line3d.DistanceToUnpackedPoint (self, x, y, z)
 	x, y, z = GCAD_UnpackedVector3d_Subtract (x, y, z, self [1], self [2], self [3])
-	local t = GCAD_UnpackedVector3d_Dot (x, y, z, self [4], self [5], self [6])
+	local scaledT = GCAD_UnpackedVector3d_Dot (x, y, z, self [4], self [5], self [6])
 	
-	return math_sqrt (GCAD_UnpackedVector3d_LengthSquared (x, y, z) - t * t / GCAD_Line3d_GetDirectionLengthSquared (self))
+	return math_sqrt (GCAD_UnpackedVector3d_LengthSquared (x, y, z) - scaledT * scaledT / GCAD_Line3d_GetDirectionLengthSquared (self))
 end
 
 local GCAD_Line3d_DistanceToUnpackedPoint = GCAD.Line3d.DistanceToUnpackedPoint
@@ -146,6 +148,20 @@ end
 
 function GCAD.Line3d.DistanceToNativePoint (self, v)
 	return GCAD_Line3d_DistanceToUnpackedPoint (self, GCAD_UnpackedVector3d_FromNativeVector (v))
+end
+
+function GCAD.Line3d.GetNearestPointParameterToUnpackedPoint (self, x, y, z)
+	x, y, z = GCAD_UnpackedVector3d_Subtract (x, y, z, self [1], self [2], self [3])
+	return GCAD_UnpackedVector3d_Dot (x, y, z, self [4], self [5], self [6]) / GCAD_Line3d_GetDirectionLengthSquared (self)
+end
+
+local GCAD_Line3d_GetNearestPointParameterToUnpackedPoint = GCAD.Line3d.GetNearestPointParameterToUnpackedPoint
+function GCAD.Line3d.GetNearestPointParameterToPoint (self, v3d)
+	return GCAD_Line3d_GetNearestPointParameterToUnpackedPoint (self, GCAD_Vector3d_Unpack (v3d))
+end
+
+function GCAD.Line3d.GetNearestPointParameterToNativePoint (self, v)
+	return GCAD_Line3d_GetNearestPointParameterToUnpackedPoint (self, GCAD_UnpackedVector3d_FromNativeVector (v))
 end
 
 function GCAD.Line3d.EvaluateUnpacked (self, t)
@@ -187,27 +203,36 @@ function self:ctor ()
 end
 
 -- Copying
-self.Clone                     = GCAD.Line3d.Clone
-self.Copy                      = GCAD.Line3d.Copy
+self.Clone                                   = GCAD.Line3d.Clone
+self.Copy                                    = GCAD.Line3d.Copy
 
 -- Line properties
-self.GetPosition               = GCAD.Line3d.GetPosition
-self.GetPositionNative         = GCAD.Line3d.GetPositionNative
-self.GetPositionUnpacked       = GCAD.Line3d.GetPositionUnpacked
-self.GetDirection              = GCAD.Line3d.GetDirection
-self.GetDirectionNative        = GCAD.Line3d.GetDirectionNative
-self.GetDirectionUnpacked      = GCAD.Line3d.GetDirectionUnpacked
-self.GetDirectionLength        = GCAD.Line3d.GetDirectionLength
-self.GetDirectionLengthSquared = GCAD.Line3d.GetDirectionLengthSquared
+self.GetPosition                             = GCAD.Line3d.GetPosition
+self.GetPositionNative                       = GCAD.Line3d.GetPositionNative
+self.GetPositionUnpacked                     = GCAD.Line3d.GetPositionUnpacked
+self.GetDirection                            = GCAD.Line3d.GetDirection
+self.GetDirectionNative                      = GCAD.Line3d.GetDirectionNative
+self.GetDirectionUnpacked                    = GCAD.Line3d.GetDirectionUnpacked
+self.GetDirectionLength                      = GCAD.Line3d.GetDirectionLength
+self.GetDirectionLengthSquared               = GCAD.Line3d.GetDirectionLengthSquared
+self.SetPosition                             = GCAD.Line3d.SetPosition
+self.SetPositionNative                       = GCAD.Line3d.SetPositionNative
+self.SetPositionUnpacked                     = GCAD.Line3d.SetPositionUnpacked
+self.SetDirection                            = GCAD.Line3d.SetDirection
+self.SetDirectionNative                      = GCAD.Line3d.SetDirectionNative
+self.SetDirectionUnpacked                    = GCAD.Line3d.SetDirectionUnpacked
 
 -- Line queries
-self.DistanceToPoint           = GCAD.Line3d.DistanceToPoint
-self.DistanceToNativePoint     = GCAD.Line3d.DistanceToNativePoint
-self.DistanceToUnpackedPoint   = GCAD.Line3d.DistanceToUnpackedPoint
-self.Evaluate                  = GCAD.Line3d.Evaluate
-self.EvaluateNative            = GCAD.Line3d.EvaluateNative
-self.EvaluateUnpacked          = GCAD.Line3d.EvaluateUnpacked
+self.DistanceToPoint                         = GCAD.Line3d.DistanceToPoint
+self.DistanceToNativePoint                   = GCAD.Line3d.DistanceToNativePoint
+self.DistanceToUnpackedPoint                 = GCAD.Line3d.DistanceToUnpackedPoint
+self.GetNearestPointParameterToPoint         = GCAD.Line3d.GetNearestPointParameterToPoint
+self.GetNearestPointParameterToNativePoint   = GCAD.Line3d.GetNearestPointParameterToNativePoint
+self.GetNearestPointParameterToUnpackedPoint = GCAD.Line3d.GetNearestPointParameterToUnpackedPoint
+self.Evaluate                                = GCAD.Line3d.Evaluate
+self.EvaluateNative                          = GCAD.Line3d.EvaluateNative
+self.EvaluateUnpacked                        = GCAD.Line3d.EvaluateUnpacked
 
 -- Utility
-self.ToString                  = GCAD.Line3d.ToString
-self.__tostring                = GCAD.Line3d.ToString
+self.ToString                                = GCAD.Line3d.ToString
+self.__tostring                              = GCAD.Line3d.ToString
