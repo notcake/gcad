@@ -224,18 +224,24 @@ function GCAD.OBB3d.IntersectLine (self, line3d)
 	px, py, pz = GCAD_UnpackedVector3d_Subtract (px, py, pz, GCAD_Vector3d_Unpack (self.Position))
 	px, py, pz = GCAD_Matrix3x3_UnpackedVectorMatrixMultiply (px, py, pz, self.RotationMatrix)
 	
-	print ((self.Min [1] - px) / dx, (self.Max [1] - px) / dx)
-	print ((self.Min [2] - py) / dy, (self.Max [2] - py) / dy)
-	print ((self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz)
+	local x1, x2 = (self.Min [1] - px) / dx, (self.Max [1] - px) / dx
+	local y1, y2 = (self.Min [2] - py) / dy, (self.Max [2] - py) / dy
+	local z1, z2 = (self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz
+	
+	if x1 > x2 then x1, x2 = x2, x1 end
+	if y1 > y2 then y1, y2 = y2, y1 end
+	if z1 > z2 then z1, z2 = z2, z1 end
+	
 	local t1, t2 = GCAD_UnpackedRange1d_IntersectTriple (
-		(self.Min [1] - px) / dx, (self.Max [1] - px) / dx,
-		(self.Min [2] - py) / dy, (self.Max [2] - py) / dy,
-		(self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz
+		x1, x2,
+		y1, y2,
+		z1, z2
 	)
 	
 	if GCAD_UnpackedRange1d_IsEmpty (t1, t2) then return nil end
 	return t1, t2
 end
+GCAD.OBB3d.IntersectLine = GCAD.Profiler:Wrap (GCAD.OBB3d.IntersectLine, "OBB3d:IntersectLine")
 
 local GCAD_OBB3d_IntersectLine = GCAD.OBB3d.IntersectLine
 function GCAD.OBB3d.IntersectsLine (self, line3d)

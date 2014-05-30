@@ -35,3 +35,7 @@ end
 function self:FindIntersectingFrustum (frustum3d, spatialQueryResult)
 	GCAD.Error ("ISpatialQueryable3d:FindIntersectingFrustum : Not implemented.")
 end
+
+function self:TraceLine (line3d, lineTraceResult)
+	GCAD.Error ("ISpatialQueryable3d:TraceLine : Not implemented.")
+end

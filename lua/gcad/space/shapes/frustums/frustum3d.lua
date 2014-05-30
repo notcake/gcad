@@ -1,6 +1,16 @@
 local self = {}
 GCAD.Frustum3d = GCAD.MakeConstructor (self)
 
+local Angle_Forward                                      = debug.getregistry ().Angle.Forward
+local Angle_Right                                        = debug.getregistry ().Angle.Right
+local Angle_Up                                           = debug.getregistry ().Angle.Up
+local Entity_EyeAngles                                   = debug.getregistry ().Entity.EyeAngles
+local Entity_EyePos                                      = debug.getregistry ().Entity.EyePos
+local Vector_Cross                                       = debug.getregistry ().Vector.Cross
+local Vector___unm                                       = debug.getregistry ().Vector.__unm
+
+local gui_ScreenToVector                                 = gui.ScreenToVector
+
 local GCAD_NormalizedPlane3d_Clone                       = GCAD.NormalizedPlane3d.Clone
 local GCAD_NormalizedPlane3d_ContainsNativePoint         = GCAD.NormalizedPlane3d.ContainsNativePoint
 local GCAD_NormalizedPlane3d_ContainsNativeSphere        = GCAD.NormalizedPlane3d.ContainsNativeSphere
@@ -15,25 +25,37 @@ local GCAD_NormalizedPlane3d_IntersectsOBB               = GCAD.NormalizedPlane3
 local GCAD_NormalizedPlane3d_IntersectsSphere            = GCAD.NormalizedPlane3d.IntersectsSphere
 local GCAD_NormalizedPlane3d_Maximum                     = GCAD.NormalizedPlane3d.Maximum
 local GCAD_NormalizedPlane3d_ToNativeNormalizedPlane3d   = GCAD.NormalizedPlane3d.ToNativeNormalizedPlane3d
+local GCAD_Vector3d_FromNativeVector                     = GCAD.Vector3d.FromNativeVector
 
 if CLIENT then
+	local position  = GCAD.Vector3d ()
+	local direction = GCAD.Vector3d ()
 	function GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, out)
 		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB")
 		
 		out = out or GCAD.Frustum3d ()
 		
-		local pos = LocalPlayer ():EyePos ()
-		local ang = LocalPlayer ():EyeAngles ()
-		local right = ang:Right ()
-		local up    = ang:Up ()
+		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Get camera data")
+		local pos = Entity_EyePos    (LocalPlayer ())
+		local ang = Entity_EyeAngles (LocalPlayer ())
+		local forward = Angle_Forward (ang)
+		local right   = Angle_Right   (ang)
+		local up      = Angle_Up      (ang)
+		GCAD.Profiler:End ()
 		
-		local topLeft     = gui.ScreenToVector (x1, y1)
-		local bottomRight = gui.ScreenToVector (x2, y2)
+		GCAD.Profiler:Begin ("gui.ScreenToVector")
+		local topLeft     = gui_ScreenToVector (x1, y1)
+		local bottomRight = gui_ScreenToVector (x2, y2)
+		GCAD.Profiler:End ()
 		
-		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (pos, up         :Cross (topLeft), out.LeftPlane  )
-		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (pos, bottomRight:Cross (up     ), out.RightPlane )
-		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (pos, right      :Cross (topLeft), out.TopPlane   )
-		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (pos, bottomRight:Cross (right  ), out.BottomPlane)
+		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Construct planes")
+		position = GCAD_Vector3d_FromNativeVector (pos, position)
+		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (up,          topLeft), temp), out.LeftPlane  )
+		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (bottomRight, up     ), temp), out.RightPlane )
+		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (right,       topLeft), temp), out.TopPlane   )
+		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (bottomRight, right  ), temp), out.BottomPlane)
+		out.NearPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector___unm (forward             ), temp), out.NearPlane  )
+		GCAD.Profiler:End ()
 		
 		GCAD.Profiler:End ()
 		return out

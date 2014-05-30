@@ -1,6 +1,14 @@
 local self = {}
 GCAD.NativeFrustum3d = GCAD.MakeConstructor (self)
 
+local Angle_Forward                                      = debug.getregistry ().Angle.Forward
+local Angle_Right                                        = debug.getregistry ().Angle.Right
+local Angle_Up                                           = debug.getregistry ().Angle.Up
+local Entity_EyeAngles                                   = debug.getregistry ().Entity.EyeAngles
+local Entity_EyePos                                      = debug.getregistry ().Entity.EyePos
+local Vector_Cross                                       = debug.getregistry ().Vector.Cross
+local Vector___unm                                       = debug.getregistry ().Vector.__unm
+
 local GCAD_NativeNormalizedPlane3d_Clone                  = GCAD.NativeNormalizedPlane3d.Clone
 local GCAD_NativeNormalizedPlane3d_ContainsNativePoint    = GCAD.NativeNormalizedPlane3d.ContainsNativePoint
 local GCAD_NativeNormalizedPlane3d_ContainsNativeSphere   = GCAD.NativeNormalizedPlane3d.ContainsNativeSphere
@@ -22,18 +30,26 @@ if CLIENT then
 		
 		out = out or GCAD.NativeFrustum3d ()
 		
-		local pos = LocalPlayer ():EyePos ()
-		local ang = LocalPlayer ():EyeAngles ()
-		local right = ang:Right ()
-		local up    = ang:Up ()
+		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Get camera data")
+		local pos = Entity_EyePos    (LocalPlayer ())
+		local ang = Entity_EyeAngles (LocalPlayer ())
+		local forward = Angle_Forward (ang)
+		local right   = Angle_Right   (ang)
+		local up      = Angle_Up      (ang)
+		GCAD.Profiler:End ()
 		
-		local topLeft     = gui.ScreenToVector (x1, y1)
-		local bottomRight = gui.ScreenToVector (x2, y2)
+		GCAD.Profiler:Begin ("gui.ScreenToVector")
+		local topLeft     = gui_ScreenToVector (x1, y1)
+		local bottomRight = gui_ScreenToVector (x2, y2)
+		GCAD.Profiler:End ()
 		
-		out.LeftPlane   = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, up         :Cross (topLeft), out.LeftPlane  )
-		out.RightPlane  = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, bottomRight:Cross (up     ), out.RightPlane )
-		out.TopPlane    = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, right      :Cross (topLeft), out.TopPlane   )
-		out.BottomPlane = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, bottomRight:Cross (right  ), out.BottomPlane)
+		GCAD.Profiler:Begin ("NativeFrustum3d.FromScreenAABB : Construct planes")
+		out.LeftPlane   = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, Vector_Cross (up,          topLeft), out.LeftPlane  )
+		out.RightPlane  = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, Vector_Cross (bottomRight, up     ), out.RightPlane )
+		out.TopPlane    = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, Vector_Cross (right,       topLeft), out.TopPlane   )
+		out.BottomPlane = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, Vector_Cross (bottomRight, right  ), out.BottomPlane)
+		out.NearPlane   = GCAD_NativeNormalizedPlane3d_FromPositionAndNormal (pos, Vector___unm (forward             ), out.NearPlane  )
+		GCAD.Profiler:End ()
 		
 		GCAD.Profiler:End ()
 		return out

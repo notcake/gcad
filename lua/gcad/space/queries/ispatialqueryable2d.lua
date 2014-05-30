@@ -27,3 +27,7 @@ end
 function self:FindIntersectingPlane (plane2d, spatialQueryResult)
 	GCAD.Error ("ISpatialQueryable2d:FindIntersectingPlane : Not implemented.")
 end
+
+function self:TraceLine (line2d, lineTraceResult)
+	GCAD.Error ("ISpatialQueryable2d:TraceLine : Not implemented.")
+end

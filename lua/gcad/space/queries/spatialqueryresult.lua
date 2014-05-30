@@ -27,6 +27,7 @@ function self:Clear ()
 end
 
 function self:Filter (f, out)
+	if out == self then out = nil end
 	out = out or GCAD.SpatialQueryResult ()
 	
 	for i = 1, #self.Objects [i] do

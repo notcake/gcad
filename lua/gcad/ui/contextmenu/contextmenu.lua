@@ -1,12 +1,15 @@
 local self = {}
-GCAD.ContextMenu = GCAD.MakeConstructor (self)
-
-local entsGetAllTime = 0
-local frustumIntersectsSphereTime = 0
-local frustumContainsAnyVertexTime = 0
+GCAD.UI.ContextMenu = GCAD.MakeConstructor (self)
 
 function self:ctor ()
 	self.Control = nil
+	
+	self.Selection = GCAD.UI.Selection ()
+	self.TemporarySelectionSet = GLib.Containers.EventedSet ()
+	self.SelectionPreviewSet = GCAD.Containers.EventedSet ()
+	
+	self.SelectionRenderer = GCAD.UI.SelectionRenderer (self.Selection)
+	self.SelectionRenderer:SetSelectionPreview (self.SelectionPreviewSet)
 	
 	self.MouseDown = false
 	self.MouseDownX = nil
@@ -14,18 +17,69 @@ function self:ctor ()
 	self.MouseMoveX = nil
 	self.MouseMoveY = nil
 	
-	self.SelectedEntities  = {}
-	self.SelectedEntitySet = {}
-	
 	self.ContextMenu = Gooey.Menu ()
+	self.ContextMenu:AddEventListener ("MenuClosed",
+		function (_)
+			self.SelectionPreviewSet:Clear ()
+		end
+	)
 	self.ContextMenu:AddEventListener ("MenuOpening",
 		function (_)
 			self.ContextMenu:Clear ()
 			
+			-- Ambiguous entity selection
+			local lineTraceResult = self:TraceRay (self.MouseMoveX, self.MouseMoveY)
+			local objects = {}
+			for object in lineTraceResult:GetEnumerator () do
+				if object:GetClass () == "worldspawn" then break end
+				
+				if not objects [object] then
+					objects [object] = true
+					
+					local menuItem = self.ContextMenu:AddItem (tostring (object:EntIndex ()))
+					if object:IsPlayer () then
+						menuItem:SetIcon (object:IsAdmin () and "icon16/shield.png" or "icon16/user.png")
+						menuItem:SetText (object:Nick ())
+					else
+						menuItem:SetText (object:GetClass ())
+					end
+					
+					if self.Selection:Contains (object) then
+						menuItem:SetChecked (true)
+					end
+					
+					menuItem:AddEventListener ("Click",
+						function (_)
+							if not object or not object:IsValid () then return end
+							
+							self.Selection:Clear ()
+							self.Selection:Add (object)
+						end
+					)
+					
+					menuItem:AddEventListener ("MouseEnter",
+						function (_)
+							if not object or not object:IsValid () then return end
+							
+							self.SelectionPreviewSet:Add (object)
+						end
+					)
+					
+					menuItem:AddEventListener ("MouseLeave",
+						function (_)
+							if not object or not object:IsValid () then return end
+							
+							self.SelectionPreviewSet:Remove (object)
+						end
+					)
+				end
+			end
+			
+			-- Collect list of applicable actions
 			local applicableActions = {}
 			if properties and properties.List then
 				for _, actionInfo in pairs (properties.List) do
-					for _, v in ipairs (self.SelectedEntities) do
+					for v in self.Selection:GetEnumerator () do
 						if actionInfo:Filter (v, LocalPlayer ()) and
 						   not actionInfo.MenuOpen then
 							applicableActions [#applicableActions + 1] = actionInfo
@@ -35,6 +89,7 @@ function self:ctor ()
 				end
 			end
 			
+			-- Sort actions
 			table.sort (applicableActions,
 				function (a, b)
 					if a.Type == "toggle" and b.Type ~= "toggle" then return false end
@@ -45,6 +100,13 @@ function self:ctor ()
 				end
 			)
 			
+			-- Separator
+			if self.ContextMenu:GetItemCount () > 0 and
+			   #applicableActions > 0 then
+				self.ContextMenu:AddSeparator ()
+			end
+			
+			-- Create action menu items
 			local toggleSpacerCreated = false
 			for _, actionInfo in ipairs (applicableActions) do
 				if actionInfo.Type == "toggle" and not toggleSpacerCreated then
@@ -62,7 +124,7 @@ function self:ctor ()
 				
 				local menuItem = self.ContextMenu:AddItem (text,
 					function ()
-						for _, v in ipairs (self.SelectedEntities) do
+						for v in self.Selection:GetEnumerator () do
 							if v:IsValid () and actionInfo:Filter (v, LocalPlayer ()) then
 								actionInfo:Action (v)
 							end
@@ -77,7 +139,7 @@ function self:ctor ()
 				if actionInfo.Type == "toggle" then
 					local checked = false
 					
-					for _, v in ipairs (self.SelectedEntities) do
+					for v in self.Selection:GetEnumerator () do
 						if actionInfo:Checked (v, LocalPlayer ()) then
 							checked = true
 							break
@@ -129,23 +191,7 @@ function self:ctor ()
 	local v2 = Vector ()
 	
 	local lastQueryFrame = nil
-	local results = {}
-	local Entity_IsValid = debug.getregistry ().Entity.IsValid
-	local whiteMaterial = Material ("debug/debugtranslucentvertexcolor")
-	local selectionOutlineColor = GLib.Colors.CornflowerBlue
-	local selectionColor        = GLib.Color.FromColor (GLib.Colors.CornflowerBlue, 64)
 	
-	local axesMesh = Mesh ()
-	mesh.Begin (axesMesh, MATERIAL_LINES, 3)
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (8, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (  0, 255,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 8, 0)) mesh.Color (  0, 255,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (  0,   0, 255, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 8)) mesh.Color (  0,   0, 255, 255) mesh.AdvanceVertex ()
-	mesh.End ()
-	
-	local matrix = Matrix ()
 	hook.Add ("PostDrawTranslucentRenderables", "GCAD.ContextMenu",
 		function ()
 			if self.MouseDown then
@@ -157,66 +203,34 @@ function self:ctor ()
 				if FrameNumber () ~= lastQueryFrame then
 					lastQueryFrame = FrameNumber ()
 					
-					GCAD.Profiler:Begin ("FindInFrustum")
-					self:SetSelection (self:FindInFrustum (x1, y1, x2, y2))
-					GCAD.Profiler:End ()
-				end
-			end
-			
-			if not next (self.SelectedEntities) then return end
-			
-			GCAD.Profiler:Begin ("OBB rendering")
-			render.SetMaterial (whiteMaterial)
-			for _, v in ipairs (self.SelectedEntities) do
-				if Entity_IsValid (v) then
-					local pos = v:GetPos ()
-					local ang = v:GetAngles ()
+					self.TemporarySelectionSet:Clear ()
 					
-					-- obb = GCAD.OBB3d.FromEntity (v, obb)
-					-- 
-					-- for v1, v2 in obb:GetEdgeEnumerator (v1, v2) do
-					-- 	render.DrawLine (v1, v2, GLib.Colors.White, true)
-					-- end
-					
-					-- Local coordinate axes
-					local renderType = 1
-					if renderType == 0 then
-						local mesh_AdvanceVertex = mesh.AdvanceVertex
-						local mesh_Color         = mesh.Color
-						local mesh_Position      = mesh.Position
-						cam.IgnoreZ (true)
-						mesh.Begin (MATERIAL_LINES, 3)
-							mesh_Position (pos)                      mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-							mesh_Position (pos + ang:Forward () * 8) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-							mesh_Position (pos)                      mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-							mesh_Position (pos - ang:Right   () * 8) mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-							mesh_Position (pos)                      mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-							mesh_Position (pos + ang:Up      () * 8) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-						mesh.End ()
-						cam.IgnoreZ (false)
-					elseif renderType == 1 then
-						render.DrawLine (pos, pos + ang:Forward () * 8, GLib.Colors.Red  )
-						render.DrawLine (pos, pos - ang:Right   () * 8, GLib.Colors.Green)
-						render.DrawLine (pos, pos + ang:Up      () * 8, GLib.Colors.Blue )
-					elseif renderType == 2 then
-						matrix:Identity ()
-						matrix:Translate (pos)
-						matrix:Rotate (ang)
-						cam.IgnoreZ (true)
-						cam.PushModelMatrix (matrix)
-						axesMesh:Draw ()
-						cam.PopModelMatrix ()
-						cam.IgnoreZ (false)
+					if x1 == x2 and y1 == y2 then
+						GCAD.Profiler:Begin ("TraceRay")
+						local lineTraceResult = self:TraceRay (x1, y1)
+						self.TemporarySelectionSet:AddRange (lineTraceResult)
+						GCAD.Profiler:End ()
+					else
+						GCAD.Profiler:Begin ("FindInFrustum")
+						local spatialQueryResult = self:FindInFrustum (x1, y1, x2, y2)
+						self.TemporarySelectionSet:AddRange (spatialQueryResult)
+						GCAD.Profiler:End ()
 					end
+					self.TemporarySelectionSet:Remove (SERVER and game.GetWorld () or Entity (0))
 					
-					-- OBB
-					local obbMins = v:OBBMins ()
-					local obbMaxs = v:OBBMaxs ()
-					render.DrawWireframeBox (pos, ang, obbMins, obbMaxs, selectionOutlineColor, true)
-					render.DrawBox          (pos, ang, obbMins, obbMaxs, selectionColor,        true)
+					local temporarySelectionSet = self.Selection:GetModifyingSet ()
+					self.Selection:SetModifyingSet (self.TemporarySelectionSet)
+					self.TemporarySelectionSet = temporarySelectionSet
+					self.TemporarySelectionSet:Clear ()
 				end
 			end
-			GCAD.Profiler:End ()
+			
+			if self.Selection:IsEmpty () and
+			   self.SelectionPreviewSet:IsEmpty () then
+				return
+			end
+			
+			self.SelectionRenderer:Render ()
 		end
 	)
 	
@@ -254,27 +268,32 @@ function self:GetControl ()
 end
 
 -- Intenral, do not call
+local line3d    = GCAD.Line3d ()
 local frustum3d = GCAD.Frustum3d ()
-local spatialQueryResults = GCAD.SpatialQueryResult ()
+local lineTraceResult    = GCAD.LineTraceResult ()
+local spatialQueryResult = GCAD.SpatialQueryResult ()
 
 function self:FindInFrustum (x1, y1, x2, y2, out)
-	out = out or {}
+	out = out or spatialQueryResult
 	
-	if x1 == x2 and y1 == y2 then
-		local trace = util.QuickTrace (LocalPlayer ():EyePos (), gui.ScreenToVector (x1, y1) * math.sqrt (3 * 32768 * 32768))
-		if trace.Entity and trace.Entity:IsValid () then
-			out [#out + 1] = trace.Entity
-		end
-		return out
-	end
+	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, frustum3d)
 	
-	local localPlayer = LocalPlayer ()
+	spatialQueryResult:Clear ()
+	spatialQueryResult = GCAD.EngineEntitiesSpatialQueryable:FindIntersectingFrustum (frustum3d, spatialQueryResult)
 	
-	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2)
+	return out
+end
+
+function self:TraceRay (x, y, out)
+	out = out or lineTraceResult
 	
-	spatialQueryResults:Clear ()
-	spatialQueryResults = GCAD.EngineEntitiesSpatialQueryable:FindIntersectingFrustum (frustum3d, spatialQueryResults)
-	return spatialQueryResults:ToArray (out)
+	line3d = GCAD.Line3d.FromPositionAndDirection (LocalPlayer ():EyePos (), gui.ScreenToVector (x, y), line3d)
+	
+	lineTraceResult:Clear ()
+	lineTraceResult:SetMinimumParameter (0)
+	lineTraceResult = GCAD.EngineEntitiesSpatialQueryable:TraceLine (line3d, lineTraceResult)
+	
+	return out
 end
 
 function self:SetControl (control)
@@ -314,6 +333,12 @@ function self:SetControl (control)
 		end
 		
 		self.Control.OnMousePressed = function (_, mouseCode)
+			local shift   = input.IsKeyDown (KEY_LSHIFT)
+			local control = input.IsKeyDown (KEY_LCONTROL)
+			
+			local x, y = self.Control:CursorPos ()
+			local lineTraceResult = self:TraceRay (x, y)
+			
 			if mouseCode == MOUSE_LEFT then
 				self.Control:MouseCapture (true)
 				self.MouseDown = true
@@ -321,20 +346,40 @@ function self:SetControl (control)
 				local x, y = self.Control:CursorPos ()
 				self.MouseDownX = x
 				self.MouseDownY = y
-			elseif mouseCode == MOUSE_RIGHT then
-				local x, y = self.Control:CursorPos ()
 				
-				local entities = self:FindInFrustum (x, y, x, y)
+				local selectionType
+				if     shift   then selectionType = GCAD.UI.SelectionType.Add
+				elseif control then selectionType = GCAD.UI.SelectionType.Toggle
+				else                selectionType = GCAD.UI.SelectionType.New    end
+				
+				self.Selection:BeginSelection (selectionType)
+				
+				self.Selection:GetModifyingSet ():Clear ()
+				for object in lineTraceResult:GetEnumerator () do
+					if object:GetClass () == "worldspawn" then break end
+					self.Selection:GetModifyingSet ():Add (object)
+					break
+				end
+			elseif mouseCode == MOUSE_RIGHT then
 				local showMenu = false
-				for _, v in ipairs (entities) do
-					if self.SelectedEntitySet [v] then
+				
+				for v in lineTraceResult:GetIntersectionEnumerator () do
+					if self.Selection:Contains (v) then
 						showMenu = true
 						break
 					end
 				end
 				
-				if not showMenu and #entities > 0 then
-					self:SetSelection (entities)
+				if not showMenu and lineTraceResult:GetIntersectionCount () > 0 then
+					-- Set the selection
+					self.Selection:Clear ()
+					
+					for object in lineTraceResult:GetEnumerator () do
+						if object:GetClass () == "worldspawn" then break end
+						self.Selection:Add (object)
+						break
+					end
+					
 					showMenu = true
 				end
 				
@@ -348,6 +393,8 @@ function self:SetControl (control)
 			if mouseCode == MOUSE_LEFT then
 				self.Control:MouseCapture (false)
 				self.MouseDown = false
+				
+				self.Selection:EndSelection ()
 			end
 		end
 	end
@@ -355,12 +402,4 @@ function self:SetControl (control)
 	return self
 end
 
-function self:SetSelection (selectedEntities)
-	self.SelectedEntities = selectedEntities
-	self.SelectedEntitySet = {}
-	for _, v in ipairs (self.SelectedEntities) do
-		self.SelectedEntitySet [v] = true
-	end
-end
-
-GCAD.ContextMenu = GCAD.ContextMenu ()
+GCAD.UI.ContextMenu = GCAD.UI.ContextMenu ()
