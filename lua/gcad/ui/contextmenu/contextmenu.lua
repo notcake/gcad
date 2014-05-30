@@ -60,8 +60,22 @@ function self:ctor ()
 							if not object or not object:IsValid () then return end
 							
 							self.SelectionTemporary = false
-							self.Selection:Clear ()
-							self.Selection:Add (object)
+							
+							local shift   = input.IsKeyDown (KEY_LSHIFT)
+							local control = input.IsKeyDown (KEY_LCONTROL)
+							
+							if shift then
+								self.Selection:Add (object)
+							elseif control then
+								if self.Selection:Contains (object) then
+									self.Selection:Remove (object)
+								else
+									self.Selection:Add (object)
+								end
+							else
+								self.Selection:Clear ()
+								self.Selection:Add (object)
+							end
 						end
 					)
 					
