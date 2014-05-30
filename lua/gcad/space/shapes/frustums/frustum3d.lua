@@ -9,7 +9,7 @@ local Entity_EyePos                                      = debug.getregistry ().
 local Vector_Cross                                       = debug.getregistry ().Vector.Cross
 local Vector___unm                                       = debug.getregistry ().Vector.__unm
 
-local gui_ScreenToVector                                 = gui.ScreenToVector
+local gui_ScreenToVector                                 = gui and gui.ScreenToVector
 
 local GCAD_NormalizedPlane3d_Clone                       = GCAD.NormalizedPlane3d.Clone
 local GCAD_NormalizedPlane3d_ContainsNativePoint         = GCAD.NormalizedPlane3d.ContainsNativePoint

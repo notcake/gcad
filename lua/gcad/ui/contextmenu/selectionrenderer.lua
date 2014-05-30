@@ -14,7 +14,7 @@ function self:ctor (selection)
 	
 	self.WhiteMaterial = Material ("debug/debugtranslucentvertexcolor")
 	self.AxesMesh = Mesh ()
-	mesh.Begin (axesMesh, MATERIAL_LINES, 3)
+	mesh.Begin (self.AxesMesh, MATERIAL_LINES, 3)
 		mesh.Position (Vector (0, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
 		mesh.Position (Vector (8, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
 		mesh.Position (Vector (0, 0, 0)) mesh.Color (  0, 255,   0, 255) mesh.AdvanceVertex ()
