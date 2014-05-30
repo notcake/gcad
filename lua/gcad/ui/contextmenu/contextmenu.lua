@@ -5,6 +5,8 @@ function self:ctor ()
 	self.Control = nil
 	
 	self.Selection = GCAD.UI.Selection ()
+	self.SelectionTemporary = false
+	
 	self.TemporarySelectionSet = GLib.Containers.EventedSet ()
 	self.SelectionPreviewSet = GCAD.Containers.EventedSet ()
 	
@@ -20,6 +22,11 @@ function self:ctor ()
 	self.ContextMenu = Gooey.Menu ()
 	self.ContextMenu:AddEventListener ("MenuClosed",
 		function (_)
+			if self.SelectionTemporary then
+				self.SelectionTemporary = false
+				self.Selection:Clear ()
+			end
+			
 			self.SelectionPreviewSet:Clear ()
 		end
 	)
@@ -52,6 +59,7 @@ function self:ctor ()
 						function (_)
 							if not object or not object:IsValid () then return end
 							
+							self.SelectionTemporary = false
 							self.Selection:Clear ()
 							self.Selection:Add (object)
 						end
@@ -373,6 +381,7 @@ function self:SetControl (control)
 				if not showMenu and lineTraceResult:GetIntersectionCount () > 0 then
 					-- Set the selection
 					self.Selection:Clear ()
+					self.SelectionTemporary = true
 					
 					for object in lineTraceResult:GetEnumerator () do
 						if object:GetClass () == "worldspawn" then break end

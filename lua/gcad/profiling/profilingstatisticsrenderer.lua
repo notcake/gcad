@@ -24,7 +24,11 @@ function self:ctor ()
 		end
 	)
 	
-	self:SetEnabled (true)
+	GLib.WaitForLocalPlayer (
+		function ()
+			self:SetEnabled (LocalPlayer ():SteamID () == "STEAM_0:1:19269760")
+		end
+	)
 end
 
 function self:dtor ()
