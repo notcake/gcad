@@ -99,7 +99,7 @@ GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 
 if CLIENT then
 	GCAD.UI = {}
-	include ("ui/selectiontype.lua")
+	include ("ui/events.lua")
 	include ("ui/selection.lua")
 	GCAD.IncludeDirectory ("gcad/ui")
 end

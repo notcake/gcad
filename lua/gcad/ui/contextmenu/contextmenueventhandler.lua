@@ -1,8 +1,8 @@
 local self = {}
-GCAD.UI.ContextMenu = GCAD.MakeConstructor (self)
+GCAD.UI.ContextMenuEventHandler = GCAD.MakeConstructor (self, GCAD.UI.IMouseEventSink)
 
 function self:ctor ()
-	self.Control = nil
+	self:SetMouseEventSource (GCAD.UI.ContextMenuEventSource)
 	
 	self.Selection = GCAD.UI.Selection ()
 	self.SelectionTemporary = false
@@ -177,20 +177,6 @@ function self:ctor ()
 		end
 	)
 	
-	self:SetControl (g_ContextMenu)
-	
-	hook.Add ("OnContextMenuOpen", "GCAD.ContextMenu",
-		function ()
-			self:SetControl (g_ContextMenu)
-		end
-	)
-	
-	hook.Add ("OnContextMenuClose", "GCAD.ContextMenu",
-		function ()
-			self.MouseDown = false
-		end
-	)
-	
 	local fillColor = GLib.Color.FromColor (GLib.Colors.CornflowerBlue, 128)
 	hook.Add ("HUDPaint", "GCAD.ContextMenu",
 		function ()
@@ -256,7 +242,7 @@ function self:ctor ()
 		end
 	)
 	
-	GCAD:AddEventListener ("Unloaded", "GCAD.ContextMenu",
+	GCAD:AddEventListener ("Unloaded", "GCAD.ContextMenuEventHandler",
 		function ()
 			self:dtor ()
 		end
@@ -269,160 +255,124 @@ function self:dtor ()
 		self.ContextMenu = nil
 	end
 	
-	self:SetControl (nil)
-	
-	hook.Remove ("OnContextMenuOpen",  "GCAD.ContextMenu")
-	hook.Remove ("OnContextMenuClose", "GCAD.ContextMenu")
+	self:SetMouseEventSource (nil)
 	
 	hook.Remove ("HUDPaint", "GCAD.ContextMenu")
-	hook.Add ("PreDrawOpaqueRenderables",       "GCAD.ContextMenu")
-	hook.Add ("PostDrawOpaqueRenderables",      "GCAD.ContextMenu")
-	hook.Add ("PreDrawTranslucentRenderables",  "GCAD.ContextMenu")
-	hook.Add ("PostDrawTranslucentRenderables", "GCAD.ContextMenu")
-	hook.Add ("PreDrawViewModel",               "GCAD.ContextMenu")
-	hook.Add ("PostDrawViewModel",              "GCAD.ContextMenu")
+	hook.Remove ("PreDrawOpaqueRenderables",       "GCAD.ContextMenu")
+	hook.Remove ("PostDrawOpaqueRenderables",      "GCAD.ContextMenu")
+	hook.Remove ("PreDrawTranslucentRenderables",  "GCAD.ContextMenu")
+	hook.Remove ("PostDrawTranslucentRenderables", "GCAD.ContextMenu")
+	hook.Remove ("PreDrawViewModel",               "GCAD.ContextMenu")
+	hook.Remove ("PostDrawViewModel",              "GCAD.ContextMenu")
 	
-	GCAD:RemoveEventListener ("Unloaded", "GCAD.ContextMenu")
+	GCAD:RemoveEventListener ("Unloaded", "GCAD.ContextMenuEventHandler")
 end
 
-function self:GetControl ()
-	return self.Control
+function self:OnMouseEnter ()
 end
 
--- Intenral, do not call
-local line3d    = GCAD.Line3d ()
+function self:OnMouseLeave ()
+	self.MouseDown = false
+	
+	self.Selection:EndSelection ()
+end
+
+function self:OnMouseMove (mouseCode, mouseX, mouseY)
+	self.MouseMoveX = mouseX
+	self.MouseMoveY = mouseY
+end
+
+function self:OnMouseDown (mouseCode, mouseX, mouseY)
+	local shift   = input.IsKeyDown (KEY_LSHIFT)
+	local control = input.IsKeyDown (KEY_LCONTROL)
+	
+	local lineTraceResult = self:TraceRay (mouseX, mouseY)
+	
+	if mouseCode == MOUSE_LEFT then
+		self.MouseDown = true
+		
+		self.MouseDownX = mouseX
+		self.MouseDownY = mouseY
+		self.MouseMoveX = self.MouseDownX
+		self.MouseMoveY = self.MouseDownY
+		
+		local selectionType
+		if     shift   then selectionType = GCAD.UI.SelectionType.Add
+		elseif control then selectionType = GCAD.UI.SelectionType.Toggle
+		else                selectionType = GCAD.UI.SelectionType.New    end
+		
+		self.Selection:BeginSelection (selectionType)
+		
+		self.Selection:GetModifyingSet ():Clear ()
+		for object in lineTraceResult:GetEnumerator () do
+			if object:GetClass () == "worldspawn" then break end
+			self.Selection:GetModifyingSet ():Add (object)
+			break
+		end
+	elseif mouseCode == MOUSE_RIGHT then
+		local showMenu = false
+		
+		for v in lineTraceResult:GetIntersectionEnumerator () do
+			if self.Selection:Contains (v) then
+				showMenu = true
+				break
+			end
+		end
+		
+		if not showMenu and lineTraceResult:GetIntersectionCount () > 0 then
+			-- Set the selection
+			self.Selection:Clear ()
+			self.SelectionTemporary = true
+			
+			for object in lineTraceResult:GetEnumerator () do
+				if object:GetClass () == "worldspawn" then break end
+				self.Selection:Add (object)
+				break
+			end
+			
+			showMenu = true
+		end
+		
+		if showMenu then
+			self.ContextMenu:Show ()
+		end
+	end
+end
+
+function self:OnMouseUp (mouseCode, mouseX, mouseY)
+	if mouseCode == MOUSE_LEFT then
+		self.MouseDown = false
+		
+		self.Selection:EndSelection ()
+	end
+end
+
+-- Internal, do not call
 local frustum3d = GCAD.Frustum3d ()
-local lineTraceResult    = GCAD.LineTraceResult ()
 local spatialQueryResult = GCAD.SpatialQueryResult ()
-
 function self:FindInFrustum (x1, y1, x2, y2, out)
 	out = out or spatialQueryResult
 	
 	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, frustum3d)
 	
-	spatialQueryResult:Clear ()
-	spatialQueryResult = GCAD.EngineEntitiesSpatialQueryable:FindIntersectingFrustum (frustum3d, spatialQueryResult)
+	out:Clear ()
+	out = GCAD.EngineEntitiesSpatialQueryable:FindIntersectingFrustum (frustum3d, out)
 	
 	return out
 end
 
+local line3d = GCAD.Line3d ()
+local lineTraceResult = GCAD.LineTraceResult ()
 function self:TraceRay (x, y, out)
 	out = out or lineTraceResult
 	
 	line3d = GCAD.Line3d.FromPositionAndDirection (LocalPlayer ():EyePos (), gui.ScreenToVector (x, y), line3d)
 	
-	lineTraceResult:Clear ()
-	lineTraceResult:SetMinimumParameter (0)
-	lineTraceResult = GCAD.EngineEntitiesSpatialQueryable:TraceLine (line3d, lineTraceResult)
+	out:Clear ()
+	out:SetMinimumParameter (0)
+	out = GCAD.EngineEntitiesSpatialQueryable:TraceLine (line3d, out)
 	
 	return out
 end
 
-function self:SetControl (control)
-	if self.Control == control then return self end
-	
-	if self.Control then
-		self.Control:SetWorldClicker (true)
-		for _, child in ipairs (self.Control:GetChildren ()) do
-			if child.ClassName == "DIconLayout" then
-				self.Control.Canvas:SetWorldClicker (true)
-			end
-		end
-		
-		self.Control.OnCursorMoved   = self.Control._OnCursorMoved
-		self.Control.OnMousePressed  = self.Control._OnMousePressed
-		self.Control.OnMouseReleased = self.Control._OnMouseReleased
-	end
-	
-	self.Control = control
-	
-	if self.Control then
-		self.Control:SetWorldClicker (false)
-		self.Control.Canvas:SetWorldClicker (false)
-		for _, child in ipairs (self.Control:GetChildren ()) do
-			if child.ClassName == "DIconLayout" then
-				child:SetWorldClicker (false)
-			end
-		end
-		
-		self.Control._OnCursorMoved   = self.Control._OnCursorMoved   or self.Control.OnCursorMoved
-		self.Control._OnMousePressed  = self.Control._OnMousePressed  or self.Control.OnMousePressed
-		self.Control._OnMouseReleased = self.Control._OnMouseReleased or self.Control.OnMouseReleased
-		
-		self.Control.OnCursorMoved = function (_, x, y)
-			self.MouseMoveX = x
-			self.MouseMoveY = y
-		end
-		
-		self.Control.OnMousePressed = function (_, mouseCode)
-			local shift   = input.IsKeyDown (KEY_LSHIFT)
-			local control = input.IsKeyDown (KEY_LCONTROL)
-			
-			local x, y = self.Control:CursorPos ()
-			local lineTraceResult = self:TraceRay (x, y)
-			
-			if mouseCode == MOUSE_LEFT then
-				self.Control:MouseCapture (true)
-				self.MouseDown = true
-				
-				local x, y = self.Control:CursorPos ()
-				self.MouseDownX = x
-				self.MouseDownY = y
-				
-				local selectionType
-				if     shift   then selectionType = GCAD.UI.SelectionType.Add
-				elseif control then selectionType = GCAD.UI.SelectionType.Toggle
-				else                selectionType = GCAD.UI.SelectionType.New    end
-				
-				self.Selection:BeginSelection (selectionType)
-				
-				self.Selection:GetModifyingSet ():Clear ()
-				for object in lineTraceResult:GetEnumerator () do
-					if object:GetClass () == "worldspawn" then break end
-					self.Selection:GetModifyingSet ():Add (object)
-					break
-				end
-			elseif mouseCode == MOUSE_RIGHT then
-				local showMenu = false
-				
-				for v in lineTraceResult:GetIntersectionEnumerator () do
-					if self.Selection:Contains (v) then
-						showMenu = true
-						break
-					end
-				end
-				
-				if not showMenu and lineTraceResult:GetIntersectionCount () > 0 then
-					-- Set the selection
-					self.Selection:Clear ()
-					self.SelectionTemporary = true
-					
-					for object in lineTraceResult:GetEnumerator () do
-						if object:GetClass () == "worldspawn" then break end
-						self.Selection:Add (object)
-						break
-					end
-					
-					showMenu = true
-				end
-				
-				if showMenu then
-					self.ContextMenu:Show ()
-				end
-			end
-		end
-		
-		self.Control.OnMouseReleased = function (_, mouseCode)
-			if mouseCode == MOUSE_LEFT then
-				self.Control:MouseCapture (false)
-				self.MouseDown = false
-				
-				self.Selection:EndSelection ()
-			end
-		end
-	end
-	
-	return self
-end
-
-GCAD.UI.ContextMenu = GCAD.UI.ContextMenu ()
+GCAD.UI.ContextMenuEventHandler = GCAD.UI.ContextMenuEventHandler ()

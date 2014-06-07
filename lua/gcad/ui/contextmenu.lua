@@ -1,2 +1,3 @@
 include ("contextmenu/selectionrenderer.lua")
-include ("contextmenu/contextmenu.lua")
+include ("contextmenu/contextmenueventsource.lua")
+include ("contextmenu/contextmenueventhandler.lua")

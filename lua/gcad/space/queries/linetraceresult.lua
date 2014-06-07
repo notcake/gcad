@@ -11,8 +11,22 @@ local GCAD_UnpackedRange1d_IsEmpty       = GCAD.UnpackedRange1d.IsEmpty
 function self:ctor ()
 	self.MinimumParameter = -math_huge
 	self.MaximumParameter =  math_huge
+	self.Line = nil
 	
 	self:Clear ()
+end
+
+-- Line
+function self:GetLine ()
+	return self.Line
+end
+
+function self:SetLine (line)
+	if self.Line == line then return self end
+	
+	self.Line = line
+	
+	return self
 end
 
 -- Parameter range
@@ -237,6 +251,30 @@ end
 
 function self:IsFullyEmpty ()
 	return #self.SortedIntersectionIds == 0
+end
+
+function self:ToString ()
+	local lineTraceResult = GLib.StringBuilder ()
+	lineTraceResult:Append ("LineTraceResult")
+	
+	if self:IsFullyEmpty () then
+	lineTraceResult:Append (" {}")
+	else
+		lineTraceResult:Append ("\n")
+		lineTraceResult:Append ("{")
+		for object, t, intersectionType in self:GetEnumerator () do
+			intersectionType = GCAD.LineTraceIntersectionType [intersectionType]
+			lineTraceResult:Append ("\n\t")
+			lineTraceResult:Append (intersectionType)
+			lineTraceResult:Append ("\t")
+			lineTraceResult:Append (tostring (t))
+			lineTraceResult:Append ("\t")
+			lineTraceResult:Append (tostring (object))
+		end
+		lineTraceResult:Append ("\n}")
+	end
+	
+	return lineTraceResult:ToString ()
 end
 
 -- Internal, do not call

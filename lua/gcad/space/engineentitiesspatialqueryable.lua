@@ -95,6 +95,8 @@ traceData.mask   = CONTENTS_SOLID
 function self:TraceLine (line3d, lineTraceResult)
 	lineTraceResult = lineTraceResult or GCAD.LineTraceResult ()
 	
+	lineTraceResult:SetLine (line3d)
+	
 	-- Calculate the first world intersection
 	GCAD.Profiler:Begin ("util.TraceLine")
 	traceData.start  = line3d:GetPositionNative (traceData.start)
