@@ -46,7 +46,7 @@ function GCAD.UnpackedRange3d.ContainsPoint (x1, y1, z1, x2, y2, z2, v)
 		   z1 <= v [3] and v [3] <= z2
 end
 
-function GCAD.UnpackedRange3d.ContainsUnpackedPoint (x1, y1, z1, x2, y2, z3, x, y, z)
+function GCAD.UnpackedRange3d.ContainsUnpackedPoint (x1, y1, z1, x2, y2, z2, x, y, z)
 	return x1 <= x and x <= x2 and
 	       y1 <= y and y <= y2 and
 		   z1 <= z and z <= z2

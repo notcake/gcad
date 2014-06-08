@@ -202,13 +202,13 @@ function GCAD.OBB3d.ContainsUnpackedPoint (self, x, y, z)
 	return GCAD_UnpackedRange3d_ContainsUnpackedPoint (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], x, y, z)
 end
 
-local GCAD_OBB3d_ContainsPointUnpacked = GCAD.OBB3d.ContainsPointUnpacked
+local GCAD_OBB3d_ContainsUnpackedPoint = GCAD.OBB3d.ContainsUnpackedPoint
 function GCAD.OBB3d.ContainsPoint (self, v3d)
-	return GCAD_OBB3d_ContainsPointUnpacked (self, v3d [1], v3d [2], v3d [3])
+	return GCAD_OBB3d_ContainsUnpackedPoint (self, v3d [1], v3d [2], v3d [3])
 end
 
 function GCAD.OBB3d.ContainsNativePoint (self, v)
-	return GCAD_OBB3d_ContainsPointUnpacked (self, GCAD_UnpackedVector3d_FromNativeVector (v))
+	return GCAD_OBB3d_ContainsUnpackedPoint (self, GCAD_UnpackedVector3d_FromNativeVector (v))
 end
 
 -- Line
