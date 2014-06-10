@@ -20,6 +20,7 @@ function self:ctor ()
 	self.AABB           = GCAD.AABB3d ()
 	self.BoundingSphere = GCAD.Sphere3d ()
 	self.OBB            = GCAD.OBB3d ()
+	self.NativeOBB      = GCAD.NativeOBB3d ()
 	
 	-- EntityReference
 	self.Entity = nil
@@ -33,17 +34,22 @@ end
 -- ISpatialNode3d
 function self:GetAABB (out)
 	out = out or self.AABB
-	return GCAD.AABB3d:FromEntity (self:GetEntity (), out)
+	return GCAD.AABB3d.FromEntity (self:GetEntity (), out)
 end
 
 function self:GetBoundingSphere (out)
 	out = out or self.BoundingSphere
-	return GCAD.Sphere3d:FromEntityBoundingSphere (self:GetEntity (), out)
+	return GCAD.Sphere3d.FromEntityBoundingSphere (self:GetEntity (), out)
 end
 
 function self:GetOBB (out)
 	out = out or self.OBB
-	return GCAD.OBB3d:FromEntity (self:GetEntity (), out)
+	return GCAD.OBB3d.FromEntity (self:GetEntity (), out)
+end
+
+function self:GetNativeOBB (out)
+	out = out or self.NativeOBB
+	return GCAD.NativeOBB3d.FromEntity (self:GetEntity (), out)
 end
 
 -- IComponent

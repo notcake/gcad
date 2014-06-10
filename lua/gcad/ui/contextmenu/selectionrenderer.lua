@@ -1,7 +1,42 @@
 local self = {}
 GCAD.UI.SelectionRenderer = GCAD.MakeConstructor (self)
 
-local Entity_IsValid = debug.getregistry ().Entity.IsValid
+local Angle                   = Angle
+local LocalToWorld            = LocalToWorld
+local Vector                  = Vector
+
+local cam_IgnoreZ             = cam.IgnoreZ
+local cam_PushModelMatrix     = cam._PushModelMatrix or cam.PushModelMatrix
+local cam_PopModelMatrix      = cam._PopModelMatrix  or cam.PopModelMatrix
+local mesh_Begin              = mesh._Begin          or mesh.Begin
+local mesh_End                = mesh._End            or mesh.End
+local mesh_AdvanceVertex      = mesh.AdvanceVertex
+local mesh_Color              = mesh.Color
+local mesh_Position           = mesh.Position
+local render_DrawBox          = render.DrawBox
+local render_DrawWireframeBox = render.DrawWireframeBox
+local render_SetMaterial      = render.SetMaterial
+
+local IMaterial_SetFloat      = debug.getregistry ().IMaterial.SetFloat
+local IMaterial_SetVector     = debug.getregistry ().IMaterial.SetVector
+local IMesh_Draw              = debug.getregistry ().IMesh.Draw
+local Vector_Set              = debug.getregistry ().Vector.Set
+local Vector_Sub              = debug.getregistry ().Vector.Sub
+local VMatrix_Identity        = debug.getregistry ().VMatrix.Identity
+local VMatrix_Rotate          = debug.getregistry ().VMatrix.Rotate
+local VMatrix_Scale           = debug.getregistry ().VMatrix.Scale
+local VMatrix_Translate       = debug.getregistry ().VMatrix.Translate
+
+local MATERIAL_LINES          = MATERIAL_LINES
+local MATERIAL_TRIANGLES      = MATERIAL_TRIANGLES
+
+local GLib_Color_ToVector     = GLib.Color.ToVector
+
+-- cam_IgnoreZ         = GCAD.Profiler:Wrap (cam_IgnoreZ,         "cam.IgnoreZ"        )
+-- cam_PushModelMatrix = GCAD.Profiler:Wrap (cam_PushModelMatrix, "cam.PushModelMatrix")
+-- cam_PopModelMatrix  = GCAD.Profiler:Wrap (cam_PopModelMatrix,  "cam.PopModelMatrix" )
+-- IMesh_Draw          = GCAD.Profiler:Wrap (IMesh_Draw,          "IMesh:Draw"         )
+-- render_SetMaterial  = GCAD.Profiler:Wrap (render_SetMaterial, "render.SetMaterial"  )
 
 function self:ctor (selection)
 	self.Selection = selection
@@ -12,16 +47,117 @@ function self:ctor (selection)
 	self.SelectionPreviewOutlineColor = GLib.Colors.Orange
 	self.SelectionPreviewColor        = GLib.Color.FromColor (self.SelectionPreviewOutlineColor, 64)
 	
-	self.WhiteMaterial = Material ("debug/debugtranslucentvertexcolor")
+	self.PerVertexColorMaterial = CreateMaterial ("GCAD.VertexColorMaterial", "UnlitGeneric",
+		{
+			["$vertexcolor"] = 1,
+			["$vertexalpha"] = 1,
+			["$translucent"] = 1
+		}
+	)
+	self.ColorMaterial          = CreateMaterial ("GCAD.SingleColorMaterial", "UnlitGeneric",
+		{
+			["$translucent"] = 1
+		}
+	)
+	
+	-- Axes mesh
 	self.AxesMesh = Mesh ()
-	mesh.Begin (self.AxesMesh, MATERIAL_LINES, 3)
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (8, 0, 0)) mesh.Color (255,   0,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (  0, 255,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 8, 0)) mesh.Color (  0, 255,   0, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 0)) mesh.Color (  0,   0, 255, 255) mesh.AdvanceVertex ()
-		mesh.Position (Vector (0, 0, 8)) mesh.Color (  0,   0, 255, 255) mesh.AdvanceVertex ()
-	mesh.End ()
+	mesh_Begin (self.AxesMesh, MATERIAL_LINES, 3)
+		mesh_Position (Vector (0, 0, 0)) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
+		mesh_Position (Vector (8, 0, 0)) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
+		mesh_Position (Vector (0, 0, 0)) mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
+		mesh_Position (Vector (0, 8, 0)) mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
+		mesh_Position (Vector (0, 0, 0)) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (Vector (0, 0, 8)) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
+	mesh_End ()
+	
+	-- Box mesh
+	local vertices =
+	{
+		Vector (0, 0, 0),
+		Vector (0, 1, 0),
+		Vector (1, 1, 0),
+		Vector (1, 0, 0),
+		Vector (0, 0, 1),
+		Vector (0, 1, 1),
+		Vector (1, 1, 1),
+		Vector (1, 0, 1)
+	}
+	
+	self.BoxMesh = Mesh ()
+	mesh_Begin (self.BoxMesh, MATERIAL_TRIANGLES, 12)
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+	mesh_End ()
+
+	self.WireframeBoxMesh = Mesh ()
+	mesh_Begin (self.WireframeBoxMesh, MATERIAL_LINES, 12)
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [1]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (255, 255, 255, 255) mesh_AdvanceVertex ()
+	mesh_End ()
 end
 
 function self:dtor ()
@@ -30,6 +166,14 @@ function self:dtor ()
 	if self.AxesMesh then
 		self.AxesMesh:Destroy ()
 		self.AxesMesh = nil
+	end
+	if self.BoxMesh then
+		self.BoxMesh:Destroy ()
+		self.BoxMesh = nil
+	end
+	if self.WireframeBoxMesh then
+		self.WireframeBoxMesh:Destroy ()
+		self.WireframeBoxMesh = nil
 	end
 end
 
@@ -59,66 +203,25 @@ end
 
 local matrix = Matrix ()
 function self:Render ()
-	render.SetMaterial (self.WhiteMaterial)
+	self:DrawComponentSelections (self.Selection, self.SelectionOutlineColor, self.SelectionColor)
 	
-	if false then
-		for object in self.Selection:GetEnumerator () do
-			self:DrawComponentSelection (object, self.SelectionOutlineColor, self.SelectionColor)
-		end
-	else
-		self:DrawComponentSelections (self.Selection, self.SelectionOutlineColor, self.SelectionColor)
-	end
-	
-	if self.SelectionPreview then
-		for object in self.SelectionPreview:GetEnumerator () do
-			self:DrawComponentSelection (object, self.SelectionPreviewOutlineColor, self.SelectionPreviewColor)
-		end
+	if self.SelectionPreview and
+	   not self.SelectionPreview:IsEmpty () then
+		self:DrawComponentSelections (self.SelectionPreview, self.SelectionPreviewOutlineColor, self.SelectionPreviewColor)
 	end
 end
 self.Render = GCAD.Profiler:Wrap (self.Render, "SelectionRenderer:Render")
 
 -- Internal, do not call
-local pos     = Vector ()
-local obbMins = Vector ()
-local obbMaxs = Vector ()
-local angle   = Angle ()
-local nativeOBB3d = GCAD.NativeOBB3d ()
-
-local cam_IgnoreZ         = cam.IgnoreZ
-local cam_PushModelMatrix = cam.PushModelMatrix
-local cam_PopModelMatrix  = cam.PopModelMatrix
-local mesh_AdvanceVertex  = mesh.AdvanceVertex
-local mesh_Begin          = mesh.Begin
-local mesh_Color          = mesh.Color
-local mesh_End            = mesh.End
-local mesh_Position       = mesh.Position
-local render_DrawLine     = render.DrawLine
-
-local Angle_Forward       = debug.getregistry ().Angle.Forward
-local Angle_Right         = debug.getregistry ().Angle.Right
-local Angle_Up            = debug.getregistry ().Angle.Up
-local IMesh_Draw          = debug.getregistry ().IMesh.Draw
-local Vector___add        = debug.getregistry ().Vector.__add
-local Vector___mul        = debug.getregistry ().Vector.__mul
-local Vector___sub        = debug.getregistry ().Vector.__sub
-local Vector___unm        = debug.getregistry ().Vector.__unm
-local VMatrix_Identity    = debug.getregistry ().VMatrix.Identity
-local VMatrix_Rotate      = debug.getregistry ().VMatrix.Rotate
-local VMatrix_Translate   = debug.getregistry ().VMatrix.Translate
-
-local MATERIAL_LINES      = MATERIAL_LINES
-
--- cam_IgnoreZ         = GCAD.Profiler:Wrap (cam_IgnoreZ,         "cam.IgnoreZ"        )
--- cam_PushModelMatrix = GCAD.Profiler:Wrap (cam_PushModelMatrix, "cam.PushModelMatrix")
--- cam_PopModelMatrix  = GCAD.Profiler:Wrap (cam_PopModelMatrix,  "cam.PopModelMatrix" )
--- mesh_Begin          = GCAD.Profiler:Wrap (mesh_Begin,          "mesh.Begin"         )
--- mesh_End            = GCAD.Profiler:Wrap (mesh_End,            "mesh.End"           )
--- IMesh_Draw          = GCAD.Profiler:Wrap (IMesh_Draw,          "IMesh:Draw"         )
+local angle_zero = Angle (0, 0, 0)
+local v  = Vector ()
 
 local components              = GLib.WeakValueTable ()
 local componentSpatialNode3ds = GLib.WeakValueTable ()
-local componentNativeOBB3ds   = GLib.WeakValueTable ()
+local componentNativeOBB3ds   = {} -- Should not be garbage collected
+local componentOBBMatrices    = {} -- Should not be garbage collected
 local componentCount = 0
+
 function self:DrawComponentSelections (componentEnumerable, selectionOutlineColor, selectionColor)
 	-- Filter down to ISpatialNode3d components.
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Filter to ISpatialNode3ds")
@@ -139,70 +242,71 @@ function self:DrawComponentSelections (componentEnumerable, selectionOutlineColo
 	-- Compute OBBs
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBBs")
 	for i = 1, componentCount do
-		local component = components [i]
-		if component:Is (GCAD.Components.EntityReference) then
-			componentNativeOBB3ds [i] = GCAD.NativeOBB3d.FromEntity (component:GetEntity (), componentNativeOBB3ds [i])
-		else
-			local obb3d = componentSpatialNode3ds [i]:GetOBB ()
-			componentNativeOBB3ds [i] = obb3d:ToNativeOBB3d (componentNativeOBB3ds [i])
-		end
+		componentNativeOBB3ds [i] = componentSpatialNode3ds [i]:GetNativeOBB ()
 	end
 	GCAD.Profiler:End ()
 	
 	-- Local coordinate axes
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw axes")
-	local renderType = 0 -- Best rendering times for large numbers of objects
-	if renderType == 0 then
-		cam_IgnoreZ (true)
-		for i = 1, componentCount do
-			local nativeOBB3d = componentNativeOBB3ds [i]
-			local pos   = nativeOBB3d.Position
-			local angle = nativeOBB3d.Angle
-			mesh_Begin (MATERIAL_LINES, 3)
-				mesh_Position (pos)                                                         mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-				mesh_Position (Vector___add (pos, Vector___mul (Angle_Forward (angle), 8))) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-				mesh_Position (pos)                                                         mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-				mesh_Position (Vector___sub (pos, Vector___mul (Angle_Right   (angle), 8))) mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-				mesh_Position (pos)                                                         mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-				mesh_Position (Vector___add (pos, Vector___mul (Angle_Up      (angle), 8))) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-			mesh_End ()
-		end
-		cam_IgnoreZ (false)
-	elseif renderType == 1 then
-		for i = 1, componentCount do
-			local nativeOBB3d = componentNativeOBB3ds [i]
-			local pos   = nativeOBB3d.Position
-			local angle = nativeOBB3d.Angle
-			render_DrawLine (pos, Vector___add (pos, Vector___mul (Angle_Forward (angle), 8)), GLib.Colors.Red  )
-			render_DrawLine (pos, Vector___sub (pos, Vector___mul (Angle_Right   (angle), 8)), GLib.Colors.Green)
-			render_DrawLine (pos, Vector___add (pos, Vector___mul (Angle_Up      (angle), 8)), GLib.Colors.Blue )
-		end
-	elseif renderType == 2 then
-		cam_IgnoreZ (true)
-		for i = 1, componentCount do
-			local nativeOBB3d = componentNativeOBB3ds [i]
-			local pos   = nativeOBB3d.Position
-			local angle = nativeOBB3d.Angle
-			-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Compute matrix")
-			VMatrix_Identity (matrix)
-			VMatrix_Translate (matrix, pos)
-			VMatrix_Rotate (matrix, angle)
-			-- GCAD.Profiler:End ()
-			cam_PushModelMatrix (matrix)
-			IMesh_Draw (self.AxesMesh)
-			cam_PopModelMatrix ()
-		end
-		cam_IgnoreZ (false)
+	local axesMesh         = self.AxesMesh
+	render_SetMaterial (self.PerVertexColorMaterial)
+	cam_IgnoreZ (true)
+	for i = 1, componentCount do
+		local nativeOBB3d = componentNativeOBB3ds [i]
+		-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute matrix")
+		VMatrix_Identity  (matrix)
+		VMatrix_Translate (matrix, nativeOBB3d.Position)
+		VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
+		-- GCAD.Profiler:End ()
+		cam_PushModelMatrix (matrix)
+		IMesh_Draw (axesMesh)
+		cam_PopModelMatrix ()
 	end
+	cam_IgnoreZ (false)
 	GCAD.Profiler:End ()
 	
 	-- OBBs
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw OBBs")
+	
+	-- Wireframe OBBs
+	local wireframeBoxMesh = self.WireframeBoxMesh
+	local v, alpha = GLib_Color_ToVector (selectionOutlineColor, v)
+	IMaterial_SetVector (self.ColorMaterial, "$color", v    )
+	IMaterial_SetFloat  (self.ColorMaterial, "$alpha", alpha)
+	render_SetMaterial (self.ColorMaterial)
 	for i = 1, componentCount do
 		local nativeOBB3d = componentNativeOBB3ds [i]
-		render.DrawWireframeBox (nativeOBB3d.Position, nativeOBB3d.Angle, nativeOBB3d.Min, nativeOBB3d.Max, selectionOutlineColor, true)
-		render.DrawBox          (nativeOBB3d.Position, nativeOBB3d.Angle, nativeOBB3d.Min, nativeOBB3d.Max, selectionColor,        true)
+		local matrix = componentOBBMatrices [i] or Matrix ()
+		componentOBBMatrices [i] = matrix
+		
+		-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBB matrix")
+		VMatrix_Identity  (matrix)
+		VMatrix_Translate (matrix, LocalToWorld (nativeOBB3d.Min, angle_zero, nativeOBB3d.Position, nativeOBB3d.Angle))
+		VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
+		
+		Vector_Set (v, nativeOBB3d.Max)
+		Vector_Sub (v, nativeOBB3d.Min)
+		VMatrix_Scale     (matrix, v)
+		-- GCAD.Profiler:End ()
+		
+		cam_PushModelMatrix (matrix)
+		IMesh_Draw (wireframeBoxMesh)
+		cam_PopModelMatrix ()
 	end
+	
+	-- Shaded OBBs
+	local boxMesh = self.BoxMesh
+	local v, alpha = GLib_Color_ToVector (selectionColor, v)
+	IMaterial_SetVector (self.ColorMaterial, "$color", v    )
+	IMaterial_SetFloat  (self.ColorMaterial, "$alpha", alpha)
+	render_SetMaterial (self.ColorMaterial)
+	
+	for i = 1, componentCount do
+		cam_PushModelMatrix (componentOBBMatrices [i])
+		IMesh_Draw (boxMesh)
+		cam_PopModelMatrix ()
+	end
+	
 	GCAD.Profiler:End ()
 end
 self.DrawComponentSelections = GCAD.Profiler:Wrap (self.DrawComponentSelections, "SelectionRenderer:DrawComponentSelections")
@@ -225,45 +329,28 @@ function self:DrawComponentSelection (component, selectionOutlineColor, selectio
 	local angle   = nativeOBB3d.Angle
 	-- GCAD.Profiler:End ()
 	
+	-- Local coordinate axes
+	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Draw axes")
+	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Compute matrix")
+	VMatrix_Identity (matrix)
+	VMatrix_Translate (matrix, pos)
+	VMatrix_Rotate (matrix, angle)
+	-- GCAD.Profiler:End ()
+	cam_IgnoreZ (true)
+	cam_PushModelMatrix (matrix)
+	IMesh_Draw (self.AxesMesh)
+	cam_PopModelMatrix ()
+	cam_IgnoreZ (false)
+	-- GCAD.Profiler:End ()
+	
+	-- OBB
+	
 	-- obb = GCAD.OBB3d.FromEntity (entity, obb)
 	-- 
 	-- for v1, v2 in obb:GetEdgeEnumerator (v1, v2) do
 	-- 	render.DrawLine (v1, v2, GLib.Colors.White, true)
 	-- end
 	
-	-- Local coordinate axes
-	local renderType = 0 -- Best rendering times for large numbers of objects
-	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Draw axes")
-	if renderType == 0 then
-		cam_IgnoreZ (true)
-		mesh_Begin (MATERIAL_LINES, 3)
-			mesh_Position (pos)                                                         mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-			mesh_Position (Vector___add (pos, Vector___mul (Angle_Forward (angle), 8))) mesh_Color (255,   0,   0, 255) mesh_AdvanceVertex ()
-			mesh_Position (pos)                                                         mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-			mesh_Position (Vector___sub (pos, Vector___mul (Angle_Right   (angle), 8))) mesh_Color (  0, 255,   0, 255) mesh_AdvanceVertex ()
-			mesh_Position (pos)                                                         mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-			mesh_Position (Vector___add (pos, Vector___mul (Angle_Up      (angle), 8))) mesh_Color (  0,   0, 255, 255) mesh_AdvanceVertex ()
-		mesh_End ()
-		cam_IgnoreZ (false)
-	elseif renderType == 1 then
-		render_DrawLine (pos, Vector___add (pos, Vector___mul (Angle_Forward (angle), 8)), GLib.Colors.Red  )
-		render_DrawLine (pos, Vector___sub (pos, Vector___mul (Angle_Right   (angle), 8)), GLib.Colors.Green)
-		render_DrawLine (pos, Vector___add (pos, Vector___mul (Angle_Up      (angle), 8)), GLib.Colors.Blue )
-	elseif renderType == 2 then
-		-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Compute matrix")
-		VMatrix_Identity (matrix)
-		VMatrix_Translate (matrix, pos)
-		VMatrix_Rotate (matrix, angle)
-		-- GCAD.Profiler:End ()
-		cam_IgnoreZ (true)
-		cam_PushModelMatrix (matrix)
-		IMesh_Draw (self.AxesMesh)
-		cam_PopModelMatrix ()
-		cam_IgnoreZ (false)
-	end
-	-- GCAD.Profiler:End ()
-	
-	-- OBB
 	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Draw OBB")
 	render.DrawWireframeBox (pos, angle, obbMins, obbMaxs, selectionOutlineColor, true)
 	render.DrawBox          (pos, angle, obbMins, obbMaxs, selectionColor,        true)

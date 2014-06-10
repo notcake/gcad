@@ -15,6 +15,7 @@ function self:ctor ()
 	self.AABB           = GCAD.AABB3d ()
 	self.BoundingSphere = GCAD.Sphere3d ()
 	self.OBB            = GCAD.OBB3d ()
+	self.NativeOBB      = GCAD.NativeOBB3d ()
 	
 	-- PACPartReference
 	self.Part = nil
@@ -75,6 +76,11 @@ end
 function self:GetOBB (out)
 	out = out or self.OBB
 	return GCAD.OBB3d.FromPACPart (self.Part, out)
+end
+
+function self:GetNativeOBB (out)
+	out = out or self.NativeOBB
+	return GCAD.NativeOBB3d.FromPACPart (self.Part, out)
 end
 
 -- PACPartReference

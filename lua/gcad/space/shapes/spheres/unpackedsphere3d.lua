@@ -2,8 +2,8 @@ GCAD.UnpackedSphere3d = {}
 
 local Entity_BoundingRadius                  = debug.getregistry ().Entity.BoundingRadius
 local Entity_GetPos                          = debug.getregistry ().Entity.GetPos
+local Entity_LocalToWorld                    = debug.getregistry ().Entity.LocalToWorld
 local Entity_OBBCenter                       = debug.getregistry ().Entity.OBBCenter
-local Vector___add                           = debug.getregistry ().Vector.__add
 local Vector___index                         = debug.getregistry ().Vector.__index
 
 local GCAD_Vector3d_DistanceTo               = GCAD.Vector3d.DistanceTo
@@ -12,7 +12,7 @@ local GCAD_UnpackedVector3d_FromNativeVector = GCAD.UnpackedVector3d.FromNativeV
 local GCAD_UnpackedVector3d_ToNativeVector   = GCAD.UnpackedVector3d.ToNativeVector
 
 function GCAD.UnpackedSphere3d.FromEntityBoundingSphere (ent)
-	local pos = Vector___add (Entity_GetPos (ent), Entity_OBBCenter (ent))
+	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
 	return Vector___index (pos, "x"), Vector___index (pos, "y"), Vector___index (pos, "z"), Entity_BoundingRadius (ent)
 end
 GCAD.UnpackedSphere3d.FromEntityBoundingSphere = GCAD.Profiler:Wrap (GCAD.UnpackedSphere3d.FromEntityBoundingSphere, "UnpackedSphere3d.FromEntityBoundingSphere")

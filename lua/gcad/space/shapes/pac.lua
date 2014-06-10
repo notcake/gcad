@@ -89,8 +89,8 @@ function GCAD.NativeOBB3d.FromPACPart (part, out)
 	Vector_Set (out.Position, Entity_GetPos    (ent))
 	Angle_Set  (out.Angle,    Entity_GetAngles (ent))
 	
-	local x1, y1, z1 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMins)
-	local x2, y2, z2 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMaxs)
+	local x1, y1, z1 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMins (ent))
+	local x2, y2, z2 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMaxs (ent))
 	
 	local kx, ky, kz = GCAD_UnpackedVector3d_FromNativeVector (part:GetScale ())
 	kx, ky, kz = GCAD_UnpackedVector3d_VectorScalarMultiply (kx, ky, kz, part:GetSize ())
@@ -111,4 +111,4 @@ function GCAD.NativeOBB3d.FromPACPart (part, out)
 	
 	return out
 end
-GCAD.NativeOBB3d.FromPACPart = GCAD.Profiler:Wrap (GCAD.NativeOBB3d.FromPACPart, "NativeOBB3d.FromPACPart")
+-- GCAD.NativeOBB3d.FromPACPart = GCAD.Profiler:Wrap (GCAD.NativeOBB3d.FromPACPart, "NativeOBB3d.FromPACPart")

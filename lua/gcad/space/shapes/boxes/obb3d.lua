@@ -40,7 +40,7 @@ function GCAD.OBB3d.FromEntity (ent, out)
 	
 	return out
 end
-GCAD.OBB3d.FromEntity = GCAD.Profiler:Wrap (GCAD.OBB3d.FromEntity, "OBB3d.FromEntity")
+-- GCAD.OBB3d.FromEntity = GCAD.Profiler:Wrap (GCAD.OBB3d.FromEntity, "OBB3d.FromEntity")
 
 -- Copying
 function GCAD.OBB3d.Clone (self, out)
