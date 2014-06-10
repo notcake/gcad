@@ -4,6 +4,7 @@ GCAD.Sphere3d = GCAD.MakeConstructor (self)
 local math_sqrt                           = math.sqrt
 
 local Entity_BoundingRadius               = debug.getregistry ().Entity.BoundingRadius
+local Entity_IsValid                      = debug.getregistry ().Entity.IsValid
 local Entity_LocalToWorld                 = debug.getregistry ().Entity.LocalToWorld
 local Entity_OBBCenter                    = debug.getregistry ().Entity.OBBCenter
 local Vector___index                      = debug.getregistry ().Vector.__index
@@ -18,6 +19,8 @@ local GCAD_UnpackedVector3d_Subtract      = GCAD.UnpackedVector3d.Subtract
 
 function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
 	out = out or GCAD.Sphere3d ()
+	
+	if not Entity_IsValid (ent) then return out end
 	
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
 	out [1] = Vector___index (pos, "x")

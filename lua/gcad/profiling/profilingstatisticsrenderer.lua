@@ -29,6 +29,17 @@ function self:ctor ()
 			self:SetEnabled (LocalPlayer ():SteamID () == "STEAM_0:1:19269760")
 		end
 	)
+	
+	concommand.Add ("gcad_profiling_display_enable",
+		function ()
+			self:SetEnabled (true)
+		end
+	)
+	concommand.Add ("gcad_profiling_display_disable",
+		function ()
+			self:SetEnabled (false)
+		end
+	)
 end
 
 function self:dtor ()
@@ -45,7 +56,10 @@ function self:SetEnabled (enabled)
 		hook.Add ("HUDPaint", "GCAD.ProfilingStatisticsRenderer",
 			function ()
 				if GCAD.Profiler:GetSectionCount () == 0 then return end
-				if GCAD.Profiler:GetSectionCount () == 1 and GCAD.Profiler:GetSectionName (1) == "ProfilingStatisticsRenderer:Render" then return end
+				if GCAD.Profiler:GetSectionCount () == 1 and
+				   GCAD.Profiler:GetSectionName (1) == "ProfilingStatisticsRenderer:Render" then
+					return
+				end
 				
 				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render")
 				
@@ -56,7 +70,7 @@ function self:SetEnabled (enabled)
 				lineHeight = lineHeight + 6
 				
 				local x = ScrW () / 2
-				local y = ScrH () * 0.15
+				local y = ScrH () * 0.10
 				
 				local x0 = x - 320
 				local x1 = x + 64

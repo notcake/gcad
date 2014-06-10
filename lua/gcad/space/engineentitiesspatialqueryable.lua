@@ -3,13 +3,16 @@ GCAD.EngineEntitiesSpatialQueryable = GCAD.MakeConstructor (self, GCAD.ISpatialQ
 
 local Entity_GetOwner       = debug.getregistry ().Entity.GetOwner
 local Entity_IsEffectActive = debug.getregistry ().Entity.IsEffectActive
-local EF_NODRAW = EF_NODRAW
 
-local sphere3d        = GCAD.Sphere3d ()
-local obb             = GCAD.OBB3d ()
+local EF_NODRAW             = EF_NODRAW
 
 function self:ctor ()
+	self.EntityReferenceCache = GCAD.MapCache (GCAD.Components.EntityReference.FromEntity)
 end
+
+-- ISpatialQueryable3d
+local sphere3d = GCAD.Sphere3d ()
+local obb3d    = GCAD.OBB3d ()
 
 function self:FindInFrustum (frustum3d, spatialQueryResult)
 	spatialQueryResult = spatialQueryResult or GCAD.SpatialQueryResult ()
@@ -26,20 +29,21 @@ function self:FindInFrustum (frustum3d, spatialQueryResult)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			-- Sphere culling
-			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum : Sphere cull")
+			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindInFrustum : Sphere cull")
 			sphere3d = GCAD.Sphere3d.FromEntityBoundingSphere (v, sphere3d)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsSphere (sphere3d)
 			GCAD.Profiler:End ()
 			
+			-- OBB containment
 			if intersectsSphere then
 				local contained = containsSphere
 				if not contained then
-					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:ContainsOBB (obb)
+					obb3d = GCAD.OBB3d.FromEntity (v, obb3d)
+					contained = frustum3d:ContainsOBB (obb3d)
 				end
 				
 				if contained then
-					spatialQueryResult:Add (v)
+					spatialQueryResult:Add (self.EntityReferenceCache:Get (v), true)
 				end
 			end
 		end
@@ -69,15 +73,15 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResult)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsSphere (sphere3d)
 			GCAD.Profiler:End ()
 			
+			-- OBB intersection
 			if intersectsSphere then
-				local contained = containsSphere
-				if not contained then
-					obb = GCAD.OBB3d.FromEntity (v, obb)
-					contained = frustum3d:IntersectsOBB (obb)
-				end
-				
-				if contained then
-					spatialQueryResult:Add (v)
+				if containsSphere then
+					spatialQueryResult:Add (self.EntityReferenceCache:Get (v), true)
+				else
+					obb3d = GCAD.OBB3d.FromEntity (v, obb3d)
+					if frustum3d:IntersectsOBB (obb3d) then
+						spatialQueryResult:Add (self.EntityReferenceCache:Get (v))
+					end
 				end
 			end
 		end
@@ -94,7 +98,6 @@ traceData.mask   = CONTENTS_SOLID
 
 function self:TraceLine (line3d, lineTraceResult)
 	lineTraceResult = lineTraceResult or GCAD.LineTraceResult ()
-	
 	lineTraceResult:SetLine (line3d)
 	
 	-- Calculate the first world intersection
@@ -105,7 +108,7 @@ function self:TraceLine (line3d, lineTraceResult)
 	traceData.endpos = GCAD.UnpackedVector3d.ToNativeVector (x, y, z, traceData.endpos)
 	
 	local traceResult = util.TraceLine (traceData)
-	lineTraceResult:AddEntryIntersection (SERVER and game.GetWorld () or Entity (0), traceResult.Fraction * math.sqrt (3 * 32768 * 32768) / line3d:GetDirectionLength ())
+	lineTraceResult:AddEntryIntersection (self.EntityReferenceCache:Get (SERVER and game.GetWorld () or Entity (0)), traceResult.Fraction * math.sqrt (3 * 32768 * 32768) / line3d:GetDirectionLength ())
 	GCAD.Profiler:End ()
 	
 	-- Get all entities
@@ -130,7 +133,7 @@ function self:TraceLine (line3d, lineTraceResult)
 				local tStart, tEnd = obb:IntersectLine (line3d)
 				
 				if tStart then
-					lineTraceResult:AddIntersectionSpan (v, tStart, tEnd)
+					lineTraceResult:AddIntersectionSpan (self.EntityReferenceCache:Get (v), tStart, tEnd)
 				end
 			end
 		end
@@ -140,4 +143,9 @@ function self:TraceLine (line3d, lineTraceResult)
 end
 self.TraceLine = GCAD.Profiler:Wrap (self.TraceLine, "EngineEntitiesSpatialQueryable:TraceLine")
 
-GCAD.EngineEntitiesSpatialQueryable = GCAD.EngineEntitiesSpatialQueryable ()
+-- EngineEntitiesSpatialQueryable
+function self:GetEntityReference (ent)
+	if not self.EntityReferenceCache:Contains (ent) then return nil end
+	
+	return self.EntityReferenceCache:Get (ent)
+end

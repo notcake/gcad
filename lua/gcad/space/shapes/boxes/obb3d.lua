@@ -3,6 +3,7 @@ GCAD.OBB3d = GCAD.MakeConstructor (self)
 
 local Entity_GetAngles                            = debug.getregistry ().Entity.GetAngles
 local Entity_GetPos                               = debug.getregistry ().Entity.GetPos
+local Entity_IsValid                              = debug.getregistry ().Entity.IsValid
 local Entity_OBBMaxs                              = debug.getregistry ().Entity.OBBMaxs
 local Entity_OBBMins                              = debug.getregistry ().Entity.OBBMins
 
@@ -13,7 +14,6 @@ local GCAD_EulerAngle_FromNativeAngle             = GCAD.EulerAngle.FromNativeAn
 local GCAD_EulerAngle_ToNativeAngle               = GCAD.EulerAngle.ToNativeAngle
 local GCAD_EulerAngle_Unpack                      = GCAD.EulerAngle.Unpack
 local GCAD_Matrix3x3_UnpackedVectorMatrixMultiply = GCAD.Matrix3x3.UnpackedVectorMatrixMultiply
-local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
 local GCAD_Vector3d_Add                           = GCAD.Vector3d.Add
 local GCAD_Vector3d_Clone                         = GCAD.Vector3d.Clone
 local GCAD_Vector3d_Copy                          = GCAD.Vector3d.Copy
@@ -22,12 +22,13 @@ local GCAD_Vector3d_ToNativeVector                = GCAD.Vector3d.ToNativeVector
 local GCAD_Vector3d_Unpack                        = GCAD.Vector3d.Unpack
 local GCAD_UnpackedRange1d_IntersectTriple        = GCAD.UnpackedRange1d.IntersectTriple
 local GCAD_UnpackedRange1d_IsEmpty                = GCAD.UnpackedRange1d.IsEmpty
+local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
 local GCAD_UnpackedVector3d_Subtract              = GCAD.UnpackedVector3d.Subtract
 
 function GCAD.OBB3d.FromEntity (ent, out)
-	GCAD.Profiler:Begin ("OBB3d.FromEntity")
-	
 	out = out or GCAD.OBB3d ()
+	
+	if not Entity_IsValid (ent) then return out end
 	
 	out.Position = GCAD_Vector3d_FromNativeVector  (Entity_GetPos    (ent), out.Position)
 	out.Min      = GCAD_Vector3d_FromNativeVector  (Entity_OBBMins   (ent), out.Min     )
@@ -37,9 +38,9 @@ function GCAD.OBB3d.FromEntity (ent, out)
 	out.CornersValid        = false
 	out.RotationMatrixValid = false
 	
-	GCAD.Profiler:End ()
 	return out
 end
+GCAD.OBB3d.FromEntity = GCAD.Profiler:Wrap (GCAD.OBB3d.FromEntity, "OBB3d.FromEntity")
 
 -- Copying
 function GCAD.OBB3d.Clone (self, out)

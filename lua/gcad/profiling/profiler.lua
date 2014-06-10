@@ -1,6 +1,8 @@
 local self = {}
 GCAD.Profiler = GCAD.MakeConstructor (self)
 
+local FrameNumber = FrameNumber or CurTime
+
 function self:ctor ()
 	self.ActiveSections = {}
 	
@@ -48,7 +50,7 @@ function self:Begin (sectionName)
 	self.SectionStack [#self.SectionStack + 1] = sectionName
 end
 
-function self:End (sectionName)
+function self:End (sectionName, ...)
 	sectionName = sectionName or self.SectionStack [#self.SectionStack]
 	self.SectionStack [#self.SectionStack] = nil
 	
@@ -63,6 +65,8 @@ function self:End (sectionName)
 		self:CreditSection (sectionName, SysTime () - self.SectionStartTimes [sectionName])
 		self.SectionStartTimes [sectionName] = nil
 	end
+	
+	return ...
 end
 
 function self:GetEnumerator ()
@@ -98,6 +102,24 @@ end
 
 function self:GetSectionStackLevel (sectionName)
 	return self.SectionStackLevels [sectionName] or 0
+end
+
+function self:Profile (f, ...)
+	local t0 = SysTime ()
+	local callCount = 0
+	while SysTime () - t0 < 0.005 do
+		callCount = callCount + 1
+		f (...)
+	end
+	
+	return (SysTime () - t0) / callCount
+end
+
+function self:ProfileOnce (f, ...)
+	local t0 = SysTime ()
+	f (...)
+	
+	return SysTime () - t0
 end
 
 function self:Wrap (f, sectionName)
@@ -147,3 +169,4 @@ function self:CreditSection (sectionName, duration)
 end
 
 GCAD.Profiler = GCAD.Profiler ()
+Profiler = GCAD.Profiler

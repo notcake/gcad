@@ -15,6 +15,15 @@ GLib.AddCSLuaPackFolderRecursive ("gcad")
 include ("profiling/profiler.lua")
 include ("profiling/profilingstatisticsrenderer.lua")
 
+-- Utility
+include ("util/mapcache.lua")
+include ("util/pool.lua")
+
+GCAD.Pools = GCAD.MapCache (GCAD.Pool) -- Booyah
+GCAD.Pools.Deallocate = function (self, item)
+	self:Get (item:__GetStaticTable ()):Deallocate (item)
+end
+
 -- Linear algebra
 include ("linearalgebra/unpackedvector2d.lua")
 include ("linearalgebra/unpackedvector3d.lua")
@@ -41,6 +50,9 @@ include ("space/queries/spatialqueryresult.lua")
 include ("space/queries/ispatialqueryable2d.lua")
 include ("space/queries/ispatialqueryable3d.lua")
 
+include ("space/queries/aggregatespatialqueryable2d.lua")
+include ("space/queries/aggregatespatialqueryable3d.lua")
+
 -- Solids
 -- Planes
 include ("space/shapes/planes/plane2d.lua")
@@ -66,6 +78,7 @@ include ("space/shapes/spheres/nativesphere3d.lua")
 include ("space/shapes/boxes/aabb3d.lua")
 -- include ("space/shapes/boxes/obb2d.lua")
 include ("space/shapes/boxes/obb3d.lua")
+include ("space/shapes/boxes/nativeobb3d.lua")
 
 include ("space/shapes/boxes/legacyaabb3d.lua")
 
@@ -86,8 +99,43 @@ include ("space/shapes/lines/line3d.lua")
 include ("space/shapes/frustums/frustum3d.lua")
 include ("space/shapes/frustums/nativefrustum3d.lua")
 
+-- Interop
+include ("space/shapes/pac.lua")
+
 -- Spatial queryables
 include ("space/engineentitiesspatialqueryable.lua")
+include ("space/pacpartsspatialqueryable.lua")
+
+-- Spatial nodes
+include ("space/ispatialnode2dhost.lua")
+include ("space/ispatialnode2d.lua")
+
+include ("space/ispatialnode3dhost.lua")
+include ("space/ispatialnode3d.lua")
+
+-- Space
+include ("space/space3d.lua")
+
+-- Rendering
+include ("irendernode.lua")
+include ("irendernodehost.lua")
+
+-- Models
+-- include ("models/model.lua")
+-- include ("models/modelcache.lua")
+-- include ("models/modelinstance.lua")
+-- include ("models/modelinstancecache.lua")
+
+-- Components
+GCAD.Components = {}
+include ("components/icomponent.lua")
+include ("components/point3dcomponent.lua")
+include ("components/model.lua")
+include ("components/pathfindingnode.lua")
+
+-- Component Interop
+include ("components/entityreference.lua")
+include ("components/pacpartreference.lua")
 
 -- Signal Processing
 include ("signalprocessing/digitalfilters/realfirfilter.lua")
@@ -96,6 +144,16 @@ include ("signalprocessing/digitalfilters/realiirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
+
+-- Fun starts here
+GCAD.EngineEntitiesSpatialQueryable = GCAD.EngineEntitiesSpatialQueryable ()
+GCAD.PACPartsSpatialQueryable       = GCAD.PACPartsSpatialQueryable ()
+GCAD.VSpace3d                       = GCAD.Space3d ()
+
+GCAD.AggregateSpatialQueryable      = GCAD.AggregateSpatialQueryable3d ()
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.EngineEntitiesSpatialQueryable)
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartsSpatialQueryable      )
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
 
 if CLIENT then
 	GCAD.UI = {}

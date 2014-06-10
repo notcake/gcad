@@ -30,6 +30,18 @@ function self:SetLine (line)
 end
 
 -- Parameter range
+function self:GetMinimumParameter ()
+	return self.MinimumParameter
+end
+
+function self:GetMaximumParameter ()
+	return self.MaximumParameter
+end
+
+function self:GetParameterRange ()
+	return self.MinimumParameter, self.MaximumParameter
+end
+
 function self:SetMinimumParameter (tMin)
 	self.MinimumParameter = tMin
 	

@@ -2,6 +2,7 @@ local self = {}
 GCAD.NativeSphere3d = GCAD.MakeConstructor (self)
 
 local Entity_BoundingRadius                  = debug.getregistry ().Entity.BoundingRadius
+local Entity_IsValid                         = debug.getregistry ().Entity.IsValid
 local Entity_LocalToWorld                    = debug.getregistry ().Entity.LocalToWorld
 local Entity_OBBCenter                       = debug.getregistry ().Entity.OBBCenter
 local Vector_Distance                        = debug.getregistry ().Vector.Distance
@@ -16,6 +17,8 @@ local GCAD_UnpackedVector3d_ToNativeVector   = GCAD.UnpackedVector3d.ToNativeVec
 
 function GCAD.NativeSphere3d.FromEntityBoundingSphere (ent, out)
 	out = out or GCAD.NativeSphere3d ()
+	
+	if not Entity_IsValid (ent) then return out end
 	
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
 	Vector_Set (out.Position, pos)
