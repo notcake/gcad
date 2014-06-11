@@ -396,21 +396,16 @@ function self:DrawComponentSelections (viewRenderInfo, componentEnumerable, sele
 end
 
 function self:DrawComponentSelection (viewRenderInfo, component, selectionOutlineColor, selectionColor)
-	if not component then return end
-	if not component:IsValid () then return end
+	if not component                     then return end
+	if not component:IsValid ()          then return end
 	if not component:GetSpatialNode3d () then return end
 	
 	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Compute OBB")
-	if component:Is (GCAD.Components.EntityReference) then
-		nativeOBB3d = GCAD.NativeOBB3d.FromEntity (component:GetEntity (), nativeOBB3d)
-	else
-		local obb3d = component:GetSpatialNode3d ():GetOBB ()
-		nativeOBB3d = obb3d:ToNativeOBB3d (nativeOBB3d)
-	end
-	local pos     = nativeOBB3d.Position
-	local obbMins = nativeOBB3d.Min
-	local obbMaxs = nativeOBB3d.Max
-	local angle   = nativeOBB3d.Angle
+	local nativeOBB3d = component:GetSpatialNode3d ():GetNativeOBB ()
+	local pos         = nativeOBB3d.Position
+	local obbMins     = nativeOBB3d.Min
+	local obbMaxs     = nativeOBB3d.Max
+	local angle       = nativeOBB3d.Angle
 	-- GCAD.Profiler:End ()
 	
 	-- Local coordinate axes
@@ -428,13 +423,6 @@ function self:DrawComponentSelection (viewRenderInfo, component, selectionOutlin
 	-- GCAD.Profiler:End ()
 	
 	-- OBB
-	
-	-- obb = GCAD.OBB3d.FromEntity (entity, obb)
-	-- 
-	-- for v1, v2 in obb:GetEdgeEnumerator (v1, v2) do
-	-- 	render.DrawLine (v1, v2, GLib.Colors.White, true)
-	-- end
-	
 	-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelection : Draw OBB")
 	render.DrawWireframeBox (pos, angle, obbMins, obbMaxs, selectionOutlineColor, true)
 	render.DrawBox          (pos, angle, obbMins, obbMaxs, selectionColor,        true)
