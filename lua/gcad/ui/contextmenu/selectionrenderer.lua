@@ -36,7 +36,7 @@ local GLib_Color_ToVector     = GLib.Color.ToVector
 -- cam_PushModelMatrix = GCAD.Profiler:Wrap (cam_PushModelMatrix, "cam.PushModelMatrix")
 -- cam_PopModelMatrix  = GCAD.Profiler:Wrap (cam_PopModelMatrix,  "cam.PopModelMatrix" )
 -- IMesh_Draw          = GCAD.Profiler:Wrap (IMesh_Draw,          "IMesh:Draw"         )
--- render_SetMaterial  = GCAD.Profiler:Wrap (render_SetMaterial, "render.SetMaterial"  )
+-- render_SetMaterial  = GCAD.Profiler:Wrap (render_SetMaterial,  "render.SetMaterial" )
 
 function self:ctor (selection)
 	self.Selection = selection
@@ -223,7 +223,6 @@ function self:SetSelectionPreview (selectionPreview)
 	return self
 end
 
-local matrix = Matrix ()
 function self:Render (viewRenderInfo)
 	self:DrawComponentSelections (viewRenderInfo, self.Selection, self.SelectionOutlineColor, self.SelectionColor)
 	
@@ -346,7 +345,7 @@ function self:DrawComponentSelections (viewRenderInfo, componentEnumerable, sele
 			
 			Vector_Set (v, nativeOBB3d.Max)
 			Vector_Sub (v, nativeOBB3d.Min)
-			VMatrix_Scale     (matrix, v)
+			VMatrix_Scale (matrix, v)
 		end
 		
 		renderCache.ComponentOBBMatricesFrameId = currentFrameId
