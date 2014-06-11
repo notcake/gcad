@@ -14,7 +14,7 @@ end
 
 function self:Begin (sectionName)
 	local section
-	if #self.SectionStack > 5 and self.SectionStackSet [sectionName] then
+	if self.SectionStackSet [sectionName] then
 		section = self.SectionStackSet [sectionName]
 	else
 		local parentSection = self.SectionStack [#self.SectionStack] or self.RootSection
