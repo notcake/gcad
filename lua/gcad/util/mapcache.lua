@@ -14,6 +14,10 @@ function self:Contains (k)
 	return self.Cache [k] ~= nil
 end
 
+function self:Flush (k)
+	self:Invalidate (k)
+end
+
 function self:Get (k)
 	if not self.Cache [k] then
 		self.Cache [k] = self.MapFunction (k)
@@ -26,8 +30,12 @@ function self:GetMapFunction ()
 	return self.MapFunction
 end
 
-function self:Invalidate ()
-	self.Cache = GCAD.WeakKeyTable ()
+function self:Invalidate (k)
+	if k then
+		self.Cache [k] = nil
+	else
+		self.Cache = GCAD.WeakKeyTable ()
+	end
 end
 
 function self:IsEmpty ()
