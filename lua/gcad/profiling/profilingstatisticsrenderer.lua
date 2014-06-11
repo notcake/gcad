@@ -30,16 +30,10 @@ function self:ctor ()
 		end
 	)
 	
-	concommand.Add ("gcad_profiling_display_enable",
-		function ()
-			self:SetEnabled (true)
-		end
-	)
-	concommand.Add ("gcad_profiling_display_disable",
-		function ()
-			self:SetEnabled (false)
-		end
-	)
+	concommand.Add ("gcad_profiling_display_enable",  function () self:SetEnabled (true ) end)
+	concommand.Add ("gcad_profiling_display_disable", function () self:SetEnabled (false) end)
+	concommand.Add ("+gcad_profiling_display",        function () self:SetEnabled (true ) end)
+	concommand.Add ("-gcad_profiling_display",        function () self:SetEnabled (false) end)
 end
 
 function self:dtor ()
@@ -55,12 +49,6 @@ function self:SetEnabled (enabled)
 	if self.Enabled then
 		hook.Add ("HUDPaint", "GCAD.ProfilingStatisticsRenderer",
 			function ()
-				if GCAD.Profiler:GetSectionCount () == 0 then return end
-				if GCAD.Profiler:GetSectionCount () == 1 and
-				   GCAD.Profiler:GetSectionName (1) == "ProfilingStatisticsRenderer:Render" then
-					return
-				end
-				
 				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render")
 				
 				surface_SetFont ("DermaDefault")
@@ -79,13 +67,13 @@ function self:SetEnabled (enabled)
 				
 				local maximumSectionStackLevel = 0
 				local stackLevelIndent = 16
-				for sectionName in GCAD.Profiler:GetEnumerator () do
-					maximumSectionStackLevel = math.max (maximumSectionStackLevel, GCAD.Profiler:GetSectionStackLevel (sectionName))
+				for sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount in GCAD.Profiler:GetEnumerator () do
+					maximumSectionStackLevel = math.max (maximumSectionStackLevel, depth)
 				end
 				
 				local lineCount = 0
-				for sectionName, duration, frameDuration, frameCount in GCAD.Profiler:GetEnumerator () do
-					local indent = stackLevelIndent * GCAD.Profiler:GetSectionStackLevel (sectionName)
+				for sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount in GCAD.Profiler:GetEnumerator () do
+					local indent = stackLevelIndent * depth
 					
 					surface_SetDrawColor (lineCount % 2 == 0 and self.BackgroundColor1 or self.BackgroundColor2)
 					surface_DrawRect (x0 - 8, y - 2, x3 - x0 + 16 + stackLevelIndent * maximumSectionStackLevel, lineHeight)
@@ -99,7 +87,7 @@ function self:SetEnabled (enabled)
 					surface_SetTextPos (x1 + indent - surface_GetTextSize (text), y)
 					surface_DrawText (text)
 					
-					text = frameCount .. "x / frame"
+					text = frameEntryCount .. "x / frame"
 					surface_SetTextPos (x2 + indent - surface_GetTextSize (text), y)
 					surface_DrawText (text)
 					
