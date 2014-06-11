@@ -143,6 +143,9 @@ include ("signalprocessing/digitalfilters/realiirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexfirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
+-- View
+include ("view/viewrenderinfo.lua")
+
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 
 -- Fun starts here

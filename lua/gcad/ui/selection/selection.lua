@@ -32,6 +32,10 @@ function self:Contains (item)
 	return self.SelectionSet:Contains (item)
 end
 
+function self:GetCount ()
+	return self.SelectionSet:GetCount ()
+end
+
 function self:GetEnumerator ()
 	return self.SelectionSet:GetEnumerator ()
 end

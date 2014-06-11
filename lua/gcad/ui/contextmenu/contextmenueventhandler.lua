@@ -8,7 +8,7 @@ function self:ctor ()
 	self.SelectionTemporary = false
 	
 	self.TemporarySelectionSet = GLib.Containers.EventedSet ()
-	self.SelectionPreviewSet = GCAD.Containers.EventedSet ()
+	self.SelectionPreviewSet   = GLib.Containers.EventedSet ()
 	
 	self.SelectionRenderer = GCAD.UI.SelectionRenderer (self.Selection)
 	self.SelectionRenderer:SetSelectionPreview (self.SelectionPreviewSet)
@@ -42,18 +42,20 @@ function self:ctor ()
 	local v1 = Vector ()
 	local v2 = Vector ()
 	
-	local lastQueryFrame = nil
-	
+	local lastQueryFrameId = nil
+	local viewRenderInfo = GCAD.ViewRenderInfo ()
 	hook.Add ("PostDrawTranslucentRenderables", "GCAD.ContextMenu",
-		function ()
+		function (isDepthRender, isSkyboxRender)
+			viewRenderInfo = GCAD.ViewRenderInfo.FromDrawRenderablesHook (isDepthRender, isSkyboxRender, viewRenderInfo)
+			
 			if self.MouseDown then
 				local x1 = math.min (self.MouseDownX, self.MouseMoveX)
 				local x2 = math.max (self.MouseDownX, self.MouseMoveX)
 				local y1 = math.min (self.MouseDownY, self.MouseMoveY)
 				local y2 = math.max (self.MouseDownY, self.MouseMoveY)
 				
-				if FrameNumber () ~= lastQueryFrame then
-					lastQueryFrame = FrameNumber ()
+				if viewRenderInfo:GetFrameId () ~= lastQueryFrameId then
+					lastQueryFrameId = viewRenderInfo:GetFrameId ()
 					
 					self.TemporarySelectionSet:Clear ()
 					
@@ -97,7 +99,7 @@ function self:ctor ()
 				return
 			end
 			
-			self.SelectionRenderer:Render ()
+			self.SelectionRenderer:Render (viewRenderInfo)
 		end
 	)
 	

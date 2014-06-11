@@ -202,99 +202,142 @@ function self:SetSelectionPreview (selectionPreview)
 end
 
 local matrix = Matrix ()
-function self:Render ()
-	self:DrawComponentSelections (self.Selection, self.SelectionOutlineColor, self.SelectionColor)
+function self:Render (viewRenderInfo)
+	self:DrawComponentSelections (viewRenderInfo, self.Selection, self.SelectionOutlineColor, self.SelectionColor)
 	
 	if self.SelectionPreview and
 	   not self.SelectionPreview:IsEmpty () then
-		self:DrawComponentSelections (self.SelectionPreview, self.SelectionPreviewOutlineColor, self.SelectionPreviewColor)
+		self:DrawComponentSelections (viewRenderInfo, self.SelectionPreview, self.SelectionPreviewOutlineColor, self.SelectionPreviewColor)
 	end
 end
 self.Render = GCAD.Profiler:Wrap (self.Render, "SelectionRenderer:Render")
 
 -- Internal, do not call
 local angle_zero = Angle (0, 0, 0)
-local v  = Vector ()
+local v = Vector ()
 
+local componentCount = 0
 local components              = GLib.WeakValueTable ()
 local componentSpatialNode3ds = GLib.WeakValueTable ()
 local componentNativeOBB3ds   = {} -- Should not be garbage collected
+local componentAxesMatrices   = {} -- Should not be garbage collected
 local componentOBBMatrices    = {} -- Should not be garbage collected
-local componentCount = 0
+local componentsFrameId              = nil
+local componentSpatialNode3dsFrameId = nil
+local componentNativeOBB3dsFrameId   = nil
+local componentAxesMatricesFrameId   = nil
+local componentOBBMatricesFrameId    = nil
 
-function self:DrawComponentSelections (componentEnumerable, selectionOutlineColor, selectionColor)
+function self:DrawComponentSelections (viewRenderInfo, componentEnumerable, selectionOutlineColor, selectionColor)
+	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections [" .. componentEnumerable:GetCount () .. "]")
+	
+	local currentFrameId = viewRenderInfo:GetFrameId ()
+	
 	-- Filter down to ISpatialNode3d components.
-	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Filter to ISpatialNode3ds")
-	componentCount = 0
-	for component in componentEnumerable:GetEnumerator () do
-		if component and
-		   component:IsValid () then
-			local spatialNode3d = component:GetSpatialNode3d ()
-			if spatialNode3d then
-				componentCount = componentCount + 1
-				components              [componentCount] = component
-				componentSpatialNode3ds [componentCount] = spatialNode3d
+	if componentsFrameId ~= currentFrameId or
+	   componentSpatialNode3dsFrameId ~= currentFrameId then
+		GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Filter to ISpatialNode3ds")
+		componentCount = 0
+		for component in componentEnumerable:GetEnumerator () do
+			if component and
+			   component:IsValid () then
+				local spatialNode3d = component:GetSpatialNode3d ()
+				if spatialNode3d then
+					componentCount = componentCount + 1
+					components              [componentCount] = component
+					componentSpatialNode3ds [componentCount] = spatialNode3d
+				end
 			end
 		end
+		componentsFrameId              = currentFrameId
+		componentSpatialNode3dsFrameId = currentFrameId
+		GCAD.Profiler:End ()
 	end
-	GCAD.Profiler:End ()
 	
 	-- Compute OBBs
-	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBBs")
-	for i = 1, componentCount do
-		componentNativeOBB3ds [i] = componentSpatialNode3ds [i]:GetNativeOBB ()
+	if componentNativeOBB3dsFrameId ~= currentFrameId then
+		GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBBs")
+		for i = 1, componentCount do
+			componentNativeOBB3ds [i] = componentSpatialNode3ds [i]:GetNativeOBB ()
+		end
+		componentNativeOBB3dsFrameId = currentFrameId
+		GCAD.Profiler:End ()
 	end
-	GCAD.Profiler:End ()
 	
 	-- Local coordinate axes
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw axes")
-	local axesMesh         = self.AxesMesh
+	
+	-- Axes matrices
+	if componentAxesMatricesFrameId ~= currentFrameId then
+		GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute axes matrices")
+		for i = 1, componentCount do
+			local nativeOBB3d = componentNativeOBB3ds [i]
+			local matrix = componentAxesMatrices [i] or Matrix ()
+			componentAxesMatrices [i] = matrix
+			
+			VMatrix_Identity  (matrix)
+			VMatrix_Translate (matrix, nativeOBB3d.Position)
+			VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
+		end
+		componentAxesMatricesFrameId = currentFrameId
+		GCAD.Profiler:End ()
+	end
+	
+	-- Draw axes
+	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw axes for real")
+	local axesMesh = self.AxesMesh
 	render_SetMaterial (self.PerVertexColorMaterial)
 	cam_IgnoreZ (true)
 	for i = 1, componentCount do
-		local nativeOBB3d = componentNativeOBB3ds [i]
-		-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute matrix")
-		VMatrix_Identity  (matrix)
-		VMatrix_Translate (matrix, nativeOBB3d.Position)
-		VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
-		-- GCAD.Profiler:End ()
-		cam_PushModelMatrix (matrix)
+		cam_PushModelMatrix (componentAxesMatrices [i])
 		IMesh_Draw (axesMesh)
 		cam_PopModelMatrix ()
 	end
 	cam_IgnoreZ (false)
 	GCAD.Profiler:End ()
 	
+	GCAD.Profiler:End ()
+	
 	-- OBBs
 	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw OBBs")
 	
+	-- OBB matrices
+	if componentOBBMatricesFrameId ~= currentFrameId then
+		GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBB matrices")
+		for i = 1, componentCount do
+			local nativeOBB3d = componentNativeOBB3ds [i]
+			local matrix = componentOBBMatrices [i] or Matrix ()
+			componentOBBMatrices [i] = matrix
+			
+			VMatrix_Identity  (matrix)
+			VMatrix_Translate (matrix, LocalToWorld (nativeOBB3d.Min, angle_zero, nativeOBB3d.Position, nativeOBB3d.Angle))
+			VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
+			
+			Vector_Set (v, nativeOBB3d.Max)
+			Vector_Sub (v, nativeOBB3d.Min)
+			VMatrix_Scale     (matrix, v)
+		end
+		componentOBBMatricesFrameId = currentFrameId
+		GCAD.Profiler:End ()
+	end
+	
 	-- Wireframe OBBs
+	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw wireframe OBBs")
 	local wireframeBoxMesh = self.WireframeBoxMesh
 	local v, alpha = GLib_Color_ToVector (selectionOutlineColor, v)
 	IMaterial_SetVector (self.ColorMaterial, "$color", v    )
 	IMaterial_SetFloat  (self.ColorMaterial, "$alpha", alpha)
 	render_SetMaterial (self.ColorMaterial)
+	
 	for i = 1, componentCount do
-		local nativeOBB3d = componentNativeOBB3ds [i]
-		local matrix = componentOBBMatrices [i] or Matrix ()
-		componentOBBMatrices [i] = matrix
-		
-		-- GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Compute OBB matrix")
-		VMatrix_Identity  (matrix)
-		VMatrix_Translate (matrix, LocalToWorld (nativeOBB3d.Min, angle_zero, nativeOBB3d.Position, nativeOBB3d.Angle))
-		VMatrix_Rotate    (matrix, nativeOBB3d.Angle)
-		
-		Vector_Set (v, nativeOBB3d.Max)
-		Vector_Sub (v, nativeOBB3d.Min)
-		VMatrix_Scale     (matrix, v)
-		-- GCAD.Profiler:End ()
-		
-		cam_PushModelMatrix (matrix)
+		cam_PushModelMatrix (componentOBBMatrices [i])
 		IMesh_Draw (wireframeBoxMesh)
 		cam_PopModelMatrix ()
 	end
+	GCAD.Profiler:End ()
 	
 	-- Shaded OBBs
+	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections : Draw solid OBBs")
 	local boxMesh = self.BoxMesh
 	local v, alpha = GLib_Color_ToVector (selectionColor, v)
 	IMaterial_SetVector (self.ColorMaterial, "$color", v    )
@@ -306,12 +349,14 @@ function self:DrawComponentSelections (componentEnumerable, selectionOutlineColo
 		IMesh_Draw (boxMesh)
 		cam_PopModelMatrix ()
 	end
+	GCAD.Profiler:End ()
+	
+	GCAD.Profiler:End ()
 	
 	GCAD.Profiler:End ()
 end
-self.DrawComponentSelections = GCAD.Profiler:Wrap (self.DrawComponentSelections, "SelectionRenderer:DrawComponentSelections")
 
-function self:DrawComponentSelection (component, selectionOutlineColor, selectionColor)
+function self:DrawComponentSelection (viewRenderInfo, component, selectionOutlineColor, selectionColor)
 	if not component then return end
 	if not component:IsValid () then return end
 	if not component:GetSpatialNode3d () then return end

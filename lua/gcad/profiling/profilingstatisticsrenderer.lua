@@ -72,7 +72,7 @@ function self:SetEnabled (enabled)
 				local x = ScrW () / 2
 				local y = ScrH () * 0.10
 				
-				local x0 = x - 320
+				local x0 = x - 360
 				local x1 = x + 64
 				local x2 = x + 160
 				local x3 = x + 240
