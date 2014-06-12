@@ -274,7 +274,7 @@ function GCAD.Matrix4x4.MatrixUnpackedVectorMultiply (a, x, y, z, w)
 	return a [ 1] * x + a [ 2] * y + a [ 3] * z + a [ 4] * w,
 	       a [ 5] * x + a [ 6] * y + a [ 7] * z + a [ 8] * w,
 	       a [ 9] * x + a [10] * y + a [11] * z + a [12] * w,
-		   a [13] * x + a [14] * y + a [15] * z + a [16] * w
+	       a [13] * x + a [14] * y + a [15] * z + a [16] * w
 end
 
 function GCAD.Matrix4x4.VectorMatrixMultiply (a, b, out)
@@ -293,7 +293,7 @@ function GCAD.Matrix4x4.UnpackedVectorMatrixMultiply (x, y, z, w, b)
 	return x * b [1] + y * b [5] + z * b [ 9] + w * b [13],
 	       x * b [2] + y * b [6] + z * b [10] + w * b [14],
 	       x * b [3] + y * b [7] + z * b [11] + w * b [15],
-		   x * b [4] + y * b [8] + z * b [12] + w * b [16]
+	       x * b [4] + y * b [8] + z * b [12] + w * b [16]
 end
 
 function GCAD.Matrix4x4.MatrixMatrixMultiply (a, b, out)
@@ -479,9 +479,9 @@ end
 
 -- Initialization
 function self:Set (m11, m12, m13, m14,
-                    m21, m22, m23, m24,
-                    m31, m32, m33, m34,
-                    m41, m42, m43, m44)
+                   m21, m22, m23, m24,
+                   m31, m32, m33, m34,
+                   m41, m42, m43, m44)
 	
 	self [ 1], self [ 2], self [ 3], self [ 4] = m11, m12, m13, m14
 	self [ 5], self [ 6], self [ 7], self [ 8] = m21, m22, m23, m24
