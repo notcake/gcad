@@ -36,6 +36,7 @@ include ("linearalgebra/vector3d.lua")
 include ("linearalgebra/vector4d.lua")
 include ("linearalgebra/matrix2x2.lua")
 include ("linearalgebra/matrix3x3.lua")
+include ("linearalgebra/matrix4x4.lua")
 
 -- Mathematics
 include ("math/eulerangle.lua")

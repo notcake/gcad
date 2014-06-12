@@ -148,6 +148,26 @@ function GCAD.EulerAngle.ToMatrix3x3 (self, out)
 	return out
 end
 
+function GCAD.EulerAngle.ToMatrix4x4 (self, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	local p = math_rad (self [1])
+	local y = math_rad (self [2])
+	local r = math_rad (self [3])
+	local cosp, sinp = math_cos (p), math_sin (p)
+	local cosy, siny = math_cos (y), math_sin (y)
+	local cosr, sinr = math_cos (r), math_sin (r)
+	
+	out:Set (
+		cosp * cosy, sinp * sinr * cosy - cosr * siny, cosr * sinp * cosy + sinr * siny, 0,
+		cosp * siny, sinp * sinr * siny + cosr * cosy, cosr * sinp * siny - sinr * cosy, 0,
+		      -sinp,                      cosp * sinr,                      cosp * cosr, 0,
+		          0,                                0,                                0, 1
+	)
+	
+	return out
+end
+
 function GCAD.EulerAngle.FromNativeAngle (angle, out)
 	out = out or GCAD.EulerAngle ()
 	

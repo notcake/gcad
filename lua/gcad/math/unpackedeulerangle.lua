@@ -128,6 +128,26 @@ function GCAD.UnpackedEulerAngle.ToMatrix3x3 (p, y, r, out)
 	return out
 end
 
+function GCAD.UnpackedEulerAngle.ToMatrix4x4 (p, y, r, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	local p = math_rad (p)
+	local y = math_rad (y)
+	local r = math_rad (r)
+	local cosp, sinp = math_cos (p), math_sin (p)
+	local cosy, siny = math_cos (y), math_sin (y)
+	local cosr, sinr = math_cos (r), math_sin (r)
+	
+	out:Set (
+		cosp * cosy, sinp * sinr * cosy - cosr * siny, cosr * sinp * cosy + sinr * siny, 0,
+		cosp * siny, sinp * sinr * siny + cosr * cosy, cosr * sinp * siny - sinr * cosy, 0,
+		      -sinp,                      cosp * sinr,                      cosp * cosr, 0,
+		          0,                                0,                                0, 1
+	)
+	
+	return out
+end
+
 function GCAD.UnpackedEulerAngle.FromNativeAngle (angle)
 	return Angle___index (out, "p"), Angle___index (out, "y"), Angle___index (out, "r")
 end

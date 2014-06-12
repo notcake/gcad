@@ -13,29 +13,17 @@ local Vector___newindex = debug.getregistry ().Vector.__newindex
 function GCAD.Matrix3x3.Clone (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = self [1]
-	out [2] = self [2]
-	out [3] = self [3]
-	out [4] = self [4]
-	out [5] = self [5]
-	out [6] = self [6]
-	out [7] = self [7]
-	out [8] = self [8]
-	out [9] = self [9]
+	out [1], out [2], out [3] = self [1], self [2], self [3]
+	out [4], out [5], out [6] = self [4], self [5], self [6]
+	out [7], out [8], out [9] = self [7], self [8], self [9]
 	
 	return out
 end
 
 function GCAD.Matrix3x3.Copy (self, source)
-	self [1] = source [1]
-	self [2] = source [2]
-	self [3] = source [3]
-	self [4] = source [4]
-	self [5] = source [5]
-	self [6] = source [6]
-	self [7] = source [7]
-	self [8] = source [8]
-	self [9] = source [9]
+	self [1], self [2], self [3] = source [1], source [2], source [3]
+	self [4], self [5], self [6] = source [4], source [5], source [6]
+	self [7], self [8], self [9] = source [7], source [8], source [9]
 	
 	return self
 end
@@ -218,15 +206,9 @@ end
 function GCAD.Matrix3x3.Add (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1] + b [1]
-	out [2] = a [2] + b [2]
-	out [3] = a [3] + b [3]
-	out [4] = a [4] + b [4]
-	out [5] = a [5] + b [5]
-	out [6] = a [6] + b [6]
-	out [7] = a [7] + b [7]
-	out [8] = a [8] + b [8]
-	out [9] = a [9] + b [9]
+	out [1], out [2], out [3] = a [1] + b [1], a [2] + b [2], a [3] + b [3]
+	out [4], out [5], out [6] = a [4] + b [4], a [5] + b [5], a [6] + b [6]
+	out [7], out [8], out [9] = a [7] + b [7], a [8] + b [8], a [9] + b [9]
 	
 	return out
 end
@@ -234,15 +216,9 @@ end
 function GCAD.Matrix3x3.Subtract (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1] - b [1]
-	out [2] = a [2] - b [2]
-	out [3] = a [3] - b [3]
-	out [4] = a [4] - b [4]
-	out [5] = a [5] - b [5]
-	out [6] = a [6] - b [6]
-	out [7] = a [7] - b [7]
-	out [8] = a [8] - b [8]
-	out [9] = a [9] - b [9]
+	out [1], out [2], out [3] = a [1] - b [1], a [2] - b [2], a [3] - b [3]
+	out [4], out [5], out [6] = a [4] - b [4], a [5] - b [5], a [6] - b [6]
+	out [7], out [8], out [9] = a [7] - b [7], a [8] - b [8], a [9] - b [9]
 	
 	return out
 end
@@ -250,15 +226,9 @@ end
 function GCAD.Matrix3x3.MatrixScalarMultiply (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1] * b
-	out [2] = a [2] * b
-	out [3] = a [3] * b
-	out [4] = a [4] * b
-	out [5] = a [5] * b
-	out [6] = a [6] * b
-	out [7] = a [7] * b
-	out [8] = a [8] * b
-	out [9] = a [9] * b
+	out [1], out [2], out [3] = a [1] * b, a [2] * b, a [3] * b
+	out [4], out [5], out [6] = a [4] * b, a [5] * b, a [6] * b
+	out [7], out [8], out [9] = a [7] * b, a [8] * b, a [9] * b
 	
 	return out
 end
@@ -341,9 +311,9 @@ function GCAD.Matrix3x3.MatrixMatrixMultiply2 (a, b, out)
 	VMatrix_SetField (vmatrix2, 3, 1, b [7]) VMatrix_SetField (vmatrix2, 3, 2, b [8]) VMatrix_SetField (vmatrix2, 3, 3, b [9])
 	
 	local c = vmatrix1 * vmatrix2
-	out [1] = VMatrix_GetField (c, 1, 1) out [2] = VMatrix_GetField (c, 1, 2) out [3] = VMatrix_GetField (c, 1, 3)
-	out [4] = VMatrix_GetField (c, 2, 1) out [5] = VMatrix_GetField (c, 2, 2) out [6] = VMatrix_GetField (c, 2, 3)
-	out [7] = VMatrix_GetField (c, 3, 1) out [8] = VMatrix_GetField (c, 3, 2) out [9] = VMatrix_GetField (c, 3, 3)
+	out [1], out [2], out [3] = VMatrix_GetField (c, 1, 1), VMatrix_GetField (c, 1, 2), VMatrix_GetField (c, 1, 3)
+	out [4], out [5], out [6] = VMatrix_GetField (c, 2, 1), VMatrix_GetField (c, 2, 2), VMatrix_GetField (c, 2, 3)
+	out [7], out [8], out [9] = VMatrix_GetField (c, 3, 1), VMatrix_GetField (c, 3, 2), VMatrix_GetField (c, 3, 3)
 	
 	return out
 end
@@ -374,15 +344,9 @@ end
 function GCAD.Matrix3x3.ScalarDivide (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1] / b
-	out [2] = a [2] / b
-	out [3] = a [3] / b
-	out [4] = a [4] / b
-	out [5] = a [5] / b
-	out [6] = a [6] / b
-	out [7] = a [7] / b
-	out [8] = a [8] / b
-	out [9] = a [9] / b
+	out [1], out [2], out [3] = a [1] / b, a [2] / b, a [3] / b
+	out [4], out [5], out [6] = a [4] / b, a [5] / b, a [6] / b
+	out [7], out [8], out [9] = a [7] / b, a [8] / b, a [9] / b
 	
 	return out
 end
@@ -390,41 +354,33 @@ end
 function GCAD.Matrix3x3.Negate (self, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = -self [1]
-	out [2] = -self [2]
-	out [3] = -self [3]
-	out [4] = -self [4]
-	out [5] = -self [5]
-	out [6] = -self [6]
-	out [7] = -self [7]
-	out [8] = -self [8]
-	out [9] = -self [9]
+	out [1], out [2], out [3] = -self [1], -self [2], -self [3]
+	out [4], out [5], out [6] = -self [4], -self [5], -self [6]
+	out [7], out [8], out [9] = -self [7], -self [8], -self [9]
 	
 	return out
 end
 
 -- Utility
 function GCAD.Matrix3x3.Unpack (self)
-	return self [1], self [2], self [3], self [4], self [5], self [6], self [7], self [8], self [9]
+	return self [1], self [2], self [3],
+	       self [4], self [5], self [6],
+	       self [7], self [8], self [9]
 end
 
 function GCAD.Matrix3x3.ToString (self)
-	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. ", " .. tostring (self [3]) .. "]\n[" .. tostring (self [4]) .. ", " .. tostring (self [5]) .. ", " .. tostring (self [6]) .. "]\n[" .. tostring (self [7]) .. ", " .. tostring (self [8]) .. ", " .. tostring (self [9]) .. "]"
+	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. ", " .. tostring (self [3]) .. "]\n" ..
+	       "[" .. tostring (self [4]) .. ", " .. tostring (self [5]) .. ", " .. tostring (self [6]) .. "]\n" ..
+	       "[" .. tostring (self [7]) .. ", " .. tostring (self [8]) .. ", " .. tostring (self [9]) .. "]"
 end
 
 -- Construction
 function GCAD.Matrix3x3.Identity (out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = 1
-	out [2] = 0
-	out [3] = 0
-	out [4] = 0
-	out [5] = 1
-	out [6] = 0
-	out [7] = 0
-	out [8] = 0
-	out [9] = 1
+	out [1], out [2], out [3] = 1, 0, 0
+	out [4], out [5], out [6] = 0, 1, 0
+	out [7], out [8], out [9] = 0, 0, 1
 	
 	return out
 end
@@ -460,43 +416,31 @@ end
 function GCAD.Matrix3x3.Zero (out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = 0
-	out [2] = 0
-	out [3] = 0
-	out [4] = 0
-	out [5] = 0
-	out [6] = 0
-	out [7] = 0
-	out [8] = 0
-	out [9] = 0
+	out [1], out [2], out [3] = 0, 0, 0
+	out [4], out [5], out [6] = 0, 0, 0
+	out [7], out [8], out [9] = 0, 0, 0
 	
 	return out
 end
 
 -- Constructor
-function self:ctor (m11, m12, m13, m21, m22, m23, m31, m32, m33)
-	self [1] = m11 or 0
-	self [2] = m12 or 0
-	self [3] = m13 or 0
-	self [4] = m21 or 0
-	self [5] = m22 or 0
-	self [6] = m23 or 0
-	self [7] = m31 or 0
-	self [8] = m32 or 0
-	self [9] = m33 or 0
+function self:ctor (m11, m12, m13,
+                    m21, m22, m23,
+                    m31, m32, m33)
+	
+	self [1], self [2], self [3] = m11 or 0, m12 or 0, m13 or 0
+	self [4], self [5], self [6] = m21 or 0, m22 or 0, m23 or 0
+	self [7], self [8], self [9] = m31 or 0, m32 or 0, m33 or 0
 end
 
 -- Initialization
-function self:Set (m11, m12, m13, m21, m22, m23, m31, m32, m33)
-	self [1] = m11
-	self [2] = m12
-	self [3] = m13
-	self [4] = m21
-	self [5] = m22
-	self [6] = m23
-	self [7] = m31
-	self [8] = m32
-	self [9] = m33
+function self:Set (m11, m12, m13,
+                   m21, m22, m23,
+                   m31, m32, m33)
+	
+	self [1], self [2], self [3] = m11, m12, m13
+	self [4], self [5], self [6] = m21, m22, m23
+	self [7], self [8], self [9] = m31, m32, m33
 	
 	return self
 end

@@ -9,19 +9,15 @@ local isnumber  = isnumber
 function GCAD.Matrix2x2.Clone (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = self [1]
-	out [2] = self [2]
-	out [3] = self [3]
-	out [4] = self [4]
+	out [1], out [2] = self [1], self [2]
+	out [3], out [4] = self [3], self [4]
 	
 	return self
 end
 
 function GCAD.Matrix2x2.Copy (self, source)
-	self [1] = source [1]
-	self [2] = source [2]
-	self [3] = source [3]
-	self [4] = source [4]
+	self [1], self [2] = source [1], source [2]
+	self [3], self [4] = source [3], source [4]
 	
 	return self
 end
@@ -139,10 +135,8 @@ end
 function GCAD.Matrix2x2.Add (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1] + b [1]
-	out [2] = a [2] + b [2]
-	out [3] = a [3] + b [3]
-	out [4] = a [4] + b [4]
+	out [1], out [2] = a [1] + b [1], a [2] + b [2]
+	out [3], out [4] = a [3] + b [3], a [4] + b [4]
 	
 	return out
 end
@@ -150,10 +144,8 @@ end
 function GCAD.Matrix2x2.Subtract (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1] - b [1]
-	out [2] = a [2] - b [2]
-	out [3] = a [3] - b [3]
-	out [4] = a [4] - b [4]
+	out [1], out [2] = a [1] - b [1], a [2] - b [2]
+	out [3], out [4] = a [3] - b [3], a [4] - b [4]
 	
 	return out
 end
@@ -161,10 +153,8 @@ end
 function GCAD.Matrix2x2.MatrixScalarMultiply (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1] * b
-	out [2] = a [2] * b
-	out [3] = a [3] * b
-	out [4] = a [4] * b
+	out [1], out [2] = a [1] * b, a [2] * b
+	out [3], out [4] = a [3] * b, a [4] * b
 	
 	return out
 end
@@ -243,10 +233,8 @@ end
 function GCAD.Matrix2x2.ScalarDivide (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1] / b
-	out [2] = a [2] / b
-	out [3] = a [3] / b
-	out [4] = a [4] / b
+	out [1], out [2] = a [1] / b, a [2] / b
+	out [3], out [4] = a [3] / b, a [4] / b
 	
 	return out
 end
@@ -254,31 +242,29 @@ end
 function GCAD.Matrix2x2.Negate (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = -self [1]
-	out [2] = -self [2]
-	out [3] = -self [3]
-	out [4] = -self [4]
+	out [1], out [2] = -self [1], -self [2]
+	out [3], out [4] = -self [3], -self [4]
 	
 	return out
 end
 
 -- Utility
 function GCAD.Matrix2x2.Unpack (self)
-	return self [1], self [2], self [3], self [4]
+	return self [1], self [2],
+	       self [3], self [4]
 end
 
 function GCAD.Matrix2x2.ToString (self)
-	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. "]\n[" .. tostring (self [3]) .. ", " .. tostring (self [4]) .. "]"
+	return "[" .. tostring (self [1]) .. ", " .. tostring (self [2]) .. "]\n" ..
+	       "[" .. tostring (self [3]) .. ", " .. tostring (self [4]) .. "]"
 end
 
 -- Construction
 function GCAD.Matrix2x2.Identity (out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = 1
-	out [2] = 0
-	out [3] = 0
-	out [4] = 1
+	out [1], out [2] = 1, 0
+	out [3], out [4] = 0, 1
 	
 	return out
 end
@@ -288,21 +274,26 @@ function GCAD.Matrix2x2.Rotate (radians, out)
 	
 	local sin = math_sin (radians)
 	local cos = math_cos (radians)
-	out [1] = cos
-	out [3] = sin
-	out [2] = -sin
-	out [4] = cos
+	out [1], out [2] = cos, -sin
+	out [3], out [4] = sin,  cos
 	
 	return out
 end
 
-function GCAD.Matrix2x2.Scale (x, y, out)
+function GCAD.Matrix2x2.Scale (v2d, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = x
-	out [2] = 0
-	out [3] = 0
-	out [4] = y
+	out [1], out [2] = v2d [1],       0
+	out [3], out [4] =       0, v2d [2]
+	
+	return out
+end
+
+function GCAD.Matrix2x2.ScaleUnpacked (x, y, out)
+	out = out or GCAD.Matrix2x2 ()
+	
+	out [1], out [2] = x, 0
+	out [3], out [4] = 0, y
 	
 	return out
 end
@@ -310,28 +301,26 @@ end
 function GCAD.Matrix2x2.Zero (out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = 0
-	out [2] = 0
-	out [3] = 0
-	out [4] = 0
+	out [1], out [2] = 0, 0
+	out [3], out [4] = 0, 0
 	
 	return out
 end
 
 -- Constructor
-function self:ctor (m11, m12, m21, m22)
-	self [1] = m11 or 0
-	self [2] = m12 or 0
-	self [3] = m21 or 0
-	self [4] = m22 or 0
+function self:ctor (m11, m12,
+                    m21, m22)
+	
+	self [1], self [2] = m11 or 0, m12 or 0
+	self [3], self [4] = m21 or 0, m22 or 0
 end
 
 -- Initialization
-function self:Set (m11, m12, m21, m22)
-	self [1] = m11
-	self [2] = m12
-	self [3] = m21
-	self [4] = m22
+function self:Set (m11, m12,
+                   m21, m22)
+	
+	self [1], self [2] = m11, m12
+	self [3], self [4] = m21, m22
 	
 	return self
 end
