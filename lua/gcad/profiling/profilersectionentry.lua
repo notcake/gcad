@@ -94,7 +94,7 @@ function self:GetChildEnumerator ()
 	local frameId = FrameNumber ()
 	local sysTime = SysTime ()
 	
-	local valueEnumerator = GLib.ValueEnumerator (self.ChildSections)
+	local valueEnumerator = GLib.ArrayEnumerator (self.ChildSections)
 	local childEnumerator = GLib.NullCallback
 	return function ()
 		local sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount = childEnumerator ()
@@ -241,9 +241,9 @@ function self:Credit (duration)
 end
 
 function self:FlushFrame ()
-	self.LastFrameId         = self.FrameId
-	self.LastFrameStartTime  = self.FrameStartTime
-	self.LastFrameEntryCount = self.FrameEntryCount
-	self.LastFrameDuration   = self.FrameDuration
-	self.LastDuration        = self.Duration
+	self.LastFrameId         = self.FrameId         or 0
+	self.LastFrameStartTime  = self.FrameStartTime  or 0
+	self.LastFrameEntryCount = self.FrameEntryCount or 0
+	self.LastFrameDuration   = self.FrameDuration   or 0
+	self.LastDuration        = self.Duration        or 0
 end

@@ -47,7 +47,7 @@ function self:SetEnabled (enabled)
 	
 	self.Enabled = enabled
 	if self.Enabled then
-		hook.Add ("HUDPaint", "GCAD.ProfilingStatisticsRenderer",
+		hook.Add ("PostRenderVGUI", "GCAD.ProfilingStatisticsRenderer",
 			function ()
 				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render")
 				
@@ -102,7 +102,7 @@ function self:SetEnabled (enabled)
 			end
 		)
 	else
-		hook.Remove ("HUDPaint", "GCAD.ProfilingStatisticsRenderer")
+		hook.Remove ("PostRenderVGUI", "GCAD.ProfilingStatisticsRenderer")
 	end
 	
 	return self
