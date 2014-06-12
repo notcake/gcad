@@ -94,6 +94,12 @@ function self:GetChildEnumerator ()
 	local frameId = FrameNumber ()
 	local sysTime = SysTime ()
 	
+	table.sort (self.ChildSections,
+		function (a, b)
+			return a.LastFrameDuration > b.LastFrameDuration
+		end
+	)
+	
 	local valueEnumerator = GLib.ArrayEnumerator (self.ChildSections)
 	local childEnumerator = GLib.NullCallback
 	return function ()

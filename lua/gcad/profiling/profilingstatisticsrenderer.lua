@@ -14,9 +14,12 @@ local surface_SetTextPos   = surface.SetTextPos
 function self:ctor ()
 	self.Enabled = false
 	
-	self.BackgroundColor  = GLib.Color.FromColor (GLib.Colors.Gray,   128)
-	self.BackgroundColor1 = GLib.Color.FromColor (GLib.Colors.Gray,   128)
-	self.BackgroundColor2 = GLib.Color.FromColor (GLib.Colors.Silver, 128)
+	self.Priority0BackgroundColor1 = GLib.Color.FromColor (GLib.Colors.Gray,       128)
+	self.Priority0BackgroundColor2 = GLib.Color.FromColor (GLib.Colors.Silver,     128)
+	self.Priority1BackgroundColor1 = GLib.Color.FromColor (GLib.Colors.Orange,     128)
+	self.Priority1BackgroundColor2 = GLib.Color.FromColor (GLib.Colors.DarkOrange, 128)
+	self.Priority2BackgroundColor1 = GLib.Color.FromColor (GLib.Colors.Red,        128)
+	self.Priority2BackgroundColor2 = GLib.Color.FromColor (GLib.Colors.Crimson,    128)
 	
 	GCAD:AddEventListener ("Unloaded", "GCAD.ProfilingStatisticsRenderer",
 		function ()
@@ -73,9 +76,22 @@ function self:SetEnabled (enabled)
 				
 				local lineCount = 0
 				for sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount in GCAD.Profiler:GetEnumerator () do
+					local shouldDraw = frameDuration > 0.00002
+					sectionEntry.LastShouldDrawTime = sectionEntry.LastShouldDrawTime or 0
+					if shouldDraw then
+						sectionEntry.LastShouldDrawTime = SysTime ()
+					end
+					if SysTime () - sectionEntry.LastShouldDrawTime > 1 then continue end
+					
 					local indent = stackLevelIndent * depth
 					
-					surface_SetDrawColor (lineCount % 2 == 0 and self.BackgroundColor1 or self.BackgroundColor2)
+					if frameDuration >= 0.000750 then
+						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority2BackgroundColor1 or self.Priority2BackgroundColor2)
+					elseif frameDuration >= 0.000100 then
+						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority1BackgroundColor1 or self.Priority1BackgroundColor2)
+					else
+						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority0BackgroundColor1 or self.Priority0BackgroundColor2)
+					end
 					surface_DrawRect (x0 - 8, y - 2, x3 - x0 + 16 + stackLevelIndent * maximumSectionStackLevel, lineHeight)
 					lineCount = lineCount + 1
 					
