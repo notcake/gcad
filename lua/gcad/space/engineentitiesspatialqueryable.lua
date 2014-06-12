@@ -7,7 +7,7 @@ local Entity_IsEffectActive = debug.getregistry ().Entity.IsEffectActive
 local EF_NODRAW             = EF_NODRAW
 
 function self:ctor ()
-	self.EntityReferenceCache = GCAD.MapCache (GCAD.Components.EntityReference.FromEntity)
+	self.EntityReferenceCache = GCAD.MapCache (GCAD.VEntities.EntityReference.FromEntity)
 end
 
 -- ISpatialQueryable3d

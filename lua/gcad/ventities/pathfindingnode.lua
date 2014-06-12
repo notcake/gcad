@@ -1,6 +1,6 @@
 local self = {}
-GCAD.Components.PathfindingNode = GCAD.MakeConstructor (self,
-	GCAD.Components.IComponent,
+GCAD.VEntities.PathfindingNode = GCAD.MakeConstructor (self,
+	GCAD.VEntities.VEntity,
 	GCAD.IRenderNode
 )
 

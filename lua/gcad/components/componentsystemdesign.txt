@@ -1,0 +1,66 @@
+Component system:
+	Each component host has a bunch of methods to get individual components.
+		eg. ISpatialNode3d IComponentHost::GetSpatialNode3d ()
+		
+		class IComponentHost
+		{
+			T              GetComponent<T> ()
+			ISpatialNode2d GetSpatialNode2d ()
+			ISpatialNode3d GetSpatialNode3d ()
+			IRenderNode    GetRenderNode ()
+		}
+		
+		class ComponentHost : IComponentHost
+		{
+			this SetComponent<T> (T component)
+			this SetSpatialNode2d ()
+			this SetSpatialNode3d ()
+			this SetRenderNode ()
+		}
+	
+	Each component is also a component host and has methods to get the master IComponentHost.
+	The IComponentHost methods on each IComponent should return the same as for the master IComponentHost.
+		class IComponent : IComponentHost
+		{
+			IComponentHost GetComponentHost ()
+		}
+		
+		class ComponentHostProxy : IComponent
+		{
+			this SetComponentHost (IComponentHost componentHost)
+		}
+		
+		class Component : ComponentHostProxy
+		{
+		}
+		
+		class IRenderNode : IComponent { }
+		class RenderNode : Component, IRenderNode { }
+		
+	Tree structures should be managed in IComponents and not the master IComponentHost.
+		
+	Entity implementations should inherit from ComponentHost
+		class ComponentHost : IComponentHost { }
+	
+	Entities that need to override behaviour of any component can:
+		Inherit from and implement the IComponent itself:
+			class CrazyEntity : ComponentHost, IRenderNode
+			{
+				IRenderNode GetRenderNode () { return this; }
+				
+				void        Render () { /* Do custom stuff */ }
+			}
+		
+		Use a custom component
+			class CrazyRenderNode : RenderNode
+			{
+				void Render () { /* Do custom stuff */ }
+			}
+			
+			class CrazyEntity : ComponentHost
+			{
+				CrazyEntity ()
+				{
+					this->SetRenderNode (new CrazyRenderNode ());
+				}
+			}

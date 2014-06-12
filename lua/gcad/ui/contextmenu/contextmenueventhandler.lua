@@ -65,7 +65,7 @@ function self:ctor ()
 						-- Add everything up to and excluding the world to the selection modifier set
 						local lineTraceResult = self:TraceRay (x1, y1)
 						for object in lineTraceResult:GetEnumerator () do
-							if object:Is (GCAD.Components.EntityReference) and
+							if object:Is (GCAD.VEntities.EntityReference) and
 							   object:GetEntity ():GetClass () == "worldspawn" then break end
 							self.TemporarySelectionSet:Add (object)
 							break
@@ -78,7 +78,7 @@ function self:ctor ()
 						-- Add everything except the world to the selection modifier set
 						local spatialQueryResult = self:FindInFrustum (x1, y1, x2, y2)
 						for object in spatialQueryResult:GetEnumerator () do
-							if not object:Is (GCAD.Components.EntityReference) or
+							if not object:Is (GCAD.VEntities.EntityReference) or
 							   object:GetEntity ():GetClass () ~= "worldspawn" then
 								self.TemporarySelectionSet:Add (object)
 							end
@@ -166,7 +166,7 @@ function self:OnMouseDown (mouseCode, mouseX, mouseY)
 		
 		self.Selection:GetModifyingSet ():Clear ()
 		for object in lineTraceResult:GetEnumerator () do
-			if object:Is (GCAD.Components.EntityReference) and
+			if object:Is (GCAD.VEntities.EntityReference) and
 			   object:GetEntity ():GetClass () == "worldspawn" then break end
 			self.Selection:GetModifyingSet ():Add (object)
 			break
@@ -187,7 +187,7 @@ function self:OnMouseDown (mouseCode, mouseX, mouseY)
 			self.SelectionTemporary = true
 			
 			for object in lineTraceResult:GetEnumerator () do
-				if object:Is (GCAD.Components.EntityReference) and
+				if object:Is (GCAD.VEntities.EntityReference) and
 				   object:GetEntity ():GetClass () == "worldspawn" then break end
 				self.Selection:Add (object)
 				break

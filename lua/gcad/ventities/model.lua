@@ -1,6 +1,6 @@
 local self = {}
-GCAD.Components.Model = GCAD.MakeConstructor (self,
-	GCAD.Components.IComponent,
+GCAD.VEntities.Model = GCAD.MakeConstructor (self,
+	GCAD.VEntities.VEntity,
 	GCAD.ISpatialNode3d,
 	GCAD.IRenderNode
 )
@@ -14,11 +14,6 @@ function self:ctor ()
 	
 	-- Model
 	self.ModelInstance = nil
-end
-
--- IRenderNodeHost
-function self:GetRenderNode ()
-	return self
 end
 
 -- IRenderNode

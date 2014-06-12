@@ -1,6 +1,6 @@
 local self = {}
-GCAD.Components.Point3dComponent = GCAD.MakeConstructor (self,
-	GCAD.Components.IComponent,
+GCAD.VEntities.Point3dComponent = GCAD.MakeConstructor (self,
+	GCAD.VEntities.VEntity,
 	GCAD.ISpatialNode3d
 )
 

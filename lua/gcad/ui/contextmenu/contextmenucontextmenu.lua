@@ -58,7 +58,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 			local lineTraceResult = self:TraceRay (self.MouseMoveX, self.MouseMoveY)
 			local objects = {}
 			for object in lineTraceResult:GetEnumerator () do
-				if object:Is (GCAD.Components.EntityReference) and
+				if object:Is (GCAD.VEntities.EntityReference) and
 				   object:GetEntity ():GetClass () == "worldspawn" then break end
 				
 				if not objects [object] then
@@ -128,7 +128,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 				for _, actionInfo in pairs (properties.List) do
 					for object in self.Selection:GetEnumerator () do
 						if object:IsValid () and
-						   object:Is (GCAD.Components.EntityReference) and
+						   object:Is (GCAD.VEntities.EntityReference) and
 						   actionInfo:Filter (object:GetEntity (), LocalPlayer ()) and
 						   not actionInfo.MenuOpen then
 							applicableActions [#applicableActions + 1] = actionInfo
@@ -174,7 +174,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 					function ()
 						for object in self.Selection:GetEnumerator () do
 							if object:IsValid () and
-							   object:Is (GCAD.Components.EntityReference) and
+							   object:Is (GCAD.VEntities.EntityReference) and
 							   actionInfo:Filter (object:GetEntity (), LocalPlayer ()) then
 								actionInfo:Action (object:GetEntity ())
 							end
@@ -191,7 +191,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 					
 					for object in self.Selection:GetEnumerator () do
 						if object:IsValid () and
-						   object:Is (GCAD.Components.EntityReference) and
+						   object:Is (GCAD.VEntities.EntityReference) and
 						   actionInfo:Checked (object:GetEntity (), LocalPlayer ()) then
 							checked = true
 							break

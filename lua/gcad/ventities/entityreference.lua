@@ -1,14 +1,14 @@
 local self = {}
-GCAD.Components.EntityReference = GCAD.MakeConstructor (self,
-	GCAD.Components.IComponent,
+GCAD.VEntities.EntityReference = GCAD.MakeConstructor (self,
+	GCAD.VEntities.VEntity,
 	GCAD.ISpatialNode3d
 )
 
 local Entity_GetTable = debug.getregistry ().Entity.GetTable
 local Entity_IsValid  = debug.getregistry ().Entity.IsValid
 
-function GCAD.Components.EntityReference.FromEntity (ent, out)
-	out = out or GCAD.Components.EntityReference ()
+function GCAD.VEntities.EntityReference.FromEntity (ent, out)
+	out = out or GCAD.VEntities.EntityReference ()
 	out:SetEntity (ent)
 	return out
 end

@@ -30,8 +30,10 @@ end
 -- Linear algebra
 include ("linearalgebra/unpackedvector2d.lua")
 include ("linearalgebra/unpackedvector3d.lua")
+include ("linearalgebra/unpackedvector4d.lua")
 include ("linearalgebra/vector2d.lua")
 include ("linearalgebra/vector3d.lua")
+include ("linearalgebra/vector4d.lua")
 include ("linearalgebra/matrix2x2.lua")
 include ("linearalgebra/matrix3x3.lua")
 
@@ -102,12 +104,20 @@ include ("space/shapes/lines/line3d.lua")
 include ("space/shapes/frustums/frustum3d.lua")
 include ("space/shapes/frustums/nativefrustum3d.lua")
 
--- Interop
-include ("space/shapes/pac.lua")
+-- Models
+-- include ("models/model.lua")
+-- include ("models/modelcache.lua")
+-- include ("models/modelinstance.lua")
+-- include ("models/modelinstancecache.lua")
 
--- Spatial queryables
-include ("space/engineentitiesspatialqueryable.lua")
-include ("space/pacpartsspatialqueryable.lua")
+-- Components
+GCAD.Components = {}
+include ("components/icomponenthost.lua")
+include ("components/componenthost.lua")
+include ("components/componenthostproxy.lua")
+
+include ("components/icomponent.lua")
+include ("components/component.lua")
 
 -- Spatial nodes
 include ("space/ispatialnode2dhost.lua")
@@ -123,22 +133,13 @@ include ("space/space3d.lua")
 include ("irendernode.lua")
 include ("irendernodehost.lua")
 
--- Models
--- include ("models/model.lua")
--- include ("models/modelcache.lua")
--- include ("models/modelinstance.lua")
--- include ("models/modelinstancecache.lua")
+-- VEntities
+GCAD.VEntities = {}
+include ("ventities/ventity.lua")
 
--- Components
-GCAD.Components = {}
-include ("components/icomponent.lua")
-include ("components/point3dcomponent.lua")
-include ("components/model.lua")
-include ("components/pathfindingnode.lua")
-
--- Component Interop
-include ("components/entityreference.lua")
-include ("components/pacpartreference.lua")
+include ("ventities/point3dcomponent.lua")
+include ("ventities/model.lua")
+include ("ventities/pathfindingnode.lua")
 
 -- Signal Processing
 include ("signalprocessing/digitalfilters/realfirfilter.lua")
@@ -146,8 +147,18 @@ include ("signalprocessing/digitalfilters/realiirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexfirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
--- View
-include ("view/viewrenderinfo.lua")
+-- Rendering
+include ("rendering/viewrenderinfo.lua")
+
+-- Engine Interop
+include ("space/engineentitiesspatialqueryable.lua")
+include ("ventities/entityreference.lua")
+
+-- PAC3 Interop
+GCAD.PAC3 = {}
+include ("pac3/spatialextensions.lua")
+include ("pac3/pacpartsspatialqueryable.lua")
+include ("pac3/pacpartreference.lua")
 
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 

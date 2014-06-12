@@ -2,7 +2,7 @@ local self = {}
 GCAD.PACPartsSpatialQueryable = GCAD.MakeConstructor (self, GCAD.ISpatialQueryable3d)
 
 function self:ctor ()
-	self.PACPartReferenceCache = GCAD.MapCache (GCAD.Components.PACPartReference.FromPACPart)
+	self.PACPartReferenceCache = GCAD.MapCache (GCAD.VEntities.PACPartReference.FromPACPart)
 end
 
 -- ISpatialQueryable3d

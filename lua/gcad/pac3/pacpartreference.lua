@@ -1,11 +1,11 @@
 local self = {}
-GCAD.Components.PACPartReference = GCAD.MakeConstructor (self,
-	GCAD.Components.IComponent,
+GCAD.VEntities.PACPartReference = GCAD.MakeConstructor (self,
+	GCAD.VEntities.VEntity,
 	GCAD.ISpatialNode3d
 )
 
-function GCAD.Components.PACPartReference.FromPACPart (part, out)
-	out = out or GCAD.Components.PACPartReference ()
+function GCAD.VEntities.PACPartReference.FromPACPart (part, out)
+	out = out or GCAD.VEntities.PACPartReference ()
 	out:SetPart (part)
 	return out
 end
