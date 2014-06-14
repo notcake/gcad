@@ -4,25 +4,25 @@ Component system:
 		
 		class IComponentHost
 		{
-			T              GetComponent<T> ()
-			ISpatialNode2d GetSpatialNode2d ()
-			ISpatialNode3d GetSpatialNode3d ()
-			IRenderNode    GetRenderNode ()
+			T              GetComponent<T> ();
+			ISpatialNode2d GetSpatialNode2d ();
+			ISpatialNode3d GetSpatialNode3d ();
+			IRenderNode    GetRenderNode ();
 		}
 		
 		class ComponentHost : IComponentHost
 		{
-			this SetComponent<T> (T component)
-			this SetSpatialNode2d ()
-			this SetSpatialNode3d ()
-			this SetRenderNode ()
+			this SetComponent<T> (T component);
+			this SetSpatialNode2d ();
+			this SetSpatialNode3d ();
+			this SetRenderNode ();
 		}
 	
 	Each component is also a component host and has methods to get the master IComponentHost.
 	The IComponentHost methods on each IComponent should return the same as for the master IComponentHost.
 		class IComponent : IComponentHost
 		{
-			IComponentHost GetComponentHost ()
+			IComponentHost GetComponentHost ();
 		}
 		
 		class ComponentHostProxy : IComponent

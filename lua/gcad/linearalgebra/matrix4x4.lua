@@ -5,9 +5,14 @@ local math              = math
 
 local isnumber          = isnumber
 
+local Matrix            = Matrix
+
 local Vector            = Vector
 local Vector___index    = debug.getregistry ().Vector.__index
 local Vector___newindex = debug.getregistry ().Vector.__newindex
+local VMatrix_GetField  = debug.getregistry ().VMatrix.GetField
+local VMatrix_Identity  = debug.getregistry ().VMatrix.Identity
+local VMatrix_SetField  = debug.getregistry ().VMatrix.SetField
 
 -- Copying
 function GCAD.Matrix4x4.Clone (self, out)
@@ -323,33 +328,13 @@ function GCAD.Matrix4x4.MatrixMatrixMultiply (a, b, out)
 	return out
 end
 
+-- This multiplication method is slower than the previous one.
 local vmatrix1 = Matrix ()
 local vmatrix2 = Matrix ()
-local VMatrix_GetField = debug.getregistry ().VMatrix.GetField
-local VMatrix_Identity = debug.getregistry ().VMatrix.Identity
-local VMatrix_SetField = debug.getregistry ().VMatrix.SetField
 function GCAD.Matrix4x4.MatrixMatrixMultiply2 (a, b, out)
-	out = out or GCAD.Matrix4x4 ()
-	
-	VMatrix_Identity (vmatrix1)
-	VMatrix_SetField (vmatrix1, 1, 1, a [ 1]) VMatrix_SetField (vmatrix1, 1, 2, a [ 2]) VMatrix_SetField (vmatrix1, 1, 3, a [ 3]) VMatrix_SetField (vmatrix1, 1, 4, a [ 4])
-	VMatrix_SetField (vmatrix1, 2, 1, a [ 5]) VMatrix_SetField (vmatrix1, 2, 2, a [ 6]) VMatrix_SetField (vmatrix1, 2, 3, a [ 7]) VMatrix_SetField (vmatrix1, 2, 4, a [ 8])
-	VMatrix_SetField (vmatrix1, 3, 1, a [ 9]) VMatrix_SetField (vmatrix1, 3, 2, a [10]) VMatrix_SetField (vmatrix1, 3, 3, a [11]) VMatrix_SetField (vmatrix1, 3, 4, a [12])
-	VMatrix_SetField (vmatrix1, 4, 1, a [13]) VMatrix_SetField (vmatrix1, 4, 2, a [14]) VMatrix_SetField (vmatrix1, 4, 3, a [15]) VMatrix_SetField (vmatrix1, 4, 4, a [16])
-	
-	VMatrix_Identity (vmatrix2)
-	VMatrix_SetField (vmatrix2, 1, 1, b [ 1]) VMatrix_SetField (vmatrix2, 1, 2, b [ 2]) VMatrix_SetField (vmatrix2, 1, 3, b [ 3]) VMatrix_SetField (vmatrix2, 1, 4, b [ 4])
-	VMatrix_SetField (vmatrix2, 2, 1, b [ 5]) VMatrix_SetField (vmatrix2, 2, 2, b [ 6]) VMatrix_SetField (vmatrix2, 2, 3, b [ 7]) VMatrix_SetField (vmatrix2, 2, 4, b [ 8])
-	VMatrix_SetField (vmatrix2, 3, 1, b [ 9]) VMatrix_SetField (vmatrix2, 3, 2, b [10]) VMatrix_SetField (vmatrix2, 3, 3, b [11]) VMatrix_SetField (vmatrix2, 3, 4, b [12])
-	VMatrix_SetField (vmatrix2, 4, 1, b [13]) VMatrix_SetField (vmatrix2, 4, 2, b [14]) VMatrix_SetField (vmatrix2, 4, 3, b [15]) VMatrix_SetField (vmatrix2, 4, 4, b [16])
-	
-	local c = vmatrix1 * vmatrix2
-	out [ 1], out [ 2], out [ 3], out [ 4] = VMatrix_GetField (c, 1, 1), VMatrix_GetField (c, 1, 2), VMatrix_GetField (c, 1, 3), VMatrix_GetField (c, 1, 4)
-	out [ 5], out [ 6], out [ 7], out [ 8] = VMatrix_GetField (c, 2, 1), VMatrix_GetField (c, 2, 2), VMatrix_GetField (c, 2, 3), VMatrix_GetField (c, 2, 4)
-	out [ 9], out [10], out [11], out [12] = VMatrix_GetField (c, 3, 1), VMatrix_GetField (c, 3, 2), VMatrix_GetField (c, 3, 3), VMatrix_GetField (c, 3, 4)
-	out [13], out [14], out [15], out [16] = VMatrix_GetField (c, 4, 1), VMatrix_GetField (c, 4, 2), VMatrix_GetField (c, 4, 3), VMatrix_GetField (c, 4, 4)
-	
-	return out
+	GCAD.Matrix4x4.ToNativeMatrix (a, vmatrix1)
+	GCAD.Matrix4x4.ToNativeMatrix (b, vmatrix2)
+	return GCAD.Matrix4x4.FromNativeMatrix (vmatrix * vmatrix2, out)
 end
 
 local GCAD_Matrix4x4_ScalarMatrixMultiply = GCAD.Matrix4x4.ScalarMatrixMultiply
@@ -393,6 +378,29 @@ function GCAD.Matrix4x4.Negate (self, out)
 	out [ 5], out [ 6], out [ 7], out [ 8] = -self [ 5], -self [ 6], -self [ 7], -self [ 8]
 	out [ 9], out [10], out [11], out [12] = -self [ 9], -self [10], -self [11], -self [12]
 	out [13], out [14], out [15], out [16] = -self [13], -self [14], -self [15], -self [16]
+	
+	return out
+end
+
+-- Conversion
+function GCAD.Matrix4x4.FromNativeMatrix (matrix, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	out [ 1], out [ 2], out [ 3], out [ 4] = VMatrix_GetField (matrix, 1, 1), VMatrix_GetField (matrix, 1, 2), VMatrix_GetField (matrix, 1, 3), VMatrix_GetField (matrix, 1, 4)
+	out [ 5], out [ 6], out [ 7], out [ 8] = VMatrix_GetField (matrix, 2, 1), VMatrix_GetField (matrix, 2, 2), VMatrix_GetField (matrix, 2, 3), VMatrix_GetField (matrix, 2, 4)
+	out [ 9], out [10], out [11], out [12] = VMatrix_GetField (matrix, 3, 1), VMatrix_GetField (matrix, 3, 2), VMatrix_GetField (matrix, 3, 3), VMatrix_GetField (matrix, 3, 4)
+	out [13], out [14], out [15], out [16] = VMatrix_GetField (matrix, 4, 1), VMatrix_GetField (matrix, 4, 2), VMatrix_GetField (matrix, 4, 3), VMatrix_GetField (matrix, 4, 4)
+	
+	return out
+end
+
+function GCAD.Matrix4x4.ToNativeMatrix (self, out)
+	out = out or Matrix ()
+	
+	VMatrix_SetField (out, 1, 1, self [ 1]) VMatrix_SetField (out, 1, 2, self [ 2]) VMatrix_SetField (out, 1, 3, self [ 3]) VMatrix_SetField (out, 1, 4, self [ 4])
+	VMatrix_SetField (out, 2, 1, self [ 5]) VMatrix_SetField (out, 2, 2, self [ 6]) VMatrix_SetField (out, 2, 3, self [ 7]) VMatrix_SetField (out, 2, 4, self [ 8])
+	VMatrix_SetField (out, 3, 1, self [ 9]) VMatrix_SetField (out, 3, 2, self [10]) VMatrix_SetField (out, 3, 3, self [11]) VMatrix_SetField (out, 3, 4, self [12])
+	VMatrix_SetField (out, 4, 1, self [13]) VMatrix_SetField (out, 4, 2, self [14]) VMatrix_SetField (out, 4, 3, self [15]) VMatrix_SetField (out, 4, 4, self [16])
 	
 	return out
 end
@@ -542,6 +550,9 @@ self.__sub                  = GCAD.Matrix4x4.Subtract
 self.__mul                  = GCAD.Matrix4x4.Multiply
 self.__div                  = GCAD.Matrix4x4.ScalarDivide
 self.__unm                  = GCAD.Matrix4x4.Negate
+
+-- Conversion
+self.ToNativeMatrix         = GCAD.Matrix4x4.ToNativeMatrix
 
 -- Utility
 self.Unpack                 = GCAD.Matrix4x4.Unpack

@@ -77,6 +77,8 @@ function self:GetEnumerator ()
 end
 
 function self:Profile (f, ...)
+	local SysTime = SysTime
+	
 	local t0 = SysTime ()
 	local callCount = 0
 	while SysTime () - t0 < 0.005 do
@@ -88,6 +90,8 @@ function self:Profile (f, ...)
 end
 
 function self:ProfileOnce (f, ...)
+	local SysTime = SysTime
+	
 	local t0 = SysTime ()
 	f (...)
 	

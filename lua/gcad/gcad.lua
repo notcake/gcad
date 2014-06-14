@@ -130,10 +130,6 @@ include ("space/ispatialnode3d.lua")
 -- Space
 include ("space/space3d.lua")
 
--- Rendering
-include ("irendernode.lua")
-include ("irendernodehost.lua")
-
 -- VEntities
 GCAD.VEntities = {}
 include ("ventities/ventity.lua")
@@ -148,7 +144,17 @@ include ("signalprocessing/digitalfilters/realiirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexfirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
+-- Scene Graph
+GCAD.SceneGraph = {}
+include ("scenegraph/iscenegraph.lua")
+include ("scenegraph/iscenegraphnode.lua")
+include ("scenegraph/scenegraph.lua")
+include ("scenegraph/scenegraphnode.lua")
+include ("scenegraph/transformationnode.lua")
+
 -- Rendering
+include ("rendering/irendernode.lua")
+include ("rendering/irendernodehost.lua")
 include ("rendering/viewrenderinfo.lua")
 
 -- Engine Interop

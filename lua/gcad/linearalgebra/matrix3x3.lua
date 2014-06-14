@@ -5,9 +5,14 @@ local math              = math
 
 local isnumber          = isnumber
 
+local Matrix            = Matrix
+
 local Vector            = Vector
 local Vector___index    = debug.getregistry ().Vector.__index
 local Vector___newindex = debug.getregistry ().Vector.__newindex
+local VMatrix_GetField  = debug.getregistry ().VMatrix.GetField
+local VMatrix_Identity  = debug.getregistry ().VMatrix.Identity
+local VMatrix_SetField  = debug.getregistry ().VMatrix.SetField
 
 -- Copying
 function GCAD.Matrix3x3.Clone (self, out)
@@ -294,28 +299,10 @@ end
 -- This multiplication method is slower than the previous one.
 local vmatrix1 = Matrix ()
 local vmatrix2 = Matrix ()
-local VMatrix_GetField = debug.getregistry ().VMatrix.GetField
-local VMatrix_Identity = debug.getregistry ().VMatrix.Identity
-local VMatrix_SetField = debug.getregistry ().VMatrix.SetField
 function GCAD.Matrix3x3.MatrixMatrixMultiply2 (a, b, out)
-	out = out or GCAD.Matrix3x3 ()
-	
-	VMatrix_Identity (vmatrix1)
-	VMatrix_SetField (vmatrix1, 1, 1, a [1]) VMatrix_SetField (vmatrix1, 1, 2, a [2]) VMatrix_SetField (vmatrix1, 1, 3, a [3])
-	VMatrix_SetField (vmatrix1, 2, 1, a [4]) VMatrix_SetField (vmatrix1, 2, 2, a [5]) VMatrix_SetField (vmatrix1, 2, 3, a [6])
-	VMatrix_SetField (vmatrix1, 3, 1, a [7]) VMatrix_SetField (vmatrix1, 3, 2, a [8]) VMatrix_SetField (vmatrix1, 3, 3, a [9])
-	
-	VMatrix_Identity (vmatrix2)
-	VMatrix_SetField (vmatrix2, 1, 1, b [1]) VMatrix_SetField (vmatrix2, 1, 2, b [2]) VMatrix_SetField (vmatrix2, 1, 3, b [3])
-	VMatrix_SetField (vmatrix2, 2, 1, b [4]) VMatrix_SetField (vmatrix2, 2, 2, b [5]) VMatrix_SetField (vmatrix2, 2, 3, b [6])
-	VMatrix_SetField (vmatrix2, 3, 1, b [7]) VMatrix_SetField (vmatrix2, 3, 2, b [8]) VMatrix_SetField (vmatrix2, 3, 3, b [9])
-	
-	local c = vmatrix1 * vmatrix2
-	out [1], out [2], out [3] = VMatrix_GetField (c, 1, 1), VMatrix_GetField (c, 1, 2), VMatrix_GetField (c, 1, 3)
-	out [4], out [5], out [6] = VMatrix_GetField (c, 2, 1), VMatrix_GetField (c, 2, 2), VMatrix_GetField (c, 2, 3)
-	out [7], out [8], out [9] = VMatrix_GetField (c, 3, 1), VMatrix_GetField (c, 3, 2), VMatrix_GetField (c, 3, 3)
-	
-	return out
+	GCAD.Matrix3x3.ToNativeMatrix (a, vmatrix1)
+	GCAD.Matrix3x3.ToNativeMatrix (b, vmatrix2)
+	return GCAD.Matrix3x3.FromNativeMatrix (vmatrix * vmatrix2, out)
 end
 
 local GCAD_Matrix3x3_ScalarMatrixMultiply = GCAD.Matrix3x3.ScalarMatrixMultiply
@@ -357,6 +344,28 @@ function GCAD.Matrix3x3.Negate (self, out)
 	out [1], out [2], out [3] = -self [1], -self [2], -self [3]
 	out [4], out [5], out [6] = -self [4], -self [5], -self [6]
 	out [7], out [8], out [9] = -self [7], -self [8], -self [9]
+	
+	return out
+end
+
+-- Conversion
+function GCAD.Matrix3x3.FromNativeMatrix (matrix, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = VMatrix_GetField (matrix, 1, 1), VMatrix_GetField (matrix, 1, 2), VMatrix_GetField (matrix, 1, 3)
+	out [4], out [5], out [6] = VMatrix_GetField (matrix, 2, 1), VMatrix_GetField (matrix, 2, 2), VMatrix_GetField (matrix, 2, 3)
+	out [7], out [8], out [9] = VMatrix_GetField (matrix, 3, 1), VMatrix_GetField (matrix, 3, 2), VMatrix_GetField (matrix, 3, 3)
+	
+	return out
+end
+
+function GCAD.Matrix3x3.ToNativeMatrix (self, out)
+	out = out or Matrix ()
+	
+	VMatrix_Identity (out)
+	VMatrix_SetField (out, 1, 1, self [1]) VMatrix_SetField (out, 1, 2, self [2]) VMatrix_SetField (out, 1, 3, self [3])
+	VMatrix_SetField (out, 2, 1, self [4]) VMatrix_SetField (out, 2, 2, self [5]) VMatrix_SetField (out, 2, 3, self [6])
+	VMatrix_SetField (out, 3, 1, self [7]) VMatrix_SetField (out, 3, 2, self [8]) VMatrix_SetField (out, 3, 3, self [9])
 	
 	return out
 end
@@ -496,6 +505,9 @@ self.__sub                  = GCAD.Matrix3x3.Subtract
 self.__mul                  = GCAD.Matrix3x3.Multiply
 self.__div                  = GCAD.Matrix3x3.ScalarDivide
 self.__unm                  = GCAD.Matrix3x3.Negate
+
+-- Conversion
+self.ToNativeMatrix         = GCAD.Matrix3x3.ToNativeMatrix
 
 -- Utility
 self.Unpack                 = GCAD.Matrix3x3.Unpack
