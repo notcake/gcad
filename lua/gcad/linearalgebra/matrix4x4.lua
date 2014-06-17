@@ -194,17 +194,175 @@ end
 
 -- Matrix operations
 function GCAD.Matrix4x4.Determinant (self)
-	GCAD.Error ("Matrix4x4.Determinant : Not implemented.")
-	return 0
+	return   self [1] * (  self [ 6] * (self [11] * self [16] - self [15] * self [12])
+	                     - self [ 7] * (self [10] * self [16] - self [14] * self [12])
+	                     + self [ 8] * (self [10] * self [15] - self [14] * self [11]))
+	       - self [2] * (  self [ 5] * (self [11] * self [16] - self [15] * self [12])
+	                     - self [ 7] * (self [ 9] * self [16] - self [13] * self [12])
+	                     + self [ 8] * (self [ 9] * self [15] - self [13] * self [11]))
+	       + self [3] * (  self [ 5] * (self [10] * self [16] - self [14] * self [12])
+	                     - self [ 6] * (self [ 9] * self [16] - self [13] * self [12])
+	                     + self [ 8] * (self [ 9] * self [14] - self [13] * self [10]))
+	       - self [4] * (  self [ 5] * (self [10] * self [15] - self [14] * self [11])
+	                     - self [ 6] * (self [ 9] * self [15] - self [13] * self [11])
+	                     + self [ 7] * (self [ 9] * self [14] - self [13] * self [10]))
 end
 
 local GCAD_Matrix4x4_Determinant = GCAD.Matrix4x4.Determinant
 function GCAD.Matrix4x4.Invert (self, out)
+	if out == self then out = nil end
 	out = out or GCAD.Matrix4x4 ()
 	
-	GCAD.Error ("Matrix4x4.Invert : Not implemented.")
+	local inverseDeterminant = 1 / GCAD_Matrix4x4_Determinant (self)
+	local m11, m12, m13, m14 = self [ 1], self [ 2], self [ 3], self [ 4]
+	local m21, m22, m23, m24 = self [ 5], self [ 6], self [ 7], self [ 8]
+	local m31, m32, m33, m34 = self [ 9], self [10], self [11], self [12]
+	local m41, m42, m43, m44 = self [13], self [14], self [15], self [16]
+	
+	-- Elements are calculated in this order
+	-- because it's faster (believe it or not)
+	local m33m44m43m34 = m33 * m44 - m43 * m34
+	local m32m44m42m34 = m32 * m44 - m42 * m34
+	local m32m43m42m33 = m32 * m43 - m42 * m33
+	local m31m44m41m34 = m31 * m44 - m41 * m34
+	local m31m43m41m33 = m31 * m43 - m41 * m33
+	local m31m42m41m32 = m31 * m42 - m41 * m32
+	out [ 1] =  (  m22 * (m33m44m43m34)
+	             - m23 * (m32m44m42m34)
+	             + m24 * (m32m43m42m33)) * inverseDeterminant
+	out [ 2] = -(  m12 * (m33m44m43m34)
+	             - m13 * (m32m44m42m34)
+	             + m14 * (m32m43m42m33)) * inverseDeterminant
+	out [ 5] = -(  m21 * (m33m44m43m34)
+	             - m23 * (m31m44m41m34)
+	             + m24 * (m31m43m41m33)) * inverseDeterminant
+	out [ 6] =  (  m11 * (m33m44m43m34)
+	             - m13 * (m31m44m41m34)
+	             + m14 * (m31m43m41m33)) * inverseDeterminant
+	out [ 9] =  (  m21 * (m32m44m42m34)
+	             - m22 * (m31m44m41m34)
+	             + m24 * (m31m42m41m32)) * inverseDeterminant
+	out [10] = -(  m11 * (m32m44m42m34)
+	             - m12 * (m31m44m41m34)
+	             + m14 * (m31m42m41m32)) * inverseDeterminant
+	out [13] = -(  m21 * (m32m43m42m33)
+	             - m22 * (m31m43m41m33)
+	             + m23 * (m31m42m41m32)) * inverseDeterminant
+	out [14] =  (  m11 * (m32m43m42m33)
+	             - m12 * (m31m43m41m33)
+	             + m13 * (m31m42m41m32)) * inverseDeterminant
+	
+	local m23m44m43m24 = m23 * m44 - m43 * m24
+	local m22m44m42m24 = m22 * m44 - m42 * m24
+	local m22m43m42m23 = m22 * m43 - m42 * m23
+	local m21m44m41m24 = m21 * m44 - m41 * m24
+	local m21m43m41m23 = m21 * m43 - m41 * m23
+	local m21m42m41m22 = m21 * m42 - m41 * m22
+	out [ 3] =  (  m12 * (m23m44m43m24)
+	             - m13 * (m22m44m42m24)
+	             + m14 * (m22m43m42m23)) * inverseDeterminant
+	out [ 7] = -(  m11 * (m23m44m43m24)
+	             - m13 * (m21m44m41m24)
+	             + m14 * (m21m43m41m23)) * inverseDeterminant
+	out [11] =  (  m11 * (m22m44m42m24)
+	             - m12 * (m21m44m41m24)
+	             + m14 * (m21m42m41m22)) * inverseDeterminant
+	out [15] = -(  m11 * (m22m43m42m23)
+	             - m12 * (m21m43m41m23)
+	             + m13 * (m21m42m41m22)) * inverseDeterminant
+	
+	local m23m34m33m24 = m23 * m34 - m33 * m24
+	local m22m34m32m24 = m22 * m34 - m32 * m24
+	local m22m33m32m23 = m22 * m33 - m32 * m23
+	local m21m34m31m24 = m21 * m34 - m31 * m24
+	local m21m33m31m23 = m21 * m33 - m31 * m23
+	local m21m32m31m22 = m21 * m32 - m31 * m22
+	out [ 4] = -(  m12 * (m23m34m33m24)
+	             - m13 * (m22m34m32m24)
+	             + m14 * (m22m33m32m23)) * inverseDeterminant
+	out [ 8] =  (  m11 * (m23m34m33m24)
+	             - m13 * (m21m34m31m24)
+	             + m14 * (m21m33m31m23)) * inverseDeterminant
+	out [12] = -(  m11 * (m22m34m32m24)
+	             - m12 * (m21m34m31m24)
+	             + m14 * (m21m32m31m22)) * inverseDeterminant
+	out [16] =  (  m11 * (m22m33m32m23)
+	             - m12 * (m21m33m31m23)
+	             + m13 * (m21m32m31m22)) * inverseDeterminant
 	
 	return out
+end
+
+local math_abs                   = math.abs
+local math_huge                  = math.huge
+local GCAD_Matrix4x4_Clone       = GCAD.Matrix4x4.Clone
+local GCAD_Matrix4x4_Determinant = GCAD.Matrix4x4.Determinant
+local left
+function GCAD.Matrix4x4.InvertGaussian (self, out)
+	if out == self then out = nil end
+	out = out or GCAD.Matrix4x4 ()
+	
+	-- [ M I ]
+	left = GCAD_Matrix4x4_Clone (self, left)
+	local right = GCAD.Matrix4x4.Identity (out)
+	
+	-- We want to turn this into [ I M ^ -1 ]
+	
+	for x = 0, 3 do
+		-- Find the biggest row
+		local largestElement  = -math_huge
+		local largestElementY = 0
+		for y = x, 3 do
+			if math_abs (left [1 + y * 4 + x]) >= largestElement then
+				largestElement  = math_abs (left [1 + y * 4 + x])
+				largestElementY = y
+			end
+		end
+		
+		-- Get the row elements
+		local i = 1 + largestElementY * 4
+		local l1, r1 = left [i + 0], right [i + 0]
+		local l2, r2 = left [i + 1], right [i + 1]
+		local l3, r3 = left [i + 2], right [i + 2]
+		local l4, r4 = left [i + 3], right [i + 3]
+		largestElement = left [i + x]
+		
+		-- Swap rows
+		local i1 = 1 + largestElementY * 4
+		local i2 = 1 + x * 4
+		left  [i1 + 0], left  [i2 + 0] = left  [i2 + 0], l1
+		left  [i1 + 1], left  [i2 + 1] = left  [i2 + 1], l2
+		left  [i1 + 2], left  [i2 + 2] = left  [i2 + 2], l3
+		left  [i1 + 3], left  [i2 + 3] = left  [i2 + 3], l4
+		right [i1 + 0], right [i2 + 0] = right [i2 + 0], r1
+		right [i1 + 1], right [i2 + 1] = right [i2 + 1], r2
+		right [i1 + 2], right [i2 + 2] = right [i2 + 2], r3
+		right [i1 + 3], right [i2 + 3] = right [i2 + 3], r4
+		
+		-- Now mess around
+		for y = 0, 3 do
+			local i = 1 + y * 4
+			local k = y == x and ((left [i + x] - 1) / largestElement) or (left [i + x] / largestElement)
+			left  [i + 0] = left  [i + 0] - k * l1
+			left  [i + 1] = left  [i + 1] - k * l2
+			left  [i + 2] = left  [i + 2] - k * l3
+			left  [i + 3] = left  [i + 3] - k * l4
+			right [i + 0] = right [i + 0] - k * r1
+			right [i + 1] = right [i + 1] - k * r2
+			right [i + 2] = right [i + 2] - k * r3
+			right [i + 3] = right [i + 3] - k * r4
+		end
+	end
+	
+	return out
+end
+
+local VMatrix_Invert = debug.getregistry ().VMatrix.Invert
+local matrix = Matrix ()
+function GCAD.Matrix4x4.InvertToVMatrixAndBack (self, out)
+	GCAD.Matrix4x4.ToNativeMatrix (self, matrix)
+	VMatrix_Invert (matrix)
+	return GCAD.Matrix4x4.FromNativeMatrix (matrix, out)
 end
 
 function GCAD.Matrix4x4.Transpose (self, out)
@@ -363,10 +521,11 @@ end
 function GCAD.Matrix4x4.ScalarDivide (a, b, out)
 	out = out or GCAD.Matrix4x4 ()
 	
-	out [ 1], out [ 2], out [ 3], out [ 4] = a [ 1] / b, a [ 2] / b, a [ 3] / b, a [ 4] / b
-	out [ 5], out [ 6], out [ 7], out [ 8] = a [ 5] / b, a [ 6] / b, a [ 7] / b, a [ 8] / b
-	out [ 9], out [10], out [11], out [12] = a [ 9] / b, a [10] / b, a [11] / b, a [12] / b
-	out [13], out [14], out [15], out [16] = a [13] / b, a [14] / b, a [15] / b, a [16] / b
+	b = 1 / b
+	out [ 1], out [ 2], out [ 3], out [ 4] = a [ 1] * b, a [ 2] * b, a [ 3] * b, a [ 4] * b
+	out [ 5], out [ 6], out [ 7], out [ 8] = a [ 5] * b, a [ 6] * b, a [ 7] * b, a [ 8] * b
+	out [ 9], out [10], out [11], out [12] = a [ 9] * b, a [10] * b, a [11] * b, a [12] * b
+	out [13], out [14], out [15], out [16] = a [13] * b, a [14] * b, a [15] * b, a [16] * b
 	
 	return out
 end

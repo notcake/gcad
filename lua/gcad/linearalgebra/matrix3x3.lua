@@ -182,14 +182,88 @@ end
 function GCAD.Matrix3x3.Determinant (self)
 	return   self [1] * (self [5] * self [9] - self [8] * self [6])
 	       - self [2] * (self [4] * self [9] - self [7] * self [6])
-		   + self [3] * (self [4] * self [8] - self [7] * self [5])
+	       + self [3] * (self [4] * self [8] - self [7] * self [5])
 end
 
 local GCAD_Matrix3x3_Determinant = GCAD.Matrix3x3.Determinant
 function GCAD.Matrix3x3.Invert (self, out)
+	if out == self then out = nil end
 	out = out or GCAD.Matrix3x3 ()
 	
-	GCAD.Error ("Matrix3x3.Invert : Not implemented.")
+	local inverseDeterminant = 1 / GCAD_Matrix3x3_Determinant (self)
+	local m11, m12, m13 = self [1], self [2], self [3]
+	local m21, m22, m23 = self [4], self [5], self [6]
+	local m31, m32, m33 = self [7], self [8], self [9]
+	out [1] =  (m22 * m33 - m32 * m23) * inverseDeterminant
+	out [2] = -(m12 * m33 - m32 * m13) * inverseDeterminant
+	out [3] =  (m12 * m23 - m22 * m13) * inverseDeterminant
+	
+	out [4] = -(m21 * m33 - m31 * m23) * inverseDeterminant
+	out [5] =  (m11 * m33 - m31 * m13) * inverseDeterminant
+	out [6] = -(m11 * m23 - m21 * m13) * inverseDeterminant
+	
+	out [7] =  (m21 * m32 - m31 * m22) * inverseDeterminant
+	out [8] = -(m11 * m32 - m31 * m12) * inverseDeterminant
+	out [9] =  (m11 * m22 - m21 * m12) * inverseDeterminant
+	
+	return out
+end
+
+local math_abs                   = math.abs
+local math_huge                  = math.huge
+local GCAD_Matrix3x3_Clone       = GCAD.Matrix3x3.Clone
+local GCAD_Matrix3x3_Determinant = GCAD.Matrix3x3.Determinant
+local left
+function GCAD.Matrix3x3.InvertGaussian (self, out)
+	if out == self then out = nil end
+	out = out or GCAD.Matrix3x3 ()
+	
+	-- [ M I ]
+	left = GCAD_Matrix3x3_Clone (self, left)
+	local right = GCAD.Matrix3x3.Identity (out)
+	
+	-- We want to turn this into [ I M ^ -1 ]
+	
+	for x = 0, 2 do
+		-- Find the biggest row
+		local largestElement  = -math_huge
+		local largestElementY = 0
+		for y = x, 2 do
+			if math_abs (left [1 + y * 3 + x]) >= largestElement then
+				largestElement  = math_abs (left [1 + y * 3 + x])
+				largestElementY = y
+			end
+		end
+		
+		-- Get the row elements
+		local i = 1 + largestElementY * 3
+		local l1, r1 = left [i + 0], right [i + 0]
+		local l2, r2 = left [i + 1], right [i + 1]
+		local l3, r3 = left [i + 2], right [i + 2]
+		largestElement = left [i + x]
+		
+		-- Swap rows
+		local i1 = 1 + largestElementY * 3
+		local i2 = 1 + x * 3
+		left  [i1 + 0], left  [i2 + 0] = left  [i2 + 0], l1
+		left  [i1 + 1], left  [i2 + 1] = left  [i2 + 1], l2
+		left  [i1 + 2], left  [i2 + 2] = left  [i2 + 2], l3
+		right [i1 + 0], right [i2 + 0] = right [i2 + 0], r1
+		right [i1 + 1], right [i2 + 1] = right [i2 + 1], r2
+		right [i1 + 2], right [i2 + 2] = right [i2 + 2], r3
+		
+		-- Now mess around
+		for y = 0, 2 do
+			local i = 1 + y * 3
+			local k = y == x and ((left [i + x] - 1) / largestElement) or (left [i + x] / largestElement)
+			left  [i + 0] = left  [i + 0] - k * l1
+			left  [i + 1] = left  [i + 1] - k * l2
+			left  [i + 2] = left  [i + 2] - k * l3
+			right [i + 0] = right [i + 0] - k * r1
+			right [i + 1] = right [i + 1] - k * r2
+			right [i + 2] = right [i + 2] - k * r3
+		end
+	end
 	
 	return out
 end
@@ -331,9 +405,10 @@ end
 function GCAD.Matrix3x3.ScalarDivide (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1], out [2], out [3] = a [1] / b, a [2] / b, a [3] / b
-	out [4], out [5], out [6] = a [4] / b, a [5] / b, a [6] / b
-	out [7], out [8], out [9] = a [7] / b, a [8] / b, a [9] / b
+	b = 1 / b
+	out [1], out [2], out [3] = a [1] * b, a [2] * b, a [3] * b
+	out [4], out [5], out [6] = a [4] * b, a [5] * b, a [6] * b
+	out [7], out [8], out [9] = a [7] * b, a [8] * b, a [9] * b
 	
 	return out
 end
