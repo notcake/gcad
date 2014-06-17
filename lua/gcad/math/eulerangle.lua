@@ -1,14 +1,14 @@
 local self = {}
 GCAD.EulerAngle = GCAD.MakeConstructor (self)
 
+local math_cos                             = math.cos
+local math_rad                             = math.rad
+local math_sin                             = math.sin
+
 local Angle                                = Angle
 
 local Angle___index                        = debug.getregistry ().Angle.__index
 local Angle___newindex                     = debug.getregistry ().Angle.__newindex
-
-local math_cos                             = math.cos
-local math_rad                             = math.rad
-local math_sin                             = math.sin
 
 local GCAD_UnpackedVector3d_ToNativeVector = GCAD.UnpackedVector3d.ToNativeVector
 local GCAD_UnpackedVector3d_ToVector3d     = GCAD.UnpackedVector3d.ToVector3d

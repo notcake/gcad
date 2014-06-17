@@ -1,9 +1,9 @@
 local self = {}
 GCAD.Matrix3x3 = GCAD.MakeConstructor (self)
 
-local math              = math
-
 local isnumber          = isnumber
+
+local math              = math
 
 local Matrix            = Matrix
 
@@ -185,6 +185,10 @@ function GCAD.Matrix3x3.Determinant (self)
 	       + self [3] * (self [4] * self [8] - self [7] * self [5])
 end
 
+function GCAD.Matrix3x3.Determinant2x2 (self)
+	return  self [1] * self [5] - self [4] * self [2]
+end
+
 local GCAD_Matrix3x3_Determinant = GCAD.Matrix3x3.Determinant
 function GCAD.Matrix3x3.Invert (self, out)
 	if out == self then out = nil end
@@ -205,6 +209,60 @@ function GCAD.Matrix3x3.Invert (self, out)
 	out [7] =  (m21 * m32 - m31 * m22) * inverseDeterminant
 	out [8] = -(m11 * m32 - m31 * m12) * inverseDeterminant
 	out [9] =  (m11 * m22 - m21 * m12) * inverseDeterminant
+	
+	return out
+end
+
+local GCAD_Matrix3x3_Determinant2x2 = GCAD.Matrix3x3.Determinant2x2
+function GCAD.Matrix3x3.InvertAffine (self, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	-- A = T M
+	-- I =    InvA      A    =   A       InvA
+	--   =    InvA     T M   =  T M      InvA
+	--   = InvM InvT   T M   =  T M   InvM InvT
+	
+	-- InvT = [ I -T ]
+	--      = [ 0  1 ]
+	
+	-- InvM = [ InvM 0 ]
+	--      = [    0 1 ]
+	
+	-- InvA = [ InvM (InvM * -T) ]
+	--      = [    0           1 ]
+	
+	-- Inline expansion of Matrix2x2:Invert ()
+	local inverseDeterminant = 1 / GCAD_Matrix3x3_Determinant2x2 (self)
+	out [1], out [5] = self [5] * inverseDeterminant, self [1] * inverseDeterminant
+	out [2] = -self [2] * inverseDeterminant
+	out [4] = -self [4] * inverseDeterminant
+	
+	-- Inline expansion of Matrix2x2:MatrixUnpackedVectorMultiply ()
+	local tx, ty = -self [3], -self [6]
+	out [3] = tx * out [1] + ty * out [2]
+	out [6] = tx * out [4] + ty * out [5]
+	
+	-- Set the last row
+	out [7], out [8], out [9] = 0, 0, 1
+	
+	return out
+end
+
+function GCAD.Matrix3x3.InvertAffineOrthonormal (self, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	-- Inline expansion of Matrix2x2:Transpose ()
+	out [1] = self [1]
+	out [5] = self [5]
+	out [2], out [4] = self [4], self [2]
+	
+	-- Inline expansion of Matrix2x2:MatrixUnpackedVectorMultiply ()
+	local tx, ty = -self [3], -self [6]
+	out [3] = tx * out [1] + ty * out [2]
+	out [6] = tx * out [4] + ty * out [5]
+	
+	-- Set the last row
+	out [7], out [8], out [9] = 0, 0, 1
 	
 	return out
 end
@@ -266,6 +324,10 @@ function GCAD.Matrix3x3.InvertGaussian (self, out)
 	end
 	
 	return out
+end
+
+function GCAD.Matrix3x3.InvertOrthonormal (self, out)
+	return GCAD.Matrix3x3.Transpose (self, out)
 end
 
 function GCAD.Matrix3x3.Transpose (self, out)
@@ -424,6 +486,46 @@ function GCAD.Matrix3x3.Negate (self, out)
 end
 
 -- Conversion
+function GCAD.Matrix3x3.FromMatrix2x2 (matrix, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = matrix [1], matrix [2], 0
+	out [4], out [5], out [6] = matrix [3], matrix [4], 0
+	out [7], out [8], out [9] =          0,          0, 1
+	
+	return out
+end
+
+function GCAD.Matrix3x3.ToMatrix2x2 (self, out)
+	out = out or GCAD.Matrix2x2 ()
+	
+	out [1], out [2] = self [1], self [2]
+	out [3], out [4] = self [4], self [5]
+	
+	return out
+end
+
+function GCAD.Matrix3x3.FromMatrix4x4 (matrix, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = matrix [ 1], matrix [ 2], matrix [ 3]
+	out [4], out [5], out [6] = matrix [ 5], matrix [ 6], matrix [ 7]
+	out [7], out [8], out [9] = matrix [ 9], matrix [10], matrix [11]
+	
+	return out
+end
+
+function GCAD.Matrix3x3.ToMatrix4x4 (self, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	out [ 1], out [ 2], out [ 3], out [ 4] = self [1], self [2], self [3], 0
+	out [ 5], out [ 6], out [ 7], out [ 8] = self [4], self [5], self [6], 0
+	out [ 9], out [10], out [11], out [12] = self [7], self [8], self [9], 0
+	out [13], out [14], out [15], out [16] =        0,        0,        0, 1
+	
+	return out
+end
+
 function GCAD.Matrix3x3.FromNativeMatrix (matrix, out)
 	out = out or GCAD.Matrix3x3 ()
 	
@@ -536,55 +638,60 @@ function self:Identity () return GCAD_Matrix3x3_Identity (self) end
 function self:Zero     () return GCAD_Matrix3x3_Zero     (self) end
 
 -- Copying
-self.Clone                  = GCAD.Matrix3x3.Clone
-self.Copy                   = GCAD.Matrix3x3.Copy
+self.Clone                   = GCAD.Matrix3x3.Clone
+self.Copy                    = GCAD.Matrix3x3.Copy
 
 -- Matrix reading
-self.GetColumn              = GCAD.Matrix3x3.GetColumn
-self.GetColumnNative        = GCAD.Matrix3x3.GetColumnNative
-self.GetColumnUnpacked      = GCAD.Matrix3x3.GetColumnUnpacked
-self.GetDiagonal            = GCAD.Matrix3x3.GetDiagonal
-self.GetDiagonalNative      = GCAD.Matrix3x3.GetDiagonalNative
-self.GetDiagonalUnpacked    = GCAD.Matrix3x3.GetDiagonalUnpacked
-self.GetRow                 = GCAD.Matrix3x3.GetRow
-self.GetRowNative           = GCAD.Matrix3x3.GetRowNative
-self.GetRowUnpacked         = GCAD.Matrix3x3.GetRowUnpacked
-self.SetColumn              = GCAD.Matrix3x3.SetColumn
-self.SetColumnNative        = GCAD.Matrix3x3.SetColumnNative
-self.SetColumnUnpacked      = GCAD.Matrix3x3.SetColumnUnpacked
-self.SetDiagonal            = GCAD.Matrix3x3.SetDiagonal
-self.SetDiagonalNative      = GCAD.Matrix3x3.SetDiagonalNative
-self.SetDiagonalUnpacked    = GCAD.Matrix3x3.SetDiagonalUnpacked
-self.SetRow                 = GCAD.Matrix3x3.SetRow
-self.SetRowNative           = GCAD.Matrix3x3.SetRowNative
-self.SetRowUnpacked         = GCAD.Matrix3x3.SetRowUnpacked
+self.GetColumn               = GCAD.Matrix3x3.GetColumn
+self.GetColumnNative         = GCAD.Matrix3x3.GetColumnNative
+self.GetColumnUnpacked       = GCAD.Matrix3x3.GetColumnUnpacked
+self.GetDiagonal             = GCAD.Matrix3x3.GetDiagonal
+self.GetDiagonalNative       = GCAD.Matrix3x3.GetDiagonalNative
+self.GetDiagonalUnpacked     = GCAD.Matrix3x3.GetDiagonalUnpacked
+self.GetRow                  = GCAD.Matrix3x3.GetRow
+self.GetRowNative            = GCAD.Matrix3x3.GetRowNative
+self.GetRowUnpacked          = GCAD.Matrix3x3.GetRowUnpacked
+self.SetColumn               = GCAD.Matrix3x3.SetColumn
+self.SetColumnNative         = GCAD.Matrix3x3.SetColumnNative
+self.SetColumnUnpacked       = GCAD.Matrix3x3.SetColumnUnpacked
+self.SetDiagonal             = GCAD.Matrix3x3.SetDiagonal
+self.SetDiagonalNative       = GCAD.Matrix3x3.SetDiagonalNative
+self.SetDiagonalUnpacked     = GCAD.Matrix3x3.SetDiagonalUnpacked
+self.SetRow                  = GCAD.Matrix3x3.SetRow
+self.SetRowNative            = GCAD.Matrix3x3.SetRowNative
+self.SetRowUnpacked          = GCAD.Matrix3x3.SetRowUnpacked
 
 -- Matrix operations
-self.Determinant            = GCAD.Matrix3x3.Determinant
-self.Invert                 = GCAD.Matrix3x3.Invert
-self.Transpose              = GCAD.Matrix3x3.Transpose
+self.Determinant             = GCAD.Matrix3x3.Determinant
+self.Invert                  = GCAD.Matrix3x3.Invert
+self.InvertAffine            = GCAD.Matrix3x3.InvertAffine
+self.InvertAffineOrthonormal = GCAD.Matrix3x3.InvertAffineOrthonormal
+self.InvertOrthonormal       = GCAD.Matrix3x3.InvertOrthonormal
+self.Transpose               = GCAD.Matrix3x3.Transpose
 
 -- Matrix arithmetic
-self.Add                    = GCAD.Matrix3x3.Add
-self.Subtract               = GCAD.Matrix3x3.Subtract
-self.Multiply               = GCAD.Matrix3x3.Multiply
-self.ScalarMultiply         = GCAD.Matrix3x3.MatrixScalarMultiply
-self.ScalarDivide           = GCAD.Matrix3x3.ScalarDivide
-self.MatrixMultiply         = GCAD.Matrix3x3.MatrixMatrixMultiply
-self.VectorMultiply         = GCAD.Matrix3x3.MatrixVectorMultiply
-self.UnpackedVectorMultiply = GCAD.Matrix3x3.MatrixUnpackedVectorMultiply
-self.Negate                 = GCAD.Matrix3x3.Negate
+self.Add                     = GCAD.Matrix3x3.Add
+self.Subtract                = GCAD.Matrix3x3.Subtract
+self.Multiply                = GCAD.Matrix3x3.Multiply
+self.ScalarMultiply          = GCAD.Matrix3x3.MatrixScalarMultiply
+self.ScalarDivide            = GCAD.Matrix3x3.ScalarDivide
+self.MatrixMultiply          = GCAD.Matrix3x3.MatrixMatrixMultiply
+self.VectorMultiply          = GCAD.Matrix3x3.MatrixVectorMultiply
+self.UnpackedVectorMultiply  = GCAD.Matrix3x3.MatrixUnpackedVectorMultiply
+self.Negate                  = GCAD.Matrix3x3.Negate
 
-self.__add                  = GCAD.Matrix3x3.Add
-self.__sub                  = GCAD.Matrix3x3.Subtract
-self.__mul                  = GCAD.Matrix3x3.Multiply
-self.__div                  = GCAD.Matrix3x3.ScalarDivide
-self.__unm                  = GCAD.Matrix3x3.Negate
+self.__add                   = GCAD.Matrix3x3.Add
+self.__sub                   = GCAD.Matrix3x3.Subtract
+self.__mul                   = GCAD.Matrix3x3.Multiply
+self.__div                   = GCAD.Matrix3x3.ScalarDivide
+self.__unm                   = GCAD.Matrix3x3.Negate
 
 -- Conversion
-self.ToNativeMatrix         = GCAD.Matrix3x3.ToNativeMatrix
+self.ToMatrix2x2             = GCAD.Matrix3x3.ToMatrix2x2
+self.ToMatrix4x4             = GCAD.Matrix3x3.ToMatrix4x4
+self.ToNativeMatrix          = GCAD.Matrix3x3.ToNativeMatrix
 
 -- Utility
-self.Unpack                 = GCAD.Matrix3x3.Unpack
-self.ToString               = GCAD.Matrix3x3.ToString
-self.__tostring             = GCAD.Matrix3x3.ToString
+self.Unpack                  = GCAD.Matrix3x3.Unpack
+self.ToString                = GCAD.Matrix3x3.ToString
+self.__tostring              = GCAD.Matrix3x3.ToString

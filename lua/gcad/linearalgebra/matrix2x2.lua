@@ -1,9 +1,10 @@
 local self = {}
 GCAD.Matrix2x2 = GCAD.MakeConstructor (self)
 
-local math      = math
-
 local isnumber  = isnumber
+
+local math_cos  = math.cos
+local math_sin  = math.sin
 
 -- Copying
 function GCAD.Matrix2x2.Clone (self, out)
@@ -113,12 +114,16 @@ local GCAD_Matrix2x2_Determinant = GCAD.Matrix2x2.Determinant
 function GCAD.Matrix2x2.Invert (self, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	local determinant = GCAD_Matrix2x2_Determinant (self)
-	out [1], out [4] = self [4] / determinant, self [1] / determinant
-	out [2] = -self [2] / determinant
-	out [3] = -self [3] / determinant
+	local inverseDeterminant = 1 / GCAD_Matrix2x2_Determinant (self)
+	out [1], out [4] = self [4] * inverseDeterminant, self [1] * inverseDeterminant
+	out [2] = -self [2] * inverseDeterminant
+	out [3] = -self [3] * inverseDeterminant
 	
 	return out
+end
+
+function GCAD.Matrix2x2.InvertOrthonormal (self, out)
+	return GCAD.Matrix2x2.Transpose (self, out)
 end
 
 function GCAD.Matrix2x2.Transpose (self, out)
@@ -233,8 +238,9 @@ end
 function GCAD.Matrix2x2.ScalarDivide (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1], out [2] = a [1] / b, a [2] / b
-	out [3], out [4] = a [3] / b, a [4] / b
+	b = 1 / b
+	out [1], out [2] = a [1] * b, a [2] * b
+	out [3], out [4] = a [3] * b, a [4] * b
 	
 	return out
 end
@@ -244,6 +250,26 @@ function GCAD.Matrix2x2.Negate (self, out)
 	
 	out [1], out [2] = -self [1], -self [2]
 	out [3], out [4] = -self [3], -self [4]
+	
+	return out
+end
+
+-- Conversion
+function GCAD.Matrix2x2.FromMatrix3x3 (matrix, out)
+	out = out or GCAD.Matrix2x2 ()
+	
+	out [1], out [2] = matrix [1], matrix [2]
+	out [3], out [4] = matrix [4], matrix [5]
+	
+	return out
+end
+
+function GCAD.Matrix2x2.ToMatrix3x3 (self, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = self [1], self [2], 0
+	out [4], out [5], out [6] = self [3], self [4], 0
+	out [7], out [8], out [9] =        0,        0, 1
 	
 	return out
 end
@@ -352,6 +378,7 @@ self.SetRowUnpacked         = GCAD.Matrix2x2.SetRowUnpacked
 -- Matrix operations
 self.Determinant            = GCAD.Matrix2x2.Determinant
 self.Invert                 = GCAD.Matrix2x2.Invert
+self.InvertOrthonormal      = GCAD.Matrix2x2.InvertOrthonormal
 self.Transpose              = GCAD.Matrix2x2.Transpose
 
 -- Matrix arithmetic
@@ -370,6 +397,9 @@ self.__sub                  = GCAD.Matrix2x2.Subtract
 self.__mul                  = GCAD.Matrix2x2.Multiply
 self.__div                  = GCAD.Matrix2x2.ScalarDivide
 self.__unm                  = GCAD.Matrix2x2.Negate
+
+-- Conversion
+self.ToMatrix3x3            = GCAD.Matrix2x2.ToMatrix3x3
 
 -- Utility
 self.Unpack                 = GCAD.Matrix2x2.Unpack

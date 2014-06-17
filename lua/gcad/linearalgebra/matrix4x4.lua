@@ -208,6 +208,12 @@ function GCAD.Matrix4x4.Determinant (self)
 	                     + self [ 7] * (self [ 9] * self [14] - self [13] * self [10]))
 end
 
+function GCAD.Matrix4x4.Determinant3x3 (self)
+	return   self [1] * (self [ 6] * self [11] - self [10] * self [ 7])
+	       - self [2] * (self [ 5] * self [11] - self [ 9] * self [ 7])
+	       + self [3] * (self [ 5] * self [10] - self [ 9] * self [ 6])
+end
+
 local GCAD_Matrix4x4_Determinant = GCAD.Matrix4x4.Determinant
 function GCAD.Matrix4x4.Invert (self, out)
 	if out == self then out = nil end
@@ -293,6 +299,77 @@ function GCAD.Matrix4x4.Invert (self, out)
 	return out
 end
 
+local GCAD_Matrix4x4_Determinant3x3 = GCAD.Matrix4x4.Determinant3x3
+function GCAD.Matrix4x4.InvertAffine (self, out)
+	if out == self then out = nil end
+	out = out or GCAD.Matrix4x4 ()
+	
+	-- A = T M
+	-- I =    InvA      A    =   A       InvA
+	--   =    InvA     T M   =  T M      InvA
+	--   = InvM InvT   T M   =  T M   InvM InvT
+	
+	-- InvT = [ I -T ]
+	--      = [ 0  1 ]
+	
+	-- InvM = [ InvM 0 ]
+	--      = [    0 1 ]
+	
+	-- InvA = [ InvM (InvM * -T) ]
+	--      = [    0           1 ]
+	
+	-- Inline expansion of Matrix3x3:Invert ()
+	local inverseDeterminant = 1 / GCAD_Matrix4x4_Determinant3x3 (self)
+	local m11, m12, m13 = self [ 1], self [ 2], self [ 3]
+	local m21, m22, m23 = self [ 5], self [ 6], self [ 7]
+	local m31, m32, m33 = self [ 9], self [10], self [11]
+	out [ 1] =  (m22 * m33 - m32 * m23) * inverseDeterminant
+	out [ 2] = -(m12 * m33 - m32 * m13) * inverseDeterminant
+	out [ 3] =  (m12 * m23 - m22 * m13) * inverseDeterminant
+	
+	out [ 5] = -(m21 * m33 - m31 * m23) * inverseDeterminant
+	out [ 6] =  (m11 * m33 - m31 * m13) * inverseDeterminant
+	out [ 7] = -(m11 * m23 - m21 * m13) * inverseDeterminant
+	
+	out [ 9] =  (m21 * m32 - m31 * m22) * inverseDeterminant
+	out [10] = -(m11 * m32 - m31 * m12) * inverseDeterminant
+	out [11] =  (m11 * m22 - m21 * m12) * inverseDeterminant
+	
+	-- Inline expansion of Matrix3x3:MatrixUnpackedVectorMultiply ()
+	local tx, ty, tz = -self [4], -self [8], -self [12]
+	out [ 4] = tx * out [ 1] + ty * out [ 2] + tz * out [ 3]
+	out [ 8] = tx * out [ 5] + ty * out [ 6] + tz * out [ 7]
+	out [12] = tx * out [ 9] + ty * out [10] + tz * out [11]
+	
+	-- Set the last row
+	out [13], out [14], out [15], out [16] = 0, 0, 0, 1
+	
+	return out
+end
+
+function GCAD.Matrix4x4.InvertAffineOrthonormal (self, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	-- Inline expansion of Matrix3x3:Transpose ()
+	out [ 1] = self [ 1]
+	out [ 6] = self [ 6]
+	out [11] = self [11]
+	out [ 2], out [ 5] = self [ 5], self [ 2]
+	out [ 3], out [ 9] = self [ 9], self [ 3]
+	out [ 7], out [10] = self [10], self [ 7]
+	
+	-- Inline expansion of Matrix3x3:MatrixUnpackedVectorMultiply ()
+	local tx, ty, tz = -self [4], -self [8], -self [12]
+	out [ 4] = tx * out [ 1] + ty * out [ 2] + tz * out [ 3]
+	out [ 8] = tx * out [ 5] + ty * out [ 6] + tz * out [ 7]
+	out [12] = tx * out [ 9] + ty * out [10] + tz * out [11]
+	
+	-- Set the last row
+	out [13], out [14], out [15], out [16] = 0, 0, 0, 1
+	
+	return out
+end
+
 local math_abs                   = math.abs
 local math_huge                  = math.huge
 local GCAD_Matrix4x4_Clone       = GCAD.Matrix4x4.Clone
@@ -355,6 +432,10 @@ function GCAD.Matrix4x4.InvertGaussian (self, out)
 	end
 	
 	return out
+end
+
+function GCAD.Matrix4x4.InvertOrthonormal (self, out)
+	return GCAD.Matrix4x4.Transpose (self, out)
 end
 
 local VMatrix_Invert = debug.getregistry ().VMatrix.Invert
@@ -542,6 +623,27 @@ function GCAD.Matrix4x4.Negate (self, out)
 end
 
 -- Conversion
+function GCAD.Matrix4x4.FromMatrix3x3 (matrix, out)
+	out = out or GCAD.Matrix4x4 ()
+	
+	out [ 1], out [ 2], out [ 3], out [ 4] = matrix [1], matrix [2], matrix [3], 0
+	out [ 5], out [ 6], out [ 7], out [ 8] = matrix [4], matrix [5], matrix [6], 0
+	out [ 9], out [10], out [11], out [12] = matrix [7], matrix [8], matrix [9], 0
+	out [13], out [14], out [15], out [16] =          0,          0,          0, 1
+	
+	return out
+end
+
+function GCAD.Matrix4x4.ToMatrix3x3 (self, out)
+	out = out or GCAD.Matrix3x3 ()
+	
+	out [1], out [2], out [3] = self [ 1], self [ 2], self [ 3]
+	out [4], out [5], out [6] = self [ 5], self [ 6], self [ 7]
+	out [7], out [8], out [9] = self [ 9], self [10], self [11]
+	
+	return out
+end
+
 function GCAD.Matrix4x4.FromNativeMatrix (matrix, out)
 	out = out or GCAD.Matrix4x4 ()
 	
@@ -665,55 +767,59 @@ function self:Identity () return GCAD_Matrix4x4_Identity (self) end
 function self:Zero     () return GCAD_Matrix4x4_Zero     (self) end
 
 -- Copying
-self.Clone                  = GCAD.Matrix4x4.Clone
-self.Copy                   = GCAD.Matrix4x4.Copy
+self.Clone                   = GCAD.Matrix4x4.Clone
+self.Copy                    = GCAD.Matrix4x4.Copy
 
 -- Matrix reading
-self.GetColumn              = GCAD.Matrix4x4.GetColumn
-self.GetColumnNative        = GCAD.Matrix4x4.GetColumnNative
-self.GetColumnUnpacked      = GCAD.Matrix4x4.GetColumnUnpacked
-self.GetDiagonal            = GCAD.Matrix4x4.GetDiagonal
-self.GetDiagonalNative      = GCAD.Matrix4x4.GetDiagonalNative
-self.GetDiagonalUnpacked    = GCAD.Matrix4x4.GetDiagonalUnpacked
-self.GetRow                 = GCAD.Matrix4x4.GetRow
-self.GetRowNative           = GCAD.Matrix4x4.GetRowNative
-self.GetRowUnpacked         = GCAD.Matrix4x4.GetRowUnpacked
-self.SetColumn              = GCAD.Matrix4x4.SetColumn
-self.SetColumnNative        = GCAD.Matrix4x4.SetColumnNative
-self.SetColumnUnpacked      = GCAD.Matrix4x4.SetColumnUnpacked
-self.SetDiagonal            = GCAD.Matrix4x4.SetDiagonal
-self.SetDiagonalNative      = GCAD.Matrix4x4.SetDiagonalNative
-self.SetDiagonalUnpacked    = GCAD.Matrix4x4.SetDiagonalUnpacked
-self.SetRow                 = GCAD.Matrix4x4.SetRow
-self.SetRowNative           = GCAD.Matrix4x4.SetRowNative
-self.SetRowUnpacked         = GCAD.Matrix4x4.SetRowUnpacked
+self.GetColumn               = GCAD.Matrix4x4.GetColumn
+self.GetColumnNative         = GCAD.Matrix4x4.GetColumnNative
+self.GetColumnUnpacked       = GCAD.Matrix4x4.GetColumnUnpacked
+self.GetDiagonal             = GCAD.Matrix4x4.GetDiagonal
+self.GetDiagonalNative       = GCAD.Matrix4x4.GetDiagonalNative
+self.GetDiagonalUnpacked     = GCAD.Matrix4x4.GetDiagonalUnpacked
+self.GetRow                  = GCAD.Matrix4x4.GetRow
+self.GetRowNative            = GCAD.Matrix4x4.GetRowNative
+self.GetRowUnpacked          = GCAD.Matrix4x4.GetRowUnpacked
+self.SetColumn               = GCAD.Matrix4x4.SetColumn
+self.SetColumnNative         = GCAD.Matrix4x4.SetColumnNative
+self.SetColumnUnpacked       = GCAD.Matrix4x4.SetColumnUnpacked
+self.SetDiagonal             = GCAD.Matrix4x4.SetDiagonal
+self.SetDiagonalNative       = GCAD.Matrix4x4.SetDiagonalNative
+self.SetDiagonalUnpacked     = GCAD.Matrix4x4.SetDiagonalUnpacked
+self.SetRow                  = GCAD.Matrix4x4.SetRow
+self.SetRowNative            = GCAD.Matrix4x4.SetRowNative
+self.SetRowUnpacked          = GCAD.Matrix4x4.SetRowUnpacked
 
 -- Matrix operations
-self.Determinant            = GCAD.Matrix4x4.Determinant
-self.Invert                 = GCAD.Matrix4x4.Invert
-self.Transpose              = GCAD.Matrix4x4.Transpose
+self.Determinant             = GCAD.Matrix4x4.Determinant
+self.Invert                  = GCAD.Matrix4x4.Invert
+self.InvertAffine            = GCAD.Matrix4x4.InvertAffine
+self.InvertAffineOrthonormal = GCAD.Matrix4x4.InvertAffineOrthonormal
+self.InvertOrthonormal       = GCAD.Matrix4x4.InvertOrthonormal
+self.Transpose               = GCAD.Matrix4x4.Transpose
 
 -- Matrix arithmetic
-self.Add                    = GCAD.Matrix4x4.Add
-self.Subtract               = GCAD.Matrix4x4.Subtract
-self.Multiply               = GCAD.Matrix4x4.Multiply
-self.ScalarMultiply         = GCAD.Matrix4x4.MatrixScalarMultiply
-self.ScalarDivide           = GCAD.Matrix4x4.ScalarDivide
-self.MatrixMultiply         = GCAD.Matrix4x4.MatrixMatrixMultiply
-self.VectorMultiply         = GCAD.Matrix4x4.MatrixVectorMultiply
-self.UnpackedVectorMultiply = GCAD.Matrix4x4.MatrixUnpackedVectorMultiply
-self.Negate                 = GCAD.Matrix4x4.Negate
+self.Add                     = GCAD.Matrix4x4.Add
+self.Subtract                = GCAD.Matrix4x4.Subtract
+self.Multiply                = GCAD.Matrix4x4.Multiply
+self.ScalarMultiply          = GCAD.Matrix4x4.MatrixScalarMultiply
+self.ScalarDivide            = GCAD.Matrix4x4.ScalarDivide
+self.MatrixMultiply          = GCAD.Matrix4x4.MatrixMatrixMultiply
+self.VectorMultiply          = GCAD.Matrix4x4.MatrixVectorMultiply
+self.UnpackedVectorMultiply  = GCAD.Matrix4x4.MatrixUnpackedVectorMultiply
+self.Negate                  = GCAD.Matrix4x4.Negate
 
-self.__add                  = GCAD.Matrix4x4.Add
-self.__sub                  = GCAD.Matrix4x4.Subtract
-self.__mul                  = GCAD.Matrix4x4.Multiply
-self.__div                  = GCAD.Matrix4x4.ScalarDivide
-self.__unm                  = GCAD.Matrix4x4.Negate
+self.__add                   = GCAD.Matrix4x4.Add
+self.__sub                   = GCAD.Matrix4x4.Subtract
+self.__mul                   = GCAD.Matrix4x4.Multiply
+self.__div                   = GCAD.Matrix4x4.ScalarDivide
+self.__unm                   = GCAD.Matrix4x4.Negate
 
 -- Conversion
-self.ToNativeMatrix         = GCAD.Matrix4x4.ToNativeMatrix
+self.ToMatrix3x3             = GCAD.Matrix4x4.ToMatrix3x3
+self.ToNativeMatrix          = GCAD.Matrix4x4.ToNativeMatrix
 
 -- Utility
-self.Unpack                 = GCAD.Matrix4x4.Unpack
-self.ToString               = GCAD.Matrix4x4.ToString
-self.__tostring             = GCAD.Matrix4x4.ToString
+self.Unpack                  = GCAD.Matrix4x4.Unpack
+self.ToString                = GCAD.Matrix4x4.ToString
+self.__tostring              = GCAD.Matrix4x4.ToString
