@@ -44,7 +44,7 @@ local tempLineTraceResult = GCAD.LineTraceResult ()
 for _, queryMethodName in ipairs (lineQueryFunctions) do
 	self [queryMethodName] = function (self, line, lineTraceResult)
 		lineTraceResult = lineTraceResult or GCAD.LineTraceResult ()
-		lineTraceResult:SetLine (line3d)
+		lineTraceResult:SetLine (line)
 		
 		for spatialQueryable in self:GetSpatialQueryableEnumerator () do
 			tempLineTraceResult:SetMinimumParameter (lineTraceResult:GetMinimumParameter ())

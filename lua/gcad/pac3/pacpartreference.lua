@@ -21,12 +21,7 @@ function self:ctor ()
 	self.Part = nil
 end
 
--- IRenderNodeHost
-function self:GetRenderNode ()
-	return nil
-end
-
--- ISpatialNode3dHost
+-- IComponentHost
 function self:GetSpatialNode3d ()
 	if not self:IsResolved () then return nil end
 	if self.Part.ClassName ~= "model" then return nil end
@@ -34,7 +29,28 @@ function self:GetSpatialNode3d ()
 	return self
 end
 
--- IComponent
+-- ISpatialNode3d
+function self:GetAABB (out)
+	out = out or self.AABB
+	return GCAD.AABB3d.FromPACPart (self.Part, out)
+end
+
+function self:GetBoundingSphere (out)
+	out = out or self.BoundingSphere
+	return GCAD.Sphere3d.FromPACPartBoundingSphere (self.Part, out)
+end
+
+function self:GetOBB (out)
+	out = out or self.OBB
+	return GCAD.OBB3d.FromPACPart (self.Part, out)
+end
+
+function self:GetNativeOBB (out)
+	out = out or self.NativeOBB
+	return GCAD.NativeOBB3d.FromPACPart (self.Part, out)
+end
+
+-- VEntity
 function self:GetDisplayString ()
 	if not self:IsResolved () then return self:GetTypeDisplayString () end
 	
@@ -62,28 +78,15 @@ function self:GetTypeDisplayString ()
 	return classNameTypeDisplayStrings [self:GetPart ().ClassName] or ("PAC " .. self:GetPart ().ClassName)
 end
 
--- ISpatialNode3d
-function self:GetAABB (out)
-	out = out or self.AABB
-	return GCAD.AABB3d.FromEntity (self.Part.Entity, out)
-end
-
-function self:GetBoundingSphere (out)
-	out = out or self.BoundingSphere
-	return GCAD.Sphere3d.FromPACPartBoundingSphere (self.Part, out)
-end
-
-function self:GetOBB (out)
-	out = out or self.OBB
-	return GCAD.OBB3d.FromPACPart (self.Part, out)
-end
-
-function self:GetNativeOBB (out)
-	out = out or self.NativeOBB
-	return GCAD.NativeOBB3d.FromPACPart (self.Part, out)
-end
-
 -- PACPartReference
+function self:GetEntity ()
+	if not self:IsResolved ()          then return nil end
+	if not self.Part.Entity            then return nil end
+	if not self.Part.Entity:IsValid () then return nil end
+	
+	return self.Part.Entity
+end
+
 function self:GetPart ()
 	return self.Part
 end

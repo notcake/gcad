@@ -9,5 +9,29 @@ Rendering occurs in a few passes:
 	2. [RENDERING] Cull objects to view frustum (where it is cheap to do so) and store the result.
 	3. [RENDERING] Compute object matrices, culling data, etc and store it.
 	4. [RENDERING] Draw things (as many times as the engine wants us to)
+	5. [RENDERING] Sort translucent renderables and draw them in order.
 
 TODO: There is correlation between consecutive frames, work out how to exploit it
+
+class IRenderScene
+{
+	void GetGraphicsDevice ();
+	void Get
+	void SetGraphicsDevice (IGraphicsDevice graphicsDevice);
+	
+	void AddRenderNode (IRenderNode renderNode);
+	void RemoveRenderNode (IRenderNode renderNode);
+}
+
+class IRenderNode
+{
+	void Set
+	
+	// Forward rendering
+	void HasOpaqueRendering ();
+	void HasTranslucentRendering ();
+	void RenderOpaque (IRenderContext);
+	void RenderTranslucent (IRenderContext);
+	
+	// Deferred rendering (volvo pls)
+}

@@ -114,19 +114,19 @@ end
 function self:HookSelectionSet (selectionSet)
 	if not selectionSet then return end
 	
-	selectionSet:AddEventListener ("Cleared", "GCAD.Selected." .. self:GetHashCode (),
+	selectionSet:AddEventListener ("Cleared", "GCAD.Selection." .. self:GetHashCode (),
 		function (_)
 			self:DispatchEvent ("Cleared")
 		end
 	)
 	
-	selectionSet:AddEventListener ("ItemAdded", "GCAD.Selected." .. self:GetHashCode (),
+	selectionSet:AddEventListener ("ItemAdded", "GCAD.Selection." .. self:GetHashCode (),
 		function (_, item)
 			self:DispatchEvent ("ItemAdded", item)
 		end
 	)
 	
-	selectionSet:AddEventListener ("ItemRemoved", "GCAD.Selected." .. self:GetHashCode (),
+	selectionSet:AddEventListener ("ItemRemoved", "GCAD.Selection." .. self:GetHashCode (),
 		function (_, item)
 			self:DispatchEvent ("ItemRemoved", item)
 		end
@@ -136,7 +136,7 @@ end
 function self:UnhookSelectionSet (selectionSet)
 	if not selectionSet then return end
 	
-	selectionSet:RemoveEventListener ("Cleared",     "GCAD.Selected." .. self:GetHashCode ())
-	selectionSet:RemoveEventListener ("ItemAdded",   "GCAD.Selected." .. self:GetHashCode ())
-	selectionSet:RemoveEventListener ("ItemRemoved", "GCAD.Selected." .. self:GetHashCode ())
+	selectionSet:RemoveEventListener ("Cleared",     "GCAD.Selection." .. self:GetHashCode ())
+	selectionSet:RemoveEventListener ("ItemAdded",   "GCAD.Selection." .. self:GetHashCode ())
+	selectionSet:RemoveEventListener ("ItemRemoved", "GCAD.Selection." .. self:GetHashCode ())
 end

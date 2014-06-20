@@ -5,14 +5,22 @@ function GCAD.UI.ContextMenuContextMenu (self)
 		:SetIcon ("icon16/car.png")
 		:AddEventListener ("Click",
 			function (_)
-				print ("FEG")
 			end
 		)
 	creationMenu:AddItem ("Navigation Node")
 		:SetIcon ("icon16/vector.png")
 		:AddEventListener ("Click",
 			function (_)
-				print ("FEG")
+				GCAD.NavigationGraph:CreateNode (contextMenu.WorldIntersectionPosition)
+			end
+		)
+	creationMenu:AddItem ("Navigation Node (x100)")
+		:SetIcon ("icon16/vector.png")
+		:AddEventListener ("Click",
+			function (_)
+				for i = 1, 100 do
+					GCAD.NavigationGraph:CreateNode (contextMenu.WorldIntersectionPosition)
+				end
 			end
 		)
 	
@@ -56,10 +64,15 @@ function GCAD.UI.ContextMenuContextMenu (self)
 			-- Ambiguous entity selection
 			-- Add a menu item for each object intersecting the line segment from the cursor to the world.
 			local lineTraceResult = self:TraceRay (self.MouseMoveX, self.MouseMoveY)
+			contextMenu.LineTraceResult = lineTraceResult
+			
 			local objects = {}
-			for object in lineTraceResult:GetEnumerator () do
+			for object, t in lineTraceResult:GetEnumerator () do
 				if object:Is (GCAD.VEntities.EntityReference) and
-				   object:GetEntity ():GetClass () == "worldspawn" then break end
+				   object:GetEntity ():GetClass () == "worldspawn" then
+					contextMenu.WorldIntersectionPosition = lineTraceResult:GetLine ():Evaluate (t, contextMenu.WorldIntersectionPosition)
+					break
+				end
 				
 				if not objects [object] then
 					objects [object] = true
@@ -67,7 +80,14 @@ function GCAD.UI.ContextMenuContextMenu (self)
 					BeginItemGroup ("SelectionDisambiguation")
 					local menuItem = contextMenu:AddItem (object:GetDisplayString ())
 					menuItem:SetIcon (object:GetIcon ())
-					menuItem:SetText (object:GetDisplayString ())
+					menuItem:SetText ("Select " .. object:GetDisplayString ())
+					if object.GetEntity and
+					   object:GetEntity () and
+					   object:GetEntity ():IsValid () and
+					   object:GetEntity ():GetModel () and
+					   object:GetEntity ():GetModel () ~= "" then
+						menuItem:SetToolTipText (object:GetEntity ():GetModel ())
+					end
 					
 					if self.Selection:Contains (object) then
 						menuItem:SetChecked (true)

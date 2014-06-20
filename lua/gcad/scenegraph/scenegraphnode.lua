@@ -2,83 +2,53 @@ local self = {}
 GCAD.SceneGraph.SceneGraphNode = GCAD.MakeConstructor (self, GCAD.SceneGraph.ISceneGraphNode)
 
 function self:ctor ()
+	-- Scene graph
+	self.SceneGraph                     = nil
+	
 	-- Tree
 	self.Parent                         = nil
-	self.Children                       = nil
-	self.ChildCount                     = 0
 	
 	-- Bounding volumes
-	self.WorldAABB3d                    = nil
-	self.WorldBoundingSphere            = nil
-	self.WorldOBB3d                     = nil
+	self.LocalSpaceAABB3d               = nil
+	self.LocalSpaceBoundingSphere       = nil
+	self.LocalSpaceOBB3d                = nil
 	
-	self.WorldAABB3dValid               = false
-	self.WorldBoundingSphereValid       = false
-	self.WorldOBB3dValid                = false
+	self.WorldSpaceAABB3d               = nil
+	self.WorldSpaceBoundingSphere       = nil
+	self.WorldSpaceOBB3d                = nil
 	
-	self.LocalAABB3d                    = nil
-	self.LocalBoundingSphere            = nil
-	self.LocalOBB3d                     = nil
+	self.LocalSpaceAABB3dValid          = false
+	self.LocalSpaceBoundingSphereValid  = false
+	self.LocalSpaceOBB3dValid           = false
 	
-	self.LocalAABB3dValid               = false
-	self.LocalBoundingSphereValid       = false
-	self.LocalOBB3dValid                = false
+	self.WorldSpaceAABB3dValid          = false
+	self.WorldSpaceBoundingSphereValid  = false
+	self.WorldSpaceOBB3dValid           = false
 	
 	-- Transformations
-	self.LocalToParentMatrix            = nil
-	self.LocalToWorldMatrix             = nil
-	self.ParentToLocalMatrix            = nil
-	self.WorldToLocalMatrix             = nil
-	
-	self.LocalToParentMatrixNative      = nil
-	self.LocalToWorldMatrixNative       = nil
-	self.ParentToLocalMatrixNative      = nil
-	self.WorldToLocalMatrixNative       = nil
-	
-	self.LocalToParentMatrixValid       = false
 	self.LocalToWorldMatrixValid        = false
-	self.ParentToLocalMatrixValid       = false
 	self.WorldToLocalMatrixValid        = false
 	
-	self.LocalToParentMatrixNativeValid = false
 	self.LocalToWorldMatrixNativeValid  = false
-	self.ParentToLocalMatrixNativeValid = false
 	self.WorldToLocalMatrixNativeValid  = false
+	
+	-- Rendering
+	self.RenderModifierComponent        = GCAD.Rendering.NullRenderModifierComponent ()
+	self.RenderComponent                = GCAD.Rendering.NullRenderComponent ()
+end
+
+-- Scene graph
+function self:GetSceneGraph ()
+	return self.SceneGraph
+end
+
+function self:SetSceneGraph (sceneGraph)
+	self.SceneGraph = sceneGraph
 end
 
 -- Tree
-function self:AddChild (sceneGraphNode)
-	if not self.Children then self.Children = {} end
-	if self.Children [sceneGraphNode] then return end
-	
-	-- Remove from existing parent
-	if sceneGraphNode.Parent then
-		sceneGraphNode.Parent.Children [sceneGraphNode] = nil
-		sceneGraphNode.Parent.ChildCount = sceneGraphNode.Parent.ChildCount - 1
-	end
-	
-	-- Add to ourself
-	self.Children [sceneGraphNode] = sceneGraphNode
-	self.ChildCount = self.ChildCount + 1
-	sceneGraphNode.Parent = self
-end
-
-function self:ContainsNode (sceneGraphNode)
-	if not self.Children then return false end
-	return self.Children [sceneGraphNode] ~= nil
-end
-
-function self:HasChildren ()
-	return self.ChildCount > 0
-end
-
-function self:GetChildCount ()
-	return self.ChildCount
-end
-
 function self:GetChildEnumerator ()
-	if not self.Children then return GLib.NullEnumerator () end
-	return GLib.KeyEnumerator (self.Children)
+	return GLib.NullEnumerator ()
 end
 
 function self:GetParent ()
@@ -86,20 +56,11 @@ function self:GetParent ()
 end
 
 function self:GetRecursiveChildEnumerator ()
-	local childEnumerator               = self:GetChildEnumerator ()
-	local childRecursiveChildEnumerator = nil
-	return function ()
-		if childRecursiveChildEnumerator then
-			local ret = childRecursiveChildEnumerator ()
-			if ret then return ret end
-		end
-			
-		local child = childEnumerator ()
-		if not child then return nil end
-		
-		childRecursiveChildEnumerator = child:GetRecursiveChildEnumerator ()
-		return child
-	end
+	return GLib.NullEnumerator ()
+end
+
+function self:GetRecursiveEnumerator ()
+	return GLib.SingleValueEnumerator (self)
 end
 
 function self:GetRecursiveEnumerator ()
@@ -128,24 +89,23 @@ function self:SetParent (parent)
 	if self.Parent then
 		self.Parent.Children [self] = nil
 		self.Parent.ChildCount = self.Parent.ChildCount - 1
+		
+		-- Invalidate parent local bounding volumes (we don't have to really)
+		self.Parent:InvalidateLocalSpaceBoundingVolumes ()
 	end
 	self.Parent = parent
 	if self.Parent then
 		self.Parent.Children [self] = true
 		self.Parent.ChildCount = self.Parent.ChildCount + 1
+		
+		-- Invalidate parent local bounding volumes
+		self.Parent:InvalidateLocalSpaceBoundingVolumes ()
 	end
 	
-	return self
-end
-
-function self:RemoveChild (sceneGraphNode)
-	if not self.Children then return end
-	if not self.Children [sceneGraphNode] then return end
+	-- Invalidate our world matrices (and world space bounding volumes)
+	self:InvalidateWorldMatrices ()
 	
-	-- Remove from ourself
-	self.Children [sceneGraphNode] = nil
-	self.ChildCount = self.ChildCount - 1
-	sceneGraphNode.Parent = nil
+	return self
 end
 
 -- Scene graph
@@ -153,70 +113,175 @@ function self:Remove ()
 	self:SetParent (nil)
 end
 
--- World space bounding volumes
-function self:GetWorldAABB ()
-	if not self.WorldAABB3dValid then
-		self:ComputeWorldAABB3d ()
+-- Bounding volumes
+function self:GetLocalSpaceAABB ()
+	if not self.LocalSpaceAABB3dValid then
+		self:ComputeLocalSpaceAABB3d ()
 	end
-	return self.WorldAABB3d
+	return self.LocalSpaceAABB3d
 end
 
-function self:GetWorldBoundingSphere ()
-	if not self.WorldBoundingSphereValid then
-		self:ComputeWorldBoundingSphere ()
+function self:GetLocalSpaceBoundingSphere ()
+	if not self.LocalSpaceBoundingSphereValid then
+		self:ComputeLocalSpaceBoundingSphere ()
 	end
-	return self.WorldBoundingSphere
+	return self.LocalSpaceBoundingSphere
 end
 
-function self:GetWorldOBB ()
-	if not self.WorldOBB3dValid then
-		self:ComputeWorldOBB3d ()
+function self:GetLocalSpaceOBB ()
+	if not self.LocalSpaceOBB3dValid then
+		self:ComputeLocalSpaceOBB3d ()
 	end
-	return self.WorldOBB3d
+	return self.LocalSpaceOBB3d
+end
+
+function self:GetWorldSpaceAABB ()
+	if not self.WorldSpaceAABB3dValid then
+		self:ComputeWorldSpaceAABB3d ()
+	end
+	return self.WorldSpaceAABB3d
+end
+
+function self:GetWorldSpaceBoundingSphere ()
+	if not self.WorldSpaceBoundingSphereValid then
+		self:ComputeWorldSpaceBoundingSphere ()
+	end
+	return self.WorldSpaceBoundingSphere
+end
+
+function self:GetWorldSpaceOBB ()
+	if not self.WorldSpaceOBB3dValid then
+		self:ComputeWorldSpaceOBB3d ()
+	end
+	return self.WorldSpaceOBB3d
 end
 
 -- Transformations
-function self:GetLocalToParentMatrix ()
-	GCAD.Error ("SceneGraphNode:GetLocalToParentMatrix : Not implemented.")
-end
 
-function self:GetLocalToParentMatrixNative ()
-	GCAD.Error ("SceneGraphNode:GetLocalToParentMatrixNative : Not implemented.")
-end
-
+-- GetLocalToWorldMatrix should propagate invalidation downwards
 function self:GetLocalToWorldMatrix ()
 	GCAD.Error ("SceneGraphNode:GetLocalToWorldMatrix : Not implemented.")
 end
 
-function self:GetLocalToWorldMatrixNative ()
-	GCAD.Error ("SceneGraphNode:GetLocalToWorldMatrixNative : Not implemented.")
-end
-
-function self:GetParentToLocalMatrix ()
-	GCAD.Error ("SceneGraphNode:GetParentToLocalMatrix : Not implemented.")
-end
-
-function self:GetParentToLocalMatrixNative ()
-	GCAD.Error ("SceneGraphNode:GetParentToLocalMatrixNative : Not implemented.")
-end
-
+-- ComputeWorldToLocalMatrix should propagate invalidation downwards
 function self:GetWorldToLocalMatrix ()
 	GCAD.Error ("SceneGraphNode:GetWorldToLocalMatrix : Not implemented.")
 end
 
-function self:GetWorldToLocalMatrixNative ()
-	GCAD.Error ("SceneGraphNode:GetWorldToLocalMatrixNative : Not implemented.")
+-- Rendering
+function self:GetRenderComponent ()
+	return self.RenderComponent
+end
+
+function self:GetRenderModifierComponent ()
+	return self.RenderModifierComponent
+end
+
+function self:SetRenderComponent (renderComponent)
+	if self.RenderComponent == renderComponent then return self end
+	
+	self.RenderComponent = renderComponent
+	
+	return self
+end
+
+function self:SetRenderModifierComponent (renderModifierComponent)
+	if self.RenderModifierComponent == renderModifierComponent then return self end
+	
+	self.RenderModifierComponent = renderModifierComponent
+	
+	return self
 end
 
 -- Internal, do not call
-function self:ComputeWorldAABB3d ()
-	GCAD.Error ("SceneGraphNode:ComputeWorldAABB3d : Not implemented.")
+function self:ComputeLocalSpaceAABB3d ()
+	GCAD.Error ("SceneGraphNode:ComputeLocalSpaceAABB3d : Not implemented.")
 end
 
-function self:ComputeWorldBoundingSphere ()
-	GCAD.Error ("SceneGraphNode:ComputeWorldBoundingSphere : Not implemented.")
+function self:ComputeLocalSpaceBoundingSphere ()
+	GCAD.Error ("SceneGraphNode:ComputeLocalSpaceBoundingSphere : Not implemented.")
 end
 
-function self:ComputeWorldOBB3d ()
-	GCAD.Error ("SceneGraphNode:ComputeWorldOBB3d : Not implemented.")
+function self:ComputeLocalSpaceOBB3d ()
+	GCAD.Error ("SceneGraphNode:ComputeLocalSpaceOBB3d : Not implemented.")
+end
+
+function self:ComputeWorldSpaceAABB3d ()
+	GCAD.Error ("SceneGraphNode:ComputeWorldSpaceAABB3d : Not implemented.")
+end
+
+function self:ComputeWorldSpaceBoundingSphere ()
+	GCAD.Error ("SceneGraphNode:ComputeWorldSpaceBoundingSphere : Not implemented.")
+end
+
+function self:ComputeWorldSpaceOBB3d ()
+	GCAD.Error ("SceneGraphNode:ComputeWorldSpaceOBB3d : Not implemented.")
+end
+
+function self:InvalidateWorldMatrices ()
+	-- When these are recomputed, the invalidation
+	-- flags will be propagated down the tree.
+	self.LocalToWorldMatrixValid        = false
+	self.WorldToLocalMatrixValid        = false
+	self.LocalToWorldMatrixNativeValid  = false
+	self.WorldToLocalMatrixNativeValid  = false
+	
+	-- Invalidate world space bounding volumes too
+	self:InvalidateWorldSpaceBoundingVolumes ()
+end
+
+function self:InvalidateLocalToWorldMatrix ()
+	self.LocalToWorldMatrixValid        = false
+	self.LocalToWorldMatrixNativeValid  = false
+end
+
+function self:InvalidateWorldToLocalMatrix ()
+	self.WorldToLocalMatrixValid        = false
+	self.WorldToLocalMatrixNativeValid  = false
+end
+
+function self:InvalidateChildLocalToWorldMatrices ()
+	for childSceneGraphNode in self:GetChildEnumerator () do
+		childSceneGraphNode:InvalidateLocalToWorldMatrix ()
+	end
+end
+
+function self:InvalidateChildLocalToWorldNativeMatrices ()
+	for childSceneGraphNode in self:GetChildEnumerator () do
+		childSceneGraphNode:InvalidateLocalToWorldMatrixNative ()
+	end
+end
+
+function self:InvalidateChildWorldToLocalMatrices ()
+	for childSceneGraphNode in self:GetChildEnumerator () do
+		childSceneGraphNode:InvalidateWorldToLocalMatrix ()
+	end
+end
+
+function self:InvalidateLocalSpaceBoundingVolumes ()
+	-- If our local space bounding volumes are invalid,
+	-- it implies that our ancestors' local space bounding volumes are also invalid,
+	-- so we don't need to waste time propagating the invalidation upwards
+	if not self.LocalSpaceAABB3dValid and
+	   not self.LocalSpaceBoundingSphereValid and
+	   not self.LocalSpaceOBB3dValid then
+		return
+	end
+	
+	self.LocalSpaceAABB3dValid          = false
+	self.LocalSpaceBoundingSphereValid  = false
+	self.LocalSpaceOBB3dValid           = false
+	
+	-- Invalidate world space bounding volumes too
+	self:InvalidateWorldSpaceBoundingVolumes ()
+	
+	-- Propagate bounding volume invalidation upwards
+	if not self.Parent then return end
+	self.Parent:InvalidateLocalSpaceBoundingVolumes ()
+end
+
+function self:InvalidateWorldSpaceBoundingVolumes ()
+	self.WorldSpaceAABB3dValid         = false
+	self.WorldSpaceBoundingSphereValid = false
+	self.WorldSpaceOBB3dValid          = false
 end

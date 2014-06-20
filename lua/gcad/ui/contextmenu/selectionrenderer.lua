@@ -14,8 +14,6 @@ local mesh_End                = mesh._End            or mesh.End
 local mesh_AdvanceVertex      = mesh.AdvanceVertex
 local mesh_Color              = mesh.Color
 local mesh_Position           = mesh.Position
-local render_DrawBox          = render.DrawBox
-local render_DrawWireframeBox = render.DrawWireframeBox
 local render_SetMaterial      = render.SetMaterial
 
 local IMaterial_SetFloat      = debug.getregistry ().IMaterial.SetFloat
@@ -29,7 +27,6 @@ local VMatrix_Scale           = debug.getregistry ().VMatrix.Scale
 local VMatrix_Translate       = debug.getregistry ().VMatrix.Translate
 
 local MATERIAL_LINES          = MATERIAL_LINES
-local MATERIAL_TRIANGLES      = MATERIAL_TRIANGLES
 
 local GLib_Color_ToVector     = GLib.Color.ToVector
 
@@ -93,92 +90,8 @@ function self:ctor (selection)
 	mesh_End ()
 	
 	-- Box mesh
-	local vertices =
-	{
-		Vector (0, 0, 0),
-		Vector (0, 1, 0),
-		Vector (1, 1, 0),
-		Vector (1, 0, 0),
-		Vector (0, 0, 1),
-		Vector (0, 1, 1),
-		Vector (1, 1, 1),
-		Vector (1, 0, 1)
-	}
-	
-	self.BoxMesh = Mesh ()
-	mesh_Begin (self.BoxMesh, MATERIAL_TRIANGLES, 12)
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-	mesh_End ()
-
-	self.WireframeBoxMesh = Mesh ()
-	mesh_Begin (self.WireframeBoxMesh, MATERIAL_LINES, 12)
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [1]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_AdvanceVertex ()
-	mesh_End ()
+	self.BoxMesh          = GCAD.Meshes.CreateAxisAlignedCube (0, 1)
+	self.WireframeBoxMesh = GCAD.Meshes.CreateAxisAlignedWireframeCube (0, 1)
 end
 
 function self:dtor ()

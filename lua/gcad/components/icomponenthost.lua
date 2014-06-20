@@ -8,18 +8,18 @@ function self:GetComponent (componentName)
 	GCAD.Error ("IComponentHost:GetComponent : Not implemented.")
 end
 
+function self:GetRenderComponent ()
+	GCAD.Error ("IComponentHost:GetRenderComponent : Not implemented.")
+end
+
+function self:GetSceneGraphNode ()
+	GCAD.Error ("IComponentHost:GetSceneGraphNode : Not implemented.")
+end
+
 function self:GetSpatialNode2d ()
 	GCAD.Error ("IComponentHost:GetSpatialNode2d : Not implemented.")
 end
 
 function self:GetSpatialNode3d ()
 	GCAD.Error ("IComponentHost:GetSpatialNode3d : Not implemented.")
-end
-
-function self:GetSpatialNode3d ()
-	GCAD.Error ("IComponentHost:GetSpatialNode3d : Not implemented.")
-end
-
-function self:GetRenderNode ()
-	GCAD.Error ("IComponentHost:GetRenderNode : Not implemented.")
 end

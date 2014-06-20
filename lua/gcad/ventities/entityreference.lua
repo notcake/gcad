@@ -52,7 +52,7 @@ function self:GetNativeOBB (out)
 	return GCAD.NativeOBB3d.FromEntity (self:GetEntity (), out)
 end
 
--- IComponent
+-- VEntity
 -- Display
 function self:GetDisplayString ()
 	if not self:IsResolved () then return "Invalid entity" end

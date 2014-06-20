@@ -14,9 +14,11 @@ GLib.AddCSLuaPackFolderRecursive ("gcad")
 -- Profiling
 include ("profiling/profilersectionentry.lua")
 include ("profiling/profiler.lua")
-include ("profiling/entityprofiling.lua")
-include ("profiling/panelprofiling.lua")
-include ("profiling/profilingstatisticsrenderer.lua")
+if CLIENT then
+	include ("profiling/entityprofiling.lua")
+	include ("profiling/panelprofiling.lua")
+	include ("profiling/profilingstatisticsrenderer.lua")
+end
 
 -- Utility
 include ("util/mapcache.lua")
@@ -105,6 +107,10 @@ include ("space/shapes/lines/line3d.lua")
 include ("space/shapes/frustums/frustum3d.lua")
 include ("space/shapes/frustums/nativefrustum3d.lua")
 
+-- Meshes
+GCAD.Meshes = {}
+include ("meshes/utility.lua")
+
 -- Models
 -- include ("models/model.lua")
 -- include ("models/modelcache.lua")
@@ -123,9 +129,11 @@ include ("components/component.lua")
 -- Spatial nodes
 include ("space/ispatialnode2dhost.lua")
 include ("space/ispatialnode2d.lua")
+include ("space/spatialnode2d.lua")
 
 include ("space/ispatialnode3dhost.lua")
 include ("space/ispatialnode3d.lua")
+include ("space/spatialnode3d.lua")
 
 -- Space
 include ("space/space3d.lua")
@@ -144,18 +152,37 @@ include ("signalprocessing/digitalfilters/realiirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexfirfilter.lua")
 -- include ("signalprocessing/digitalfilters/complexiirfilter.lua")
 
+-- Rendering
+include ("rendering/irendercomponent.lua")
+include ("rendering/irendermodifiercomponent.lua")
+include ("rendering/nullrendercomponent.lua")
+include ("rendering/nullrendermodifiercomponent.lua")
+include ("rendering/viewrenderinfo.lua")
+
+-- Graphs
+GCAD.Graphs = {}
+include ("graphs/igraph.lua")
+include ("graphs/graph.lua")
+include ("graphs/directedgraph.lua")
+include ("graphs/undirectedgraph.lua")
+
 -- Scene Graph
 GCAD.SceneGraph = {}
+GCAD.SceneGraph.Components = {}
 include ("scenegraph/iscenegraph.lua")
 include ("scenegraph/iscenegraphnode.lua")
 include ("scenegraph/scenegraph.lua")
 include ("scenegraph/scenegraphnode.lua")
+include ("scenegraph/components/nontransformationnode.lua")
+include ("scenegraph/components/groupnode.lua")
+include ("scenegraph/components/transformationnode.lua")
+include ("scenegraph/components/orthogonalaffinetransformationnode.lua")
+include ("scenegraph/matrixtransformationnode.lua")
+include ("scenegraph/orthogonalaffinetransformationnode.lua")
 include ("scenegraph/transformationnode.lua")
-
--- Rendering
-include ("rendering/irendernode.lua")
-include ("rendering/irendernodehost.lua")
-include ("rendering/viewrenderinfo.lua")
+include ("scenegraph/groupnode.lua")
+include ("scenegraph/modelnode.lua")
+include ("scenegraph/scenegraphrenderer.lua")
 
 -- Engine Interop
 include ("space/engineentitiesspatialqueryable.lua")
@@ -167,9 +194,32 @@ include ("pac3/spatialextensions.lua")
 include ("pac3/pacpartsspatialqueryable.lua")
 include ("pac3/pacpartreference.lua")
 
+-- Navigation
+GCAD.Navigation = {}
+include ("navigation/navigationgraph.lua")
+include ("navigation/navigationgraphedge.lua")
+include ("navigation/navigationgraphnode.lua")
+include ("navigation/navigationgraphedgegenerator.lua")
+include ("navigation/navigationgraphentitylist.lua")
+include ("navigation/navigationgraphnodeentity.lua")
+if CLIENT then
+	include ("navigation/navigationgraphedgerendercomponent.lua")
+	include ("navigation/navigationgraphrenderer.lua")
+end
+
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 
 -- Fun starts here
+GCAD.RootSceneGraph                 = GCAD.SceneGraph.SceneGraph ()
+GCAD.RootSceneGraphRenderer         = GCAD.SceneGraph.SceneGraphRenderer (GCAD.RootSceneGraph)
+
+GCAD.NavigationGraph                = GCAD.Navigation.NavigationGraph ()
+GCAD.NavigationGraphEntities        = GCAD.Navigation.NavigationGraphEntityList (GCAD.NavigationGraph)
+GCAD.NavigationGraphEdgeGenerator   = GCAD.Navigation.NavigationGraphEdgeGenerator (GCAD.NavigationGraph)
+if CLIENT then
+	GCAD.NavigationGraphRenderer    = GCAD.Navigation.NavigationGraphRenderer (GCAD.NavigationGraph, GCAD.RootSceneGraph, GCAD.NavigationGraphEntities)
+end
+
 GCAD.EngineEntitiesSpatialQueryable = GCAD.EngineEntitiesSpatialQueryable ()
 GCAD.PACPartsSpatialQueryable       = GCAD.PACPartsSpatialQueryable ()
 GCAD.VSpace3d                       = GCAD.Space3d ()
@@ -177,6 +227,7 @@ GCAD.VSpace3d                       = GCAD.Space3d ()
 GCAD.AggregateSpatialQueryable      = GCAD.AggregateSpatialQueryable3d ()
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.EngineEntitiesSpatialQueryable)
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartsSpatialQueryable      )
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntities       )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
 
 if CLIENT then

@@ -1,0 +1,66 @@
+There are a couple of types of scene graph nodes:
+	ClipPlaneNodes
+	GroupNodes
+	ModelNodes
+	TransformationNodes
+
+These nodes cannot have children:
+	ModelNodes
+
+These nodes can have children:
+	ClipPlaneNodes
+	GroupNodes
+	TransformationNodes
+	
+Scene graph operations:
+	Invalidation of a SceneGraphNode's bounding volumes
+		Marks a SceneGraphNode's bounding volumes as needing recomputation.
+		Ancestor SceneGraphNodes' bounding volumes also need recomputation.
+	
+	Change of a TransformationNode's transform
+		SceneGraphNode's parent space bounding volumes need recomputation.
+		Ancestor SceneGraphNodes' bounding volumes also need recomputation.
+		Descendant SceneGraphNodes' world space bounding volumes need recomputation.
+		Descendant SceneGraphNodes' local to world and world to local matrices need recomputation.
+	
+	Change of a ModelNode's model
+		Invalidates the SceneGraphNode's bounding volumes.
+	
+	Cull to frustum
+		Need world space bounding volumes of tested SceneGraphNodes.
+		Testing starts at root and recurses down if necessary.
+			Outside frustum      - Ignore SceneGraphNode tree.
+			Inside frustum       - Add entire SceneGraphNode tree.
+			Intersecting frustum - Recurse down
+		Want array of nodes and node functions to call.
+			eg. ClipPlaneNode:PreRender ()
+			    ModelNode:RenderOpaque ()
+			    ClipPlaneNode:PostRender ()
+	
+	Query world space bounding volume of a SceneGraphNode
+		Recompute world space bounding volume if invalid
+	
+	Recompute world space bounding volume of a SceneGraphNode
+		Recompute parent space bounding volume of the SceneGraphNode if necessary
+		Recompute local to world matrix of the parent SceneGraphNode if necessary
+		
+	Computation of bounding volumes
+		World space AABB                      - Local to world matrix  + Local space OBB
+		World space bounding sphere           - Local to world matrix  + Local space bounding sphere
+		World space OBB                       - Local to world matrix  + Local space OBB
+		Parent space AABB                     - Local to parent matrix + Local space OBB
+		Parent space bounding sphere          - Local to parent matrix + Local space bounding sphere
+		Parent space OBB                      - Local to parent matrix + Local space OBB
+		
+		Aggregate local bounding volumes      - Children parent space bounding volumes
+		Aggregate local space AABB            - Children parent space AABBs
+		Aggregate local space bounding sphere - Children parent space bounding spheres
+		Aggregate local space OBB             - Children parent space AABBs
+	
+	Computation of matrices
+		Transformation                        - Nil
+		Local to parent matrix                - Transformation
+		Parent to local matrix                - Transformation
+		
+		Local to world matrix                 - Parent local to world matrix + local to parent matrix
+		World to local matrix                 - Parent world to local matrix + parent to local matrix

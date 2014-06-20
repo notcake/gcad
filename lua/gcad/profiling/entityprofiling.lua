@@ -1,5 +1,3 @@
-if not CLIENT then return end
-
 local self = {}
 GCAD.EntityProfiling = GCAD.MakeConstructor (self)
 
