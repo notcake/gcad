@@ -152,7 +152,7 @@ local angle_zero = Angle (0, 0, 0)
 local v = Vector ()
 
 function self:DrawComponentSelections (viewRenderInfo, componentEnumerable, selectionOutlineColor, selectionColor)
-	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections [" .. componentEnumerable:GetCount () .. "]")
+	GCAD.Profiler:Begin ("SelectionRenderer:DrawComponentSelections", componentEnumerable:GetCount ())
 	
 	local currentFrameId = viewRenderInfo:GetFrameId ()
 	local renderCache = self.RenderCache:Get (componentEnumerable)

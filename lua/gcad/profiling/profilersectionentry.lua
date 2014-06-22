@@ -4,32 +4,34 @@ GCAD.ProfilerSectionEntry = GCAD.MakeConstructor (self)
 local FrameNumber = FrameNumber or CurTime
 
 function self:ctor (sectionName, depth)
-	self.Name                = sectionName
-	self.Depth               = depth or 0
+	self.Name                   = sectionName
+	self.Depth                  = depth or 0
 	
-	self.LastFrameStartTime  = 0
-	self.LastFrameId         = 0
-	self.LastFrameEntryCount = 0
-	self.LastFrameDuration   = 0
-	self.LastDuration        = 0
+	self.DisplayName            = nil
 	
-	self.FrameStartTime      = 0
-	self.FrameId             = 0
-	self.FrameEntryCount     = 0
-	self.FrameDuration       = 0
-	self.FrameDurationSmoothingCoefficient = 0
-	self.Duration            = 0
+	self.LastFrameId            = 0
+	self.LastFrameStartTime     = 0
+	self.LastFrameEntryCount    = 0
+	self.LastFrameDuration      = 0
+	self.LastDuration           = 0
 	
-	self.InSection           = 0
-	self.EntryTime           = 0
+	self.CurrentFrameId         = 0
+	self.CurrentFrameStartTime  = 0
+	self.CurrentFrameEntryCount = 0
+	self.CurrentFrameDuration   = 0
+	self.CurrentFrameDurationSmoothingCoefficient = 0
+	self.CurrentDuration        = 0
 	
-	self.ChildSections       = {}
-	self.ChildSectionsByName = {}
+	self.InSection              = 0
+	self.EntryTime              = 0
+	
+	self.ChildSections          = {}
+	self.ChildSectionsByName    = {}
 end
 
-function self:Begin ()
+function self:Begin (note)
 	local frameId = FrameNumber ()
-	if self.FrameId ~= frameId then
+	if self.CurrentFrameId ~= currentFrameId then
 		self:AdvanceFrame (frameId)
 	end
 	
@@ -37,16 +39,22 @@ function self:Begin ()
 		self.EntryTime = SysTime ()
 	end
 	
+	if note then
+		self.DisplayName = self.Name .. " [" .. tostring (note) .. "]"
+	else
+		self.DisplayName = nil
+	end
+	
 	self.InSection = self.InSection + 1
 end
 
-function self:BeginChildSection (sectionName)
+function self:BeginChildSection (sectionName, note)
 	if not self.ChildSectionsByName [sectionName] then
 		self.ChildSectionsByName [sectionName] = GCAD.ProfilerSectionEntry (sectionName, self.Depth + 1)
 		self.ChildSections [#self.ChildSections + 1] = self.ChildSectionsByName [sectionName]
 	end
 	
-	self.ChildSectionsByName [sectionName]:Begin ()
+	self.ChildSectionsByName [sectionName]:Begin (note)
 	
 	return self.ChildSectionsByName [sectionName]
 end
@@ -90,7 +98,9 @@ function self:EndChildSection (sectionName)
 	self.ChildSectionsByName [sectionName]:End ()
 end
 
-function self:GetChildEnumerator ()
+function self:GetChildEnumerator (filterFunction)
+	filterFunction = filterFunction or function () return true end
+	
 	local frameId = FrameNumber ()
 	local sysTime = SysTime ()
 	
@@ -103,27 +113,26 @@ function self:GetChildEnumerator ()
 	local valueEnumerator = GLib.ArrayEnumerator (self.ChildSections)
 	local childEnumerator = GLib.NullCallback
 	return function ()
-		local sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount = childEnumerator ()
+		local sectionEntry = childEnumerator ()
 		
-		while not sectionName do
+		while not sectionEntry do
 			childEnumerator = nil
 			
 			-- Move to next child
 			local childSection = valueEnumerator ()
-			while childSection and
-				  sysTime - childSection:GetLastFrameStartTime () > 1 do
+			while childSection and not filterFunction (childSection) do
 				childSection = valueEnumerator ()
 			end
 			
 			-- If we're out of children, we're done here
-			if not childSection then return nil, nil, nil, nil end
+			if not childSection then return nil end
 			
 			-- Call the child enumerator
-			childEnumerator = childSection:GetEnumerator ()
-			sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount = childEnumerator ()
+			childEnumerator = childSection:GetEnumerator (filterFunction)
+			sectionEntry = childEnumerator ()
 		end
 		
-		return sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount
+		return sectionEntry
 	end
 end
 
@@ -131,24 +140,21 @@ function self:GetChildSection (sectionName)
 	return self.ChildSectionsByName [sectionName]
 end
 
-function self:GetEnumerator ()
+function self:GetEnumerator (filterFunction)
+	filterFunction = filterFunction or function () return true end
+	
 	self:CheckFlushFrame (FrameNumber ())
 	
 	local childEnumerator
 	return function ()
 		if not childEnumerator then
-			childEnumerator = self:GetChildEnumerator ()
-			return self:GetInfo ()
+			childEnumerator = self:GetChildEnumerator (filterFunction)
+			if not filterFunction (self) then return nil end
+			return self
 		end
 		
 		return childEnumerator ()
 	end
-end
-
-function self:GetInfo ()
-	self:CheckFlushFrame (FrameNumber ())
-	
-	return self, self.Depth, self.Name, self.LastDuration, self.LastFrameDuration, self.LastFrameEntryCount
 end
 
 function self:GetName ()
@@ -157,6 +163,22 @@ end
 
 function self:GetDepth ()
 	return self.Depth
+end
+
+function self:GetDisplayName ()
+	return self.DisplayName or self.Name
+end
+
+function self:SetName (sectionName)
+	self.Name = sectionName
+end
+
+function self:SetDepth (depth)
+	self.Depth = depth
+end
+
+function self:SetDisplayName (displayName)
+	self.DisplayName = displayName
 end
 
 function self:GetLastFrameId ()
@@ -183,73 +205,75 @@ function self:GetLastFrameDuration ()
 	return self.LastFrameDuration
 end
 
-function self:GetFrameId ()
-	return self.FrameId
+function self:GetLastDuration ()
+	self:CheckFlushFrame (FrameNumber ())
+	
+	return self.LastDuration
 end
 
-function self:GetFrameStartTime ()
-	return self.FrameStartTime
+function self:GetCurrentFrameId ()
+	return self.CurrentFrameId
 end
 
-function self:GetFrameStartTime ()
-	return self.FrameStartTime
+function self:GetCurrentFrameStartTime ()
+	return self.CurrentFrameStartTime
 end
 
-function self:GetDuration ()
-	return self.Duration
+function self:GetCurrentFrameEntryCount ()
+	return self.CurrentFrameEntryCount
 end
 
-function self:SetName (sectionName)
-	self.Name = sectionName
+function self:GetCurrentFrameDuration ()
+	return self.CurrentFrameDuration
 end
 
-function self:SetDepth (depth)
-	self.Depth = depth
+function self:GetCurrentDuration ()
+	return self.CurrentDuration
 end
 
 -- Internal, do not call
 function self:AdvanceFrame (frameId)
-	if self.FrameId == frameId then return end
+	if self.CurrentFrameId == frameId then return end
 	
 	self:FlushFrame ()
 	
-	self.FrameId             = FrameNumber ()
-	self.FrameStartTime      = SysTime ()
-	self.FrameEntryCount     = 0
-	self.FrameDuration       = 0.95 * self.LastFrameDuration
-	self.FrameDurationSmoothingCoefficient = 1 - 0.95
+	self.CurrentFrameId         = FrameNumber ()
+	self.CurrentFrameStartTime  = SysTime ()
+	self.CurrentFrameEntryCount = 0
+	self.CurrentFrameDuration   = 0.95 * self.LastFrameDuration
+	self.CurrentFrameDurationSmoothingCoefficient = 1 - 0.95
 	
-	if not self.LastFrameId or self.FrameId > self.LastFrameId + 5 then
+	if not self.LastFrameId or self.CurrentFrameId > self.LastFrameId + 5 then
 		-- Reset all stats
-		self.FrameDuration = 0
-		self.FrameDurationSmoothingCoefficient = 1
+		self.CurrentFrameDuration = 0
+		self.CurrentFrameDurationSmoothingCoefficient = 1
 		
-		self.Duration = nil
+		self.CurrentDuration = nil
 	end
 end
 
 function self:CheckFlushFrame (frameId)
-	if frameId - self.FrameId > 1 then
+	if frameId - self.CurrentFrameId > 1 then
 		self:FlushFrame ()
 	end
 end
 
 function self:CheckFrame (frameId)
-	if self.FrameId ~= frameId then
+	if self.CurrentFrameId ~= frameId then
 		self:AdvanceFrame (frameId)
 	end
 end
 
 function self:Credit (duration)
-	self.FrameEntryCount = self.FrameEntryCount + 1
-	self.Duration        = self.Duration and (0.95 * self.Duration + (1 - 0.95) * duration) or duration
-	self.FrameDuration   = self.FrameDuration + self.FrameDurationSmoothingCoefficient * duration
+	self.CurrentFrameEntryCount = self.CurrentFrameEntryCount + 1
+	self.CurrentDuration        = self.CurrentDuration and (0.95 * self.CurrentDuration + (1 - 0.95) * duration) or duration
+	self.CurrentFrameDuration   = self.CurrentFrameDuration + self.CurrentFrameDurationSmoothingCoefficient * duration
 end
 
 function self:FlushFrame ()
-	self.LastFrameId         = self.FrameId         or 0
-	self.LastFrameStartTime  = self.FrameStartTime  or 0
-	self.LastFrameEntryCount = self.FrameEntryCount or 0
-	self.LastFrameDuration   = self.FrameDuration   or 0
-	self.LastDuration        = self.Duration        or 0
+	self.LastFrameId         = self.CurrentFrameId         or 0
+	self.LastFrameStartTime  = self.CurrentFrameStartTime  or 0
+	self.LastFrameEntryCount = self.CurrentFrameEntryCount or 0
+	self.LastFrameDuration   = self.CurrentFrameDuration   or 0
+	self.LastDuration        = self.CurrentDuration        or 0
 end

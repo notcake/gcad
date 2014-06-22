@@ -66,14 +66,20 @@ function self:SetEnabled (enabled)
 				local x2 = x + 160
 				local x3 = x + 240
 				
+				local sysTime = SysTime ()
+				local sectionFilter = function (sectionEntry)
+					return sysTime - sectionEntry:GetLastFrameStartTime () < 1
+				end
+				
 				local maximumSectionStackLevel = 0
 				local stackLevelIndent = 16
-				for sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount in GCAD.Profiler:GetEnumerator () do
-					maximumSectionStackLevel = math.max (maximumSectionStackLevel, depth)
+				for sectionEntry in GCAD.Profiler:GetEnumerator (sectionFilter) do
+					maximumSectionStackLevel = math.max (maximumSectionStackLevel, sectionEntry:GetDepth ())
 				end
 				
 				local lineCount = 0
-				for sectionEntry, depth, sectionName, duration, frameDuration, frameEntryCount in GCAD.Profiler:GetEnumerator () do
+				for sectionEntry in GCAD.Profiler:GetEnumerator (sectionFilter) do
+					local frameDuration = sectionEntry:GetLastFrameDuration ()
 					local shouldDraw = frameDuration > 0.00002
 					sectionEntry.LastShouldDrawTime = sectionEntry.LastShouldDrawTime or 0
 					if shouldDraw then
@@ -81,7 +87,7 @@ function self:SetEnabled (enabled)
 					end
 					if SysTime () - sectionEntry.LastShouldDrawTime > 1 then continue end
 					
-					local indent = stackLevelIndent * depth
+					local indent = stackLevelIndent * sectionEntry:GetDepth ()
 					
 					if frameDuration >= 0.000750 then
 						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority2BackgroundColor1 or self.Priority2BackgroundColor2)
@@ -93,15 +99,15 @@ function self:SetEnabled (enabled)
 					surface_DrawRect (x0 - 8, y - 2, x3 - x0 + 16 + stackLevelIndent * maximumSectionStackLevel, lineHeight)
 					lineCount = lineCount + 1
 					
-					local text = sectionName
+					local text = sectionEntry:GetDisplayName ()
 					surface_SetTextPos (x0 + indent, y)
 					surface_DrawText (text)
 					
-					text = GLib.FormatDuration (duration)
+					text = GLib.FormatDuration (sectionEntry:GetLastDuration ())
 					surface_SetTextPos (x1 + indent - surface_GetTextSize (text), y)
 					surface_DrawText (text)
 					
-					text = frameEntryCount .. "x / frame"
+					text = sectionEntry:GetLastFrameEntryCount () .. "x / frame"
 					surface_SetTextPos (x2 + indent - surface_GetTextSize (text), y)
 					surface_DrawText (text)
 					

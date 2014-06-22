@@ -12,7 +12,7 @@ function self:ctor ()
 	self.NonRecursiveSections = {}
 end
 
-function self:Begin (sectionName)
+function self:Begin (sectionName, note)
 	local section
 	if self.SectionStackSet [sectionName] then
 		section = self.SectionStackSet [sectionName]
@@ -22,7 +22,7 @@ function self:Begin (sectionName)
 	end
 	
 	-- Recursive section
-	section:Begin ()
+	section:Begin (note)
 	self.SectionStack [#self.SectionStack + 1] = section
 	self.SectionStackRefCount [section] = (self.SectionStackRefCount [section] or 0) + 1
 	self.SectionStackSet [sectionName] = section
@@ -72,8 +72,8 @@ function self:EndNoCredit ()
 	-- self.NonRecursiveSections [sectionName]:EndNoCredit ()
 end
 
-function self:GetEnumerator ()
-	return self.RootSection:GetChildEnumerator ()
+function self:GetEnumerator (filterFunction)
+	return self.RootSection:GetChildEnumerator (filterFunction)
 end
 
 function self:Profile (f, ...)
