@@ -122,7 +122,10 @@ function self:HookNavigationGraph (navigationGraph)
 	
 	navigationGraph:AddEventListener ("EdgeRemoved", "GCAD.NavigationGraphEntityList." .. self:GetHashCode (),
 		function (_, sourceNode, destinationNode, navigationGraphEdge)
-			self.NavigationGraphEdgeEntities [navigationGraphEdge] = nil
+			if self.NavigationGraphEdgeEntities [navigationGraphEdge] then
+				self.NavigationGraphEdgeEntities [navigationGraphEdge]:DispatchEvent ("Removed")
+				self.NavigationGraphEdgeEntities [navigationGraphEdge] = nil
+			end
 		end
 	)
 	
