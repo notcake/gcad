@@ -4,8 +4,6 @@ GCAD.NativeFrustum3d = GCAD.MakeConstructor (self)
 local Angle_Forward                                      = debug.getregistry ().Angle.Forward
 local Angle_Right                                        = debug.getregistry ().Angle.Right
 local Angle_Up                                           = debug.getregistry ().Angle.Up
-local Entity_EyeAngles                                   = debug.getregistry ().Entity.EyeAngles
-local Entity_EyePos                                      = debug.getregistry ().Entity.EyePos
 local Vector_Cross                                       = debug.getregistry ().Vector.Cross
 local Vector___unm                                       = debug.getregistry ().Vector.__unm
 
@@ -33,8 +31,8 @@ if CLIENT then
 		out = out or GCAD.NativeFrustum3d ()
 		
 		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Get camera data")
-		local pos = Entity_EyePos    (LocalPlayer ())
-		local ang = Entity_EyeAngles (LocalPlayer ())
+		local pos     = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraPositionNative ()
+		local ang     = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraAngleNative    ()
 		local forward = Angle_Forward (ang)
 		local right   = Angle_Right   (ang)
 		local up      = Angle_Up      (ang)
