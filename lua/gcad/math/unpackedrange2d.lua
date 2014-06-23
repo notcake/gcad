@@ -9,8 +9,8 @@ local math_max  = math.max
 
 -- Range size
 function GCAD.UnpackedRange2d.IsEmpty (x1, y1, x2, y2)
-	return x1 >= x2 or
-	       y1 >= y2
+	return x1 > x2 or
+	       y1 > y2
 end
 
 function GCAD.UnpackedRange2d.Length (x1, y1, x2, y2)

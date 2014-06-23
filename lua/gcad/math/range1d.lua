@@ -27,7 +27,7 @@ end
 
 -- Range size
 function GCAD.Range1d.IsEmpty (self)
-	return self [1] >= self [2]
+	return self [1] > self [2]
 end
 
 function GCAD.Range1d.Length (self)

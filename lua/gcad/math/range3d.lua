@@ -35,9 +35,9 @@ end
 
 -- Range size
 function GCAD.Range3d.IsEmpty (self)
-	return self [1] >= self [2] or
-	       self [3] >= self [4] or
-		   self [5] >= self [6]
+	return self [1] > self [2] or
+	       self [3] > self [4] or
+		   self [5] > self [6]
 end
 
 function GCAD.Range3d.Volume (self)

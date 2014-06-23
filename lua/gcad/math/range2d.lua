@@ -31,8 +31,8 @@ end
 
 -- Range size
 function GCAD.Range2d.IsEmpty (self)
-	return self [1] >= self [2] or
-	       self [3] >= self [4]
+	return self [1] > self [2] or
+	       self [3] > self [4]
 end
 
 function GCAD.Range2d.Area (self)
