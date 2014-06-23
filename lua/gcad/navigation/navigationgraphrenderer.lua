@@ -25,8 +25,11 @@ function self:CreateNavigationGraphNodeSceneGraphNode (navigationGraphNode)
 	
 	local sceneGraphNode = self.SceneGraph:CreateModelNode ()
 	self.RootSceneGraphNode:AddChild (sceneGraphNode)
-	self.NavigationGraphEdgeSceneGraphNodes [navigationGraphNode] = sceneGraphNode
-	sceneGraphNode:SetRenderComponent (self.NavigationGraphEntityList:GetNavigationGraphNodeEntity (navigationGraphNode))
+	self.NavigationGraphNodeSceneGraphNodes [navigationGraphNode] = sceneGraphNode
+	
+	local navigationGraphNodeEntity = self.NavigationGraphEntityList:GetNavigationGraphNodeEntity (navigationGraphNode)
+	sceneGraphNode:SetRenderComponent (navigationGraphNodeEntity)
+	navigationGraphNodeEntity:SetSceneGraphNode (sceneGraphNode)
 	
 	sceneGraphNode:SetPosition (navigationGraphNode:GetPosition ())
 end

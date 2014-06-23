@@ -5,23 +5,25 @@ GCAD.Navigation.NavigationGraphNodeEntity = GCAD.MakeConstructor (self,
 	GCAD.Rendering.IRenderComponent
 )
 
-local render_SetMaterial      = render.SetMaterial
+local render_SetMaterial      = CLIENT and render.SetMaterial
 
-local IMaterial_SetFloat      = debug.getregistry ().IMaterial.SetFloat
-local IMaterial_SetVector     = debug.getregistry ().IMaterial.SetVector
-local IMesh_Draw              = debug.getregistry ().IMesh.Draw
+local IMaterial_SetFloat      = CLIENT and debug.getregistry ().IMaterial.SetFloat
+local IMaterial_SetVector     = CLIENT and debug.getregistry ().IMaterial.SetVector
+local IMesh_Draw              = CLIENT and debug.getregistry ().IMesh.Draw
 
-self.OutlineColor = GLib.Colors.CornflowerBlue
-self.Color        = GLib.Color.FromColor (self.OutlineColor, 64)
+if CLIENT then
+	self.OutlineColor = GLib.Colors.White
+	self.Color        = GLib.Color.FromColor (self.OutlineColor, 64)
 
-self.OutlineColorVector, self.OutlineColorAlpha = GLib.Color.ToVector (self.OutlineColor)
-self.ColorVector,        self.ColorAlpha        = GLib.Color.ToVector (self.Color)
-
-self.ColorMaterial = CreateMaterial ("GCAD.SingleColorMaterial", "UnlitGeneric",
-	{
-		["$translucent"] = 1
-	}
-)
+	self.OutlineColorVector, self.OutlineColorAlpha = GLib.Color.ToVector (self.OutlineColor)
+	self.ColorVector,        self.ColorAlpha        = GLib.Color.ToVector (self.Color)
+	
+	self.ColorMaterial = CreateMaterial ("GCAD.SingleColorMaterial", "UnlitGeneric",
+		{
+			["$translucent"] = 1
+		}
+	)
+end
 
 -- Box mesh
 self.BoxSize          = 16
@@ -30,8 +32,11 @@ self.BoxMin           = GCAD.Vector3d (-self.HalfBoxSize, -self.HalfBoxSize, -se
 self.BoxMax           = GCAD.Vector3d ( self.HalfBoxSize,  self.HalfBoxSize,  self.HalfBoxSize)
 self.BoxMinNative     = Vector        (-self.HalfBoxSize, -self.HalfBoxSize, -self.HalfBoxSize)
 self.BoxMaxNative     = Vector        ( self.HalfBoxSize,  self.HalfBoxSize,  self.HalfBoxSize)
-self.BoxMesh          = GCAD.Meshes.CreateAxisAlignedCube          (-self.HalfBoxSize, self.HalfBoxSize)
-self.WireframeBoxMesh = GCAD.Meshes.CreateAxisAlignedWireframeCube (-self.HalfBoxSize, self.HalfBoxSize)
+
+if CLIENT then
+	self.BoxMesh          = GCAD.Meshes.CreateAxisAlignedCube          (-self.HalfBoxSize, self.HalfBoxSize)
+	self.WireframeBoxMesh = GCAD.Meshes.CreateAxisAlignedWireframeCube (-self.HalfBoxSize, self.HalfBoxSize)
+end
 
 function self:ctor (navigationGraphNode)
 	self.NavigationGraphNode = navigationGraphNode

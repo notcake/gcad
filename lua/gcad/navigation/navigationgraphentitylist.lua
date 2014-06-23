@@ -122,7 +122,7 @@ function self:HookNavigationGraph (navigationGraph)
 	
 	navigationGraph:AddEventListener ("EdgeRemoved", "GCAD.NavigationGraphEntityList." .. self:GetHashCode (),
 		function (_, sourceNode, destinationNode, navigationGraphEdge)
-			self.NavigationGraphEdgeEntities [navigationGraphNode] = nil
+			self.NavigationGraphEdgeEntities [navigationGraphEdge] = nil
 		end
 	)
 	
@@ -134,7 +134,10 @@ function self:HookNavigationGraph (navigationGraph)
 	
 	navigationGraph:AddEventListener ("NodeRemoved", "GCAD.NavigationGraphEntityList." .. self:GetHashCode (),
 		function (_, navigationGraphNode)
-			self.NavigationGraphNodeEntities [navigationGraphNode] = nil
+			if self.NavigationGraphNodeEntities [navigationGraphNode] then
+				self.NavigationGraphNodeEntities [navigationGraphNode]:DispatchEvent ("Removed")
+				self.NavigationGraphNodeEntities [navigationGraphNode] = nil
+			end
 		end
 	)
 end
