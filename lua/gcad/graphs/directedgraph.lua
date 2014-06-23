@@ -60,6 +60,8 @@ function self:GetVertexInboundEdgeEnumerator (destinationVertex)
 	
 	local next, tbl, sourceVertexId = pairs (self.ReverseEdges [destinationVertexId])
 	return function ()
+		sourceVertexId = next (tbl, sourceVertexId)
+		
 		while sourceVertexId and not self.Vertices [sourceVertexId] do
 			sourceVertexId = next (tbl, sourceVertexId)
 		end

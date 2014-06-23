@@ -147,6 +147,8 @@ function self:GetVertexEdgeEnumerator (sourceVertex)
 	
 	local next, tbl, destinationVertexId = pairs (self.Edges [sourceVertexId])
 	return function ()
+		destinationVertexId = next (tbl, destinationVertexId)
+		
 		while destinationVertexId and not self.Vertices [destinationVertexId] do
 			destinationVertexId = next (tbl, destinationVertexId)
 		end
