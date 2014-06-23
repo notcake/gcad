@@ -1,6 +1,16 @@
 local self = {}
 GCAD.UI.Selection = GCAD.MakeConstructor (self)
 
+--[[
+	Events:
+		Cleared ()
+			Fired when this selection is cleared.
+		ItemAdded (item)
+			Fired when an item has been added to this selection.
+		ItemRemoved (item)
+			Fired when an item has been added to this selection.
+]]
+
 function self:ctor ()
 	self.SelectionSet = GLib.Containers.EventedSet ()
 	
@@ -46,6 +56,41 @@ end
 
 function self:Remove (item)
 	self.SelectionSet:Remove (item)
+end
+
+-- Modifying set
+function self:AddToModifyingSet (item)
+	self.ModifyingSet:Add (item)
+end
+
+function self:AddRangeToModifyingSet (enumerable)
+	for item in enumerable:GetEnumerator () do
+		self:AddToModifyingSet (item)
+	end
+end
+
+function self:ClearModifyingSet ()
+	self.ModifyingSet:Clear ()
+end
+
+function self:ModifyingSetContains (item)
+	return self.ModifyingSet:Contains (item)
+end
+
+function self:GetModifyingSetCount ()
+	return self.ModifyingSet:GetCount ()
+end
+
+function self:GetModifyingSetEnumerator ()
+	return self.ModifyingSet:GetEnumerator ()
+end
+
+function self:IsModifyingSetEmpty ()
+	return self.ModifyingSet:IsEmpty ()
+end
+
+function self:RemoveFromModifyingSet (item)
+	self.ModifyingSet:Remove (item)
 end
 
 -- Selection
