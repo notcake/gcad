@@ -101,9 +101,6 @@ end
 function self:GetChildEnumerator (filterFunction)
 	filterFunction = filterFunction or function () return true end
 	
-	local frameId = FrameNumber ()
-	local sysTime = SysTime ()
-	
 	table.sort (self.ChildSections,
 		function (a, b)
 			return a.LastFrameDuration > b.LastFrameDuration
