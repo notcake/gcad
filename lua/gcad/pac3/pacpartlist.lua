@@ -3,6 +3,9 @@ GCAD.PACPartList = GCAD.MakeConstructor (self, GCAD.OBBSpatialQueryable3d)
 
 local Entity_IsValid = debug.getregistry ().Entity.IsValid
 
+local GCAD_Sphere3d_FromPACPartBoundingSphere = GCAD.Sphere3d.FromPACPartBoundingSphere
+local GCAD_OBB3d_FromPACPart                  = GCAD.OBB3d.FromPACPart
+
 function self:ctor ()
 	self.PACPartReferenceCache = GCAD.MapCache (GCAD.VEntities.PACPartReference.FromPACPart)
 	
@@ -24,8 +27,6 @@ function self:GetObjectHandles (out)
 	local parts = pac and pac.GetParts () or {}
 	GCAD.Profiler:End ()
 	
-	local localPlayer = LocalPlayer ()
-	
 	GCAD.Profiler:Begin ("PACPartList : Filter parts", #parts)
 	for _, part in pairs (parts) do
 		if part.ClassName == "model" and
@@ -39,16 +40,18 @@ function self:GetObjectHandles (out)
 end
 
 function self:GetBoundingSpheres (objectHandles, out)
+	local objectHandleCount = #objectHandles
 	for i = 1, #objectHandles do
-		out [i] = GCAD.Sphere3d.FromPACPartBoundingSphere (objectHandles [i], out [i])
+		out [i] = GCAD_Sphere3d_FromPACPartBoundingSphere (objectHandles [i], out [i])
 	end
 	
 	return out
 end
 
 function self:GetOBBs (objectHandles, out)
-	for i = 1, #objectHandles do
-		out [i] = GCAD.OBB3d.FromPACPart (objectHandles [i], out [i])
+	local objectHandleCount = #objectHandles
+	for i = 1, objectHandleCount do
+		out [i] = GCAD_OBB3d_FromPACPart (objectHandles [i], out [i])
 	end
 	
 	return out

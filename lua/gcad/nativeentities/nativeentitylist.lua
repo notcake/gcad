@@ -66,7 +66,8 @@ function self:GetObjectHandles (out)
 end
 
 function self:GetBoundingSpheres (objectHandles, out)
-	for i = 1, #objectHandles do
+	local objectHandleCount = #objectHandles
+	for i = 1, objectHandleCount do
 		out [i] = GCAD.Sphere3d.FromEntityBoundingSphere (objectHandles [i], out [i])
 	end
 	
@@ -74,7 +75,8 @@ function self:GetBoundingSpheres (objectHandles, out)
 end
 
 function self:GetOBBs (objectHandles, out)
-	for i = 1, #objectHandles do
+	local objectHandleCount = #objectHandles
+	for i = 1, objectHandleCount do
 		out [i] = GCAD.OBB3d.FromEntity (objectHandles [i], out [i])
 	end
 	
