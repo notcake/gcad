@@ -53,6 +53,10 @@ function self:GetNativeOBB (out)
 end
 
 -- VEntity
+function self:GetTypeName ()
+	return "Entity"
+end
+
 -- Display
 function self:GetDisplayString ()
 	if not self:IsResolved () then return "Invalid entity" end

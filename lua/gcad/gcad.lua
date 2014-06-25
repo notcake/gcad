@@ -51,16 +51,6 @@ include ("math/unpackedrange1d.lua")
 include ("math/unpackedrange2d.lua")
 include ("math/unpackedrange3d.lua")
 
--- Spatial queries
-include ("space/queries/linetraceintersectiontype.lua")
-include ("space/queries/linetraceresult.lua")
-include ("space/queries/spatialqueryresult.lua")
-include ("space/queries/ispatialqueryable2d.lua")
-include ("space/queries/ispatialqueryable3d.lua")
-
-include ("space/queries/aggregatespatialqueryable2d.lua")
-include ("space/queries/aggregatespatialqueryable3d.lua")
-
 -- Solids
 -- Planes
 include ("space/shapes/planes/plane2d.lua")
@@ -107,6 +97,17 @@ include ("space/shapes/lines/line3d.lua")
 include ("space/shapes/frustums/frustum3d.lua")
 include ("space/shapes/frustums/nativefrustum3d.lua")
 
+-- Spatial queries
+include ("space/queries/linetraceintersectiontype.lua")
+include ("space/queries/linetraceresult.lua")
+include ("space/queries/spatialqueryresult.lua")
+include ("space/queries/ispatialqueryable2d.lua")
+include ("space/queries/ispatialqueryable3d.lua")
+
+include ("space/queries/obbspatialqueryable3d.lua")
+include ("space/queries/aggregatespatialqueryable2d.lua")
+include ("space/queries/aggregatespatialqueryable3d.lua")
+
 -- Meshes
 GCAD.Meshes = {}
 include ("meshes/utility.lua")
@@ -138,13 +139,28 @@ include ("space/spatialnode3d.lua")
 -- Space
 include ("space/space3d.lua")
 
+-- Actions
+GCAD.Actions = {}
+include ("actions/iaction.lua")
+include ("actions/iactionparameter.lua")
+include ("actions/iactionprovider.lua")
+include ("actions/action.lua")
+include ("actions/actionparameter.lua")
+include ("actions/actionprovider.lua")
+include ("actions/aggregateactionprovider.lua")
+include ("actions/contextmenuaction.lua")
+include ("actions/contextmenuactionprovider.lua")
+GCAD.ActionProvider          = GCAD.Actions.ActionProvider ()
+GCAD.AggregateActionProvider = GCAD.Actions.AggregateActionProvider ()
+GCAD.AggregateActionProvider:AddActionProvider (GCAD.ActionProvider)
+-- GCAD.AggregateActionProvider:AddActionProvider (GCAD.Actions.ContextMenuActionProvider)
+
 -- VEntities
 GCAD.VEntities = {}
 include ("ventities/ventity.lua")
 
 include ("ventities/point3dcomponent.lua")
 include ("ventities/model.lua")
-include ("ventities/pathfindingnode.lua")
 
 -- Signal Processing
 include ("signalprocessing/digitalfilters/realfirfilter.lua")
@@ -185,13 +201,13 @@ include ("scenegraph/modelnode.lua")
 include ("scenegraph/scenegraphrenderer.lua")
 
 -- Engine Interop
-include ("space/engineentitiesspatialqueryable.lua")
+include ("nativeentities/nativeentitylist.lua")
 include ("ventities/entityreference.lua")
 
 -- PAC3 Interop
 GCAD.PAC3 = {}
 include ("pac3/spatialextensions.lua")
-include ("pac3/pacpartsspatialqueryable.lua")
+include ("pac3/pacpartlist.lua")
 include ("pac3/pacpartreference.lua")
 
 -- Navigation
@@ -202,6 +218,7 @@ include ("navigation/navigationgraphnode.lua")
 include ("navigation/navigationgraphedgegenerator.lua")
 include ("navigation/navigationgraphentitylist.lua")
 include ("navigation/navigationgraphnodeentity.lua")
+include ("navigation/navigationgraphactions.lua")
 if CLIENT then
 	include ("navigation/navigationgraphedgerendercomponent.lua")
 	include ("navigation/navigationgraphrenderer.lua")
@@ -220,13 +237,13 @@ if CLIENT then
 	GCAD.NavigationGraphRenderer    = GCAD.Navigation.NavigationGraphRenderer (GCAD.NavigationGraph, GCAD.RootSceneGraph, GCAD.NavigationGraphEntities)
 end
 
-GCAD.EngineEntitiesSpatialQueryable = GCAD.EngineEntitiesSpatialQueryable ()
-GCAD.PACPartsSpatialQueryable       = GCAD.PACPartsSpatialQueryable ()
+GCAD.NativeEntityList               = GCAD.NativeEntityList ()
+GCAD.PACPartList                    = GCAD.PACPartList ()
 GCAD.VSpace3d                       = GCAD.Space3d ()
 
 GCAD.AggregateSpatialQueryable      = GCAD.AggregateSpatialQueryable3d ()
-GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.EngineEntitiesSpatialQueryable)
-GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartsSpatialQueryable      )
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NativeEntityList              )
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartList                   )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntities       )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
 

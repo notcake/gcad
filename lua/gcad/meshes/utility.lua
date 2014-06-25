@@ -1,3 +1,5 @@
+if not CLIENT then return end
+
 local mesh_Begin              = mesh._Begin          or mesh.Begin
 local mesh_End                = mesh._End            or mesh.End
 local mesh_AdvanceVertex      = mesh.AdvanceVertex

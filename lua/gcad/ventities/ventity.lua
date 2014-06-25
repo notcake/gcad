@@ -4,7 +4,27 @@ GCAD.VEntities.VEntity = GCAD.MakeConstructor (self,
 	GCAD.IDisposable
 )
 
+self.TypeName = "VEntity"
+
+--[[
+	Events:
+		Removed ()
+			Fired when this VEntity has been removed.
+]]
+
 function self:ctor ()
+	GCAD.EventProvider (self)
+	
+	self:AddEventListener ("Disposed",
+		function (_)
+			self:DispatchEvent ("Removed")
+		end
+	)
+end
+
+-- Type
+function self:GetTypeName ()
+	return self.TypeName
 end
 
 -- Display

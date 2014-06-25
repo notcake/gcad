@@ -31,8 +31,7 @@ function GCAD.Sphere3d.FromPACPartBoundingSphere (part, out)
 	out [1] = Vector___index (pos, "x")
 	out [2] = Vector___index (pos, "y")
 	out [3] = Vector___index (pos, "z")
-	out [4] = Entity_BoundingRadius (ent)
-	out [4] = out [4] * math_max (GCAD_UnpackedVector3d_FromNativeVector (part:GetScale ())) * part:GetSize ()
+	out [4] = Entity_BoundingRadius (ent) * math_max (GCAD_UnpackedVector3d_FromNativeVector (part.Scale)) * part.Size
 	return out
 end
 -- GCAD.Sphere3d.FromPACPartBoundingSphere = GCAD.Profiler:Wrap (GCAD.Sphere3d.FromPACPartBoundingSphere, "Sphere3d.FromPACPartBoundingSphere")
@@ -45,8 +44,7 @@ function GCAD.NativeSphere3d.FromPACPartBoundingSphere (part, out)
 	
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
 	Vector_Set (out.Position, pos)
-	out [4] = Entity_BoundingRadius (ent)
-	out [4] = out [4] * math_max (GCAD_UnpackedVector3d_FromNativeVector (part:GetScale ())) * part:GetSize ()
+	out [4] = Entity_BoundingRadius (ent) * math_max (GCAD_UnpackedVector3d_FromNativeVector (part.Scale)) * part.Size
 	return out
 end
 -- GCAD.NativeSphere3d.FromPACPartBoundingSphere = GCAD.Profiler:Wrap (GCAD.NativeSphere3d.FromPACPartBoundingSphere, "NativeSphere3d.FromPACPartBoundingSphere")
@@ -62,8 +60,8 @@ function GCAD.OBB3d.FromPACPart (part, out)
 	out.Max      = GCAD_Vector3d_FromNativeVector  (Entity_OBBMaxs   (ent), out.Max     )
 	out.Angle    = GCAD_EulerAngle_FromNativeAngle (Entity_GetAngles (ent), out.Angle   )
 	
-	local kx, ky, kz = GCAD_UnpackedVector3d_FromNativeVector (part:GetScale ())
-	kx, ky, kz = GCAD_UnpackedVector3d_VectorScalarMultiply (kx, ky, kz, part:GetSize ())
+	local kx, ky, kz = GCAD_UnpackedVector3d_FromNativeVector (part.Scale)
+	kx, ky, kz = GCAD_UnpackedVector3d_VectorScalarMultiply (kx, ky, kz, part.Size)
 	
 	out.Min [1] = out.Min [1] * kx
 	out.Min [2] = out.Min [2] * ky
@@ -92,8 +90,8 @@ function GCAD.NativeOBB3d.FromPACPart (part, out)
 	local x1, y1, z1 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMins (ent))
 	local x2, y2, z2 = GCAD_UnpackedVector3d_FromNativeVector (Entity_OBBMaxs (ent))
 	
-	local kx, ky, kz = GCAD_UnpackedVector3d_FromNativeVector (part:GetScale ())
-	kx, ky, kz = GCAD_UnpackedVector3d_VectorScalarMultiply (kx, ky, kz, part:GetSize ())
+	local kx, ky, kz = GCAD_UnpackedVector3d_FromNativeVector (part.Scale)
+	kx, ky, kz = GCAD_UnpackedVector3d_VectorScalarMultiply (kx, ky, kz, part.Size)
 	
 	x1 = x1 * kx
 	y1 = y1 * ky

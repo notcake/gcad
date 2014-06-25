@@ -5,6 +5,7 @@ function self:ctor ()
 	self:SetMouseEventSource (GCAD.UI.ContextMenuEventSource)
 	
 	self.Selection = GCAD.UI.Selection ()
+	GCAD.UI.EventedCollectionCuller (self.Selection)
 	self.SelectionTemporary = false
 	
 	self.TemporarySelectionSet = GLib.Containers.EventedSet ()
@@ -44,11 +45,11 @@ function self:ctor ()
 	
 	local lastQueryFrameId = nil
 	local viewRenderInfo = GCAD.ViewRenderInfo ()
-	hook.Add ("PostDrawTranslucentRenderables", "GCAD.ContextMenu",
-		function (isDepthRender, isSkyboxRender)
-			viewRenderInfo = GCAD.ViewRenderInfo.FromDrawRenderablesHook (isDepthRender, isSkyboxRender, viewRenderInfo)
-			
+	hook.Add ("RenderScene", "GCAD.ContextMenu",
+		function ()
 			if self.MouseDown then
+				viewRenderInfo = GCAD.ViewRenderInfo.FromCurrentScene ()
+				
 				local x1 = math.min (self.MouseDownX, self.MouseMoveX)
 				local x2 = math.max (self.MouseDownX, self.MouseMoveX)
 				local y1 = math.min (self.MouseDownY, self.MouseMoveY)
@@ -57,6 +58,7 @@ function self:ctor ()
 				if viewRenderInfo:GetFrameId () ~= lastQueryFrameId then
 					lastQueryFrameId = viewRenderInfo:GetFrameId ()
 					
+					-- Change the selection's modifying set
 					self.TemporarySelectionSet:Clear ()
 					
 					if x1 == x2 and y1 == y2 then
@@ -64,6 +66,7 @@ function self:ctor ()
 						
 						-- Add everything up to and excluding the world to the selection modifier set
 						local lineTraceResult = self:TraceRay (x1, y1)
+						
 						for object in lineTraceResult:GetEnumerator () do
 							if object:Is (GCAD.VEntities.EntityReference) and
 							   object:GetEntity ():GetClass () == "worldspawn" then break end
@@ -93,11 +96,17 @@ function self:ctor ()
 					self.TemporarySelectionSet:Clear ()
 				end
 			end
-			
+		end
+	)
+	
+	hook.Add ("PostDrawTranslucentRenderables", "GCAD.ContextMenu",
+		function (isDepthRender, isSkyboxRender)
 			if self.Selection:IsEmpty () and
 			   self.SelectionPreviewSet:IsEmpty () then
 				return
 			end
+			
+			viewRenderInfo = GCAD.ViewRenderInfo.FromDrawRenderablesHook (isDepthRender, isSkyboxRender, viewRenderInfo)
 			
 			self.SelectionRenderer:Render (viewRenderInfo)
 		end
@@ -118,7 +127,8 @@ function self:dtor ()
 	
 	self:SetMouseEventSource (nil)
 	
-	hook.Remove ("HUDPaint", "GCAD.ContextMenu")
+	hook.Remove ("HUDPaint",    "GCAD.ContextMenu")
+	hook.Remove ("RenderScene", "GCAD.ContextMenu")
 	hook.Add ("PreDrawOpaqueRenderables",       "GCAD.ContextMenu")
 	hook.Add ("PostDrawOpaqueRenderables",      "GCAD.ContextMenu")
 	hook.Add ("PreDrawTranslucentRenderables",  "GCAD.ContextMenu")
@@ -214,6 +224,8 @@ end
 local frustum3d = GCAD.Frustum3d ()
 local spatialQueryResult = GCAD.SpatialQueryResult ()
 function self:FindInFrustum (x1, y1, x2, y2, out)
+	ents.GetAll ()
+	
 	out = out or spatialQueryResult
 	
 	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, frustum3d)
@@ -227,13 +239,22 @@ end
 local line3d = GCAD.Line3d ()
 local lineTraceResult = GCAD.LineTraceResult ()
 function self:TraceRay (x, y, out)
+	ents.GetAll ()
+	
 	out = out or lineTraceResult
 	
-	line3d = GCAD.Line3d.FromPositionAndDirection (LocalPlayer ():EyePos (), gui.ScreenToVector (x, y), line3d)
+	line3d = GCAD.Line3d.FromPositionAndDirection (GCAD.ViewRenderInfo.CurrentViewRender:GetCameraPositionNative (), gui.ScreenToVector (x, y), line3d)
 	
 	out:Clear ()
 	out:SetMinimumParameter (0)
 	out = GCAD.AggregateSpatialQueryable:TraceLine (line3d, out)
+	
+	print ("")
+	print ("TRACE:")
+	for object, t in out:GetEnumerator () do
+		local desc = object:GetDisplayString ()
+		print ("", t, desc)
+	end
 	
 	return out
 end

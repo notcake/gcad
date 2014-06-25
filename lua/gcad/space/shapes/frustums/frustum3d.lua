@@ -89,19 +89,19 @@ end
 function GCAD.Frustum3d.ContainsPoint (v3d)
 	return GCAD_NormalizedPlane3d_ContainsPoint (self.LeftPlane,   v3d) and
 	       GCAD_NormalizedPlane3d_ContainsPoint (self.RightPlane,  v3d) and
-		   GCAD_NormalizedPlane3d_ContainsPoint (self.TopPlane,    v3d) and
-		   GCAD_NormalizedPlane3d_ContainsPoint (self.BottomPlane, v3d) and
-		   GCAD_NormalizedPlane3d_ContainsPoint (self.NearPlane,   v3d) and
-		   GCAD_NormalizedPlane3d_ContainsPoint (self.FarPlane,    v3d)
+	       GCAD_NormalizedPlane3d_ContainsPoint (self.TopPlane,    v3d) and
+	       GCAD_NormalizedPlane3d_ContainsPoint (self.BottomPlane, v3d) and
+	       GCAD_NormalizedPlane3d_ContainsPoint (self.NearPlane,   v3d) and
+	       GCAD_NormalizedPlane3d_ContainsPoint (self.FarPlane,    v3d)
 end
 
 function GCAD.Frustum3d.ContainsNativePoint (v)
 	return GCAD_NormalizedPlane3d_ContainsNativePoint (self.LeftPlane,   v) and
 	       GCAD_NormalizedPlane3d_ContainsNativePoint (self.RightPlane,  v) and
-		   GCAD_NormalizedPlane3d_ContainsNativePoint (self.TopPlane,    v) and
-		   GCAD_NormalizedPlane3d_ContainsNativePoint (self.BottomPlane, v) and
-		   GCAD_NormalizedPlane3d_ContainsNativePoint (self.NearPlane,   v) and
-		   GCAD_NormalizedPlane3d_ContainsNativePoint (self.FarPlane,    v)
+	       GCAD_NormalizedPlane3d_ContainsNativePoint (self.TopPlane,    v) and
+	       GCAD_NormalizedPlane3d_ContainsNativePoint (self.BottomPlane, v) and
+	       GCAD_NormalizedPlane3d_ContainsNativePoint (self.NearPlane,   v) and
+	       GCAD_NormalizedPlane3d_ContainsNativePoint (self.FarPlane,    v)
 end
 
 function GCAD.Frustum3d.ContainsSphere (self, sphere3d)
