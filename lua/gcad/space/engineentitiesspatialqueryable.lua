@@ -68,10 +68,10 @@ function self:FindIntersectingFrustum (frustum3d, spatialQueryResult)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			-- Sphere culling
-			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum : Sphere cull")
+			--GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:FindIntersectingFrustum : Sphere cull")
 			sphere3d = GCAD.Sphere3d.FromEntityBoundingSphere (v, sphere3d)
 			local intersectsSphere, containsSphere = frustum3d:IntersectsSphere (sphere3d)
-			GCAD.Profiler:End ()
+			--GCAD.Profiler:End ()
 			
 			-- OBB intersection
 			if intersectsSphere then
@@ -123,14 +123,14 @@ function self:TraceLine (line3d, lineTraceResult)
 		   v ~= localPlayer and
 		   not Entity_GetOwner (v):IsPlayer () then
 			-- Sphere culling
-			GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:TraceLine : Sphere cull")
+			--GCAD.Profiler:Begin ("EngineEntitiesSpatialQueryable:TraceLine : Sphere cull")
 			sphere3d = GCAD.Sphere3d.FromEntityBoundingSphere (v, sphere3d)
 			local intersectsSphere = sphere3d:IntersectsLine (line3d)
-			GCAD.Profiler:End ()
+			--GCAD.Profiler:End ()
 			
 			if intersectsSphere then
-				obb = GCAD.OBB3d.FromEntity (v, obb)
-				local tStart, tEnd = obb:IntersectLine (line3d)
+				obb3d = GCAD.OBB3d.FromEntity (v, obb3d)
+				local tStart, tEnd = obb3d:IntersectLine (line3d)
 				
 				if tStart then
 					lineTraceResult:AddIntersectionSpan (self.EntityReferenceCache:Get (v), tStart, tEnd)
