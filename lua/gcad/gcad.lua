@@ -216,6 +216,8 @@ include ("navigation/navigationgraph.lua")
 include ("navigation/navigationgraphedge.lua")
 include ("navigation/navigationgraphnode.lua")
 include ("navigation/navigationgraphedgegenerator.lua")
+include ("navigation/navigationgraphnodeentitylist.lua")
+include ("navigation/navigationgraphedgeentitylist.lua")
 include ("navigation/navigationgraphentitylist.lua")
 include ("navigation/navigationgraphnodeentity.lua")
 include ("navigation/navigationgraphactions.lua")
@@ -231,10 +233,10 @@ GCAD.RootSceneGraph                 = GCAD.SceneGraph.SceneGraph ()
 GCAD.RootSceneGraphRenderer         = GCAD.SceneGraph.SceneGraphRenderer (GCAD.RootSceneGraph)
 
 GCAD.NavigationGraph                = GCAD.Navigation.NavigationGraph ()
-GCAD.NavigationGraphEntities        = GCAD.Navigation.NavigationGraphEntityList (GCAD.NavigationGraph)
+GCAD.NavigationGraphEntityList      = GCAD.Navigation.NavigationGraphEntityList (GCAD.NavigationGraph)
 GCAD.NavigationGraphEdgeGenerator   = GCAD.Navigation.NavigationGraphEdgeGenerator (GCAD.NavigationGraph)
 if CLIENT then
-	GCAD.NavigationGraphRenderer    = GCAD.Navigation.NavigationGraphRenderer (GCAD.NavigationGraph, GCAD.RootSceneGraph, GCAD.NavigationGraphEntities)
+	GCAD.NavigationGraphRenderer    = GCAD.Navigation.NavigationGraphRenderer (GCAD.NavigationGraph, GCAD.RootSceneGraph, GCAD.NavigationGraphEntityList)
 end
 
 GCAD.NativeEntityList               = GCAD.NativeEntityList ()
@@ -244,7 +246,7 @@ GCAD.VSpace3d                       = GCAD.Space3d ()
 GCAD.AggregateSpatialQueryable      = GCAD.AggregateSpatialQueryable3d ()
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NativeEntityList              )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartList                   )
-GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntities       )
+GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntityList     )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
 
 if CLIENT then

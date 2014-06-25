@@ -1,8 +1,18 @@
 local self = {}
-GCAD.AggregateSpatialQueryable3d = GCAD.MakeConstructor (self, ISpatialQueryable3d)
+GCAD.AggregateSpatialQueryable3d = GCAD.MakeConstructor (self, GCAD.ISpatialQueryable3d)
 
 function self:ctor ()
 	self.SpatialQueryables = {}
+	
+	self.TemporarySpatialQueryResult = GCAD.SpatialQueryResult ()
+	self.TemporaryLineTraceResult    = GCAD.LineTraceResult ()
+	
+	-- Set up profiling
+	for methodName, v in pairs (self.__base) do
+		if isfunction (v) then
+			self [methodName] = GCAD.Profiler:Wrap (self [methodName], "AggregateSpatialQueryable3d:" .. methodName)
+		end
+	end
 end
 
 -- ISpatialQueryable3d
@@ -18,17 +28,16 @@ local regionQueryFunctions =
 	"FindIntersectingFrustum"
 }
 
-local tempSpatialQueryResult = GCAD.SpatialQueryResult ()
 for _, queryMethodName in ipairs (regionQueryFunctions) do
 	self [queryMethodName] = function (self, region, spatialQueryResult)
 		spatialQueryResult = spatialQueryResult or GCAD.SpatialQueryResult ()
 		
 		for spatialQueryable in self:GetSpatialQueryableEnumerator () do
-			local tempSpatialQueryResult = spatialQueryable [queryMethodName] (spatialQueryable, region, tempSpatialQueryResult)
-			for object, fullyContained in tempSpatialQueryResult:GetEnumerator () do
+			self.TemporarySpatialQueryResult = spatialQueryable [queryMethodName] (spatialQueryable, region, self.TemporarySpatialQueryResult)
+			for object, fullyContained in self.TemporarySpatialQueryResult:GetEnumerator () do
 				spatialQueryResult:Add (object, fullyContained)
 			end
-			tempSpatialQueryResult:Clear ()
+			self.TemporarySpatialQueryResult:Clear ()
 		end
 		
 		return spatialQueryResult
@@ -40,20 +49,19 @@ local lineQueryFunctions =
 	"TraceLine"
 }
 
-local tempLineTraceResult = GCAD.LineTraceResult ()
 for _, queryMethodName in ipairs (lineQueryFunctions) do
 	self [queryMethodName] = function (self, line, lineTraceResult)
 		lineTraceResult = lineTraceResult or GCAD.LineTraceResult ()
 		lineTraceResult:SetLine (line)
 		
 		for spatialQueryable in self:GetSpatialQueryableEnumerator () do
-			tempLineTraceResult:SetMinimumParameter (lineTraceResult:GetMinimumParameter ())
-			tempLineTraceResult:SetMaximumParameter (lineTraceResult:GetMaximumParameter ())
-			local tempLineTraceResult = spatialQueryable [queryMethodName] (spatialQueryable, line, tempLineTraceResult)
-			for object, t, intersectionType in tempLineTraceResult:GetFullIntersectionEnumerator () do
+			self.TemporaryLineTraceResult:SetMinimumParameter (lineTraceResult:GetMinimumParameter ())
+			self.TemporaryLineTraceResult:SetMaximumParameter (lineTraceResult:GetMaximumParameter ())
+			self.TemporaryLineTraceResult = spatialQueryable [queryMethodName] (spatialQueryable, line, self.TemporaryLineTraceResult)
+			for object, t, intersectionType in self.TemporaryLineTraceResult:GetFullIntersectionEnumerator () do
 				lineTraceResult:AddIntersection (object, t, intersectionType, true)
 			end
-			tempLineTraceResult:Clear ()
+			self.TemporaryLineTraceResult:Clear ()
 		end
 		
 		return lineTraceResult

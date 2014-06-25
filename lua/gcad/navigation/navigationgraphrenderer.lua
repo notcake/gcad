@@ -2,8 +2,10 @@ local self = {}
 GCAD.Navigation.NavigationGraphRenderer = GCAD.MakeConstructor (self)
 
 function self:ctor (navigationGraph, sceneGraph, navigationGraphEntityList)
-	self.NavigationGraph           = navigationGraph
-	self.NavigationGraphEntityList = navigationGraphEntityList
+	self.NavigationGraph               = navigationGraph
+	self.NavigationGraphEntityList     = navigationGraphEntityList
+	self.NavigationGraphNodeEntityList = self.NavigationGraphEntityList:GetNavigationGraphNodeEntityList ()
+	self.NavigationGraphEdgeEntityList = self.NavigationGraphEntityList:GetNavigationGraphEdgeEntityList ()
 	self.SceneGraph                = sceneGraph
 	
 	self.RootSceneGraphNode = self.SceneGraph:CreateGroupNode ()
@@ -27,7 +29,7 @@ function self:CreateNavigationGraphNodeSceneGraphNode (navigationGraphNode)
 	self.RootSceneGraphNode:AddChild (sceneGraphNode)
 	self.NavigationGraphNodeSceneGraphNodes [navigationGraphNode] = sceneGraphNode
 	
-	local navigationGraphNodeEntity = self.NavigationGraphEntityList:GetNavigationGraphNodeEntity (navigationGraphNode)
+	local navigationGraphNodeEntity = self.NavigationGraphNodeEntityList:GetNavigationGraphNodeEntity (navigationGraphNode)
 	sceneGraphNode:SetRenderComponent (navigationGraphNodeEntity)
 	navigationGraphNodeEntity:SetSceneGraphNode (sceneGraphNode)
 	
