@@ -1,0 +1,202 @@
+Planes:
+	p . n + d = 0
+	
+	p is any point on the plane.
+	n is the plane normal.
+	
+	To construct a plane from a position, p, and normal, n:
+		d = -p . n
+	
+Spheres:
+	| p - p0 | <= r
+	
+	p is any point on the surface of or in the sphere.
+	p0 is the centre of the sphere.
+	r is the sphere radius.
+	
+Lines:
+	x = p + t d
+	
+	x is any position along the line
+	p is an arbitrary position on the line
+	d is a direction vector for the line
+	t is a parameter, allowed to vary from -infinity to infinity.
+
+Axis-aligned bounding box:
+	min_x <= x <= max_x
+	min_y <= y <= max_y
+	min_z <= z <= max_z
+	
+	[ min_x, min_y, min_z ] and [ max_x, max_y, max_z ] are opposite corners of the axis-aligned bounding box.
+	[ x, y, z ] is any point on the surface of or within the box.
+
+Oriented bounding box:
+	Position
+	Angle
+	Min
+	Max
+
+Operations:
+	a . b          3 muls    2 adds
+	a x b          6 muls    3 adds
+	
+	| x |^2        3 muls    2 adds
+	| x |          3 muls    2 adds    1 sqrt
+	
+    a + b                    3 adds
+	a - b                    3 adds
+	k x            3 muls
+	
+	| a - b |^2    3 muls    5 adds
+	| a - b |      3 muls    5 adds    1 sqrt
+	
+	[     ] [  ]   4 muls    2 adds
+	[     ] [  ]   
+	
+	a + t b        3 muls    3 adds
+Tests:
+	Point and point:
+		Point-point distance:
+			distance = | p0 - p1 |
+			3 muls, 5 adds, 1 sqrt
+	
+	Line and point:
+		Point p0 and line x1 = p1 + t1 d1
+		
+		Point-line distance:
+			distance = | x1 - p0 |
+			distance^2 = | x1 - p0 |^2
+			           = ( x1 - p0 ) . ( x1 - p0 )
+					   = x1 . x1 - 2 p0 . x1 + p0 . p0
+					   = p0 . p0 + x1 . x1 - 2 p0 . x1
+					   = p0 . p0 + ( p1 + t1 d1 ) . ( p1 + t1 d1 ) - 2 p0 . ( p1 + t1 d1 )
+					   = p0 . p0 + p1 . p1 + 2 t1 p1 . d1 + t1^2 d1 . d1 - 2 p0 . p1 - 2 t1 po. d1
+			d / dt1 distance^2 = 0
+			         0 =                     2    p1 . d1 + 2 t1 d1 . d1             - 2 p0 . d1
+					 0 = 2 p1 . d1 + 2 t1 d1 . d1 - 2 p0 . d1
+					 0 =   p1 . d1 +   t1 d1 . d1 -   p0 . d1
+					 0 =  p1 . d1 - p0 . d1 + t1 d1 . d1
+					 0 =  (p1 - p0). d1 + t1 d1 . d1
+			
+					       (p0 - p1) . d1
+					t1 = ------------------
+						      d1 . d1
+			
+					(Project p0 - p1 onto the line's direction and normalize to a real distance
+					 by dividing by | d1 |.
+					 Divide by | d1 | again to get a parameter.)
+			
+			distance = | x1 - p0 |
+			         = | p1 + t1 d1 - p0 |
+					 = | p1 - p0 + t1 d1 |
+					 = | p1 - p0 + t1 d1 |
+					 
+					   |                (p0 - p1) . d1   |
+					 = | p1 - p0 + d1 ------------------ |
+					   |                   d1 . d1       |
+					   
+					   |                (p0 - p1) . d1   |
+					 = | p0 - p1 - d1 ------------------ |
+					   |                   d1 . d1       |
+					   
+					        (                 |      (p0 - p1) . d1   |^2 )
+					 = sqrt ( | p0 - p1 |^2 - | d1 ------------------ |   )
+					        (                 |         d1 . d1       |   )
+							
+					        (                          |   (p0 - p1) . d1   |^2 )
+					 = sqrt ( | p0 - p1 |^2 - | d1 |^2 | ------------------ |   )
+					        (                          |      d1 . d1       |   )
+					   
+					        (                         |   (p0 - p1) . d1   |^2 )
+					 = sqrt ( | p0 - p1 |^2 - d1 . d1 | ------------------ |   )
+					        (                         |      d1 . d1       |   )
+					   
+					        (                   ((p0 - p1) . d1)^2   )
+					 = sqrt ( | p0 - p1 |^2 - ---------------------- )
+					        (                        d1 . d1         )
+	Line and line:
+		Line-line distance:
+			The line segment of minimum distance between lines p0, d0 and p1, d1
+			is at right angles to the directions of both lines, d0 and d1.
+			So this line segment has direction d0 x d1.
+			
+			Project p1 - p0 onto d0 x d1, normalized, to get the distance.
+			
+			             | (p1 - p0) . (d0 x d1) |
+			distance = -----------------------------
+			                    | d0 x d1 |
+			
+			t0 and t1 can be obtained by differentiating | x0 - x1 | ^ 2
+			with respect to t0 and t1 and equating with 0.
+			This gives two linear equations in t0 and t1.
+			
+			       (p1 - p0) . (d0 (d1 . d1) - d1 (d0 . d1))
+			t0 = ---------------------------------------------
+			                    | d0 x d1 | ^ 2
+			
+			t1 can be obtained by symmetry, swapping p0, d0 for p1, d1 in the above expression.
+			
+				   (p1 - p0) . (d0 (d0 . d1) - d1 (d0 . d0))
+			t1 = ---------------------------------------------
+			                    | d0 x d1 | ^ 2
+			
+			d0 . d0   3 muls  2 adds
+			d0 . d1   3 muls  2 adds
+			d1 . d1   3 muls  2 adds
+			d0 x d1   6 muls  3 adds
+			p1 - p0           3 adds
+			distance  3 muls  2 adds
+			distance 12 muls 10 adds 1 sqrt 1 div
+	Plane and point:
+		Point-plane signed distance:
+			                    p . n
+			signed distance = ---------
+			                    | n |
+		
+		Point-plane scaled signed distance:
+			scaled signed distance = p . n
+		
+		Plane point containment
+			on plane  = p . n  = 0
+			contained = p . n <= 0
+		
+	Plane and sphere:
+		Plane sphere containment:
+			Sphere centre has to be radius deep within plane.
+			
+			              p . n
+			contained = --------- < -r
+			              | n |
+		
+		Plane sphere intersection:
+			Sphere centre has to be less than radius away from plane.
+			
+			               p . n
+			intersects = --------- < r
+			               | n |
+		
+	Sphere and point:
+		Point-sphere signed distance:
+			signed distance = | p - p0 | - r
+		
+		Sphere point containment
+			on sphere = | p - p0 |  = r
+			contained = | p - p0 | <= r
+	
+	Sphere and line:
+		Sphere p0, r0 and line x1 = p1 + t1 d1
+		Intersection:
+			intersects = point-line distance to p0
+	Sphere and sphere:
+		Sphere sphere containment:
+			Sphere p0, r0 contains sphere p1, r1
+			if p1 lies r1 deep within sphere p0, r0
+			
+			contained = | p1 - p0 | <= r0 - r1
+		
+		Sphere sphere intersections:
+			Spheres p0, r0 intersects sphere p1, r1
+			if the distance between their centres is less than
+			the sum of their radii
+			
+			intersections = | p1 - p0 | <= r0 + r1

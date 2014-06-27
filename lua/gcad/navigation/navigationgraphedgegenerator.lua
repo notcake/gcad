@@ -50,7 +50,7 @@ function self:HookNavigationGraph (navigationGraph)
 	
 	navigationGraph:AddEventListener ("NodeAdded", "GCAD.NavigationGraphEdgeGenerator." .. self:GetHashCode (),
 		function (_, navigationGraphNode)
-			self:AutolinkNode (navigationGraphNode)
+			-- self:AutolinkNode (navigationGraphNode)
 		end
 	)
 end

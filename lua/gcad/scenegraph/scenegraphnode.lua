@@ -33,6 +33,7 @@ function self:ctor ()
 	self.WorldToLocalMatrixNativeValid  = false
 	
 	-- Rendering
+	self.Visible                        = true
 	self.RenderModifierComponent        = GCAD.Rendering.NullRenderModifierComponent ()
 	self.RenderComponent                = GCAD.Rendering.NullRenderComponent ()
 end
@@ -169,6 +170,18 @@ function self:GetWorldToLocalMatrix ()
 end
 
 -- Rendering
+function self:IsVisible ()
+	return self.Visible
+end
+
+function self:SetVisible (visible)
+	if self.Visible == visible then return self end
+	
+	self.Visible = visible
+	
+	return self
+end
+
 function self:GetRenderComponent ()
 	return self.RenderComponent
 end

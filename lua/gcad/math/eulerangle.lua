@@ -1,7 +1,9 @@
 local self = {}
 GCAD.EulerAngle = GCAD.MakeConstructor (self)
 
+local math_atan2                           = math.atan2
 local math_cos                             = math.cos
+local math_deg                             = math.deg
 local math_rad                             = math.rad
 local math_sin                             = math.sin
 
@@ -10,6 +12,8 @@ local Angle                                = Angle
 local Angle___index                        = debug.getregistry ().Angle.__index
 local Angle___newindex                     = debug.getregistry ().Angle.__newindex
 
+local GCAD_Vector2d_Length                 = GCAD.Vector2d.Length
+local GCAD_UnpackedVector2d_Length         = GCAD.UnpackedVector2d.Length
 local GCAD_UnpackedVector3d_ToNativeVector = GCAD.UnpackedVector3d.ToNativeVector
 local GCAD_UnpackedVector3d_ToVector3d     = GCAD.UnpackedVector3d.ToVector3d
 
@@ -164,6 +168,26 @@ function GCAD.EulerAngle.ToMatrix4x4 (self, out)
 		      -sinp,                      cosp * sinr,                      cosp * cosr, 0,
 		          0,                                0,                                0, 1
 	)
+	
+	return out
+end
+
+function GCAD.EulerAngle.FromDirection (forwards, out)
+	out = out or GCAD.EulerAngle ()
+	
+	out [1] = math_deg (math_atan2 (forwards [3], GCAD_Vector2d_Length (forwards)))
+	out [2] = math_deg (math_atan2 (forwards [2], forwards [1]))
+	out [3] = 0
+	
+	return out
+end
+
+function GCAD.EulerAngle.FromUnpackedDirection (x, y, z, out)
+	out = out or GCAD.EulerAngle ()
+	
+	out [1] = math_deg (math_atan2 (z, GCAD_UnpackedVector2d_Length (x, y)))
+	out [2] = math_deg (math_atan2 (y, x))
+	out [3] = 0
 	
 	return out
 end

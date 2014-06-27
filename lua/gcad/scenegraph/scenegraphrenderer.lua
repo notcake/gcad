@@ -4,12 +4,6 @@ GCAD.SceneGraph.SceneGraphRenderer = GCAD.MakeConstructor (self)
 function self:ctor (sceneGraph)
 	self.SceneGraph = sceneGraph
 	
-	GCAD:AddEventListener ("Unloaded", "GCAD.SceneGraphRenderer." .. self:GetHashCode (),
-		function ()
-			self:dtor ()
-		end
-	)
-	
 	local viewRenderInfo = GCAD.ViewRenderInfo ()
 	hook.Add ("PostDrawOpaqueRenderables", "GCAD.SceneGraphRenderer." .. self:GetHashCode (),
 		function (isDepthRender, isSkyboxRender)
@@ -30,8 +24,6 @@ function self:ctor (sceneGraph)
 end
 
 function self:dtor ()
-	GCAD:RemoveEventListener ("Unloaded", "GCAD.SceneGraphRenderer." .. self:GetHashCode ())
-	
 	hook.Remove ("PostDrawOpaqueRenderables",      "GCAD.SceneGraphRenderer." .. self:GetHashCode ())
 	hook.Remove ("PostDrawTranslucentRenderables", "GCAD.SceneGraphRenderer." .. self:GetHashCode ())
 end
@@ -65,7 +57,9 @@ function self:RenderNodeOpaque (viewRenderInfo, sceneGraphNode)
 	end
 	
 	for childNode in sceneGraphNode:GetChildEnumerator () do
-		self:RenderNodeOpaque (viewRenderInfo, childNode)
+		if childNode:IsVisible () then
+			self:RenderNodeOpaque (viewRenderInfo, childNode)
+		end
 	end
 	
 	if renderComponent:HasOpaqueRendering () then
@@ -80,7 +74,6 @@ function self:RenderNodeOpaque (viewRenderInfo, sceneGraphNode)
 end
 
 function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
-	local renderComponent = sceneGraphNode:GetRenderComponent ()
 	local renderModifierComponent = sceneGraphNode:GetRenderModifierComponent ()
 	
 	if renderModifierComponent:HasPreRenderModifier () then
@@ -88,9 +81,12 @@ function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 	end
 	
 	for childNode in sceneGraphNode:GetChildEnumerator () do
-		self:RenderNodeTranslucent (viewRenderInfo, childNode)
+		if childNode:IsVisible () then
+			self:RenderNodeTranslucent (viewRenderInfo, childNode)
+		end
 	end
 	
+	local renderComponent = sceneGraphNode:GetRenderComponent ()
 	if renderComponent:HasTranslucentRendering () then
 		cam.PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
 		renderComponent:RenderTranslucent ()

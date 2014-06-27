@@ -5,10 +5,12 @@ local Vector              = Vector
 
 local Vector_Set          = debug.getregistry ().Vector.Set
 
-local GCAD_Vector3d_FromNativeVector = GCAD.Vector3d.FromNativeVector
-local GCAD_Vector3d_ToNativeVector   = GCAD.Vector3d.ToNativeVector
-local GCAD_Vector3d_Clone            = GCAD.Vector3d.Clone
-local GCAD_Vector3d_Copy             = GCAD.Vector3d.Copy
+local GCAD_UnpackedVector3d_ToNativeVector = GCAD.UnpackedVector3d.ToNativeVector
+local GCAD_Vector3d_Clone                  = GCAD.Vector3d.Clone
+local GCAD_Vector3d_Copy                   = GCAD.Vector3d.Copy
+local GCAD_Vector3d_FromNativeVector       = GCAD.Vector3d.FromNativeVector
+local GCAD_Vector3d_ToNativeVector         = GCAD.Vector3d.ToNativeVector
+local GCAD_Vector3d_Unpack                 = GCAD.Vector3d.Unpack
 
 --[[
 	Events:
@@ -32,6 +34,10 @@ end
 -- Navigation graph
 function self:GetNavigationGraph ()
 	return self.NavigationGraph
+end
+
+function self:GetId ()
+	return self.NavigationGraph:GetNodeId (self)
 end
 
 function self:Remove ()
@@ -85,6 +91,9 @@ function self:GetPositionNative (out)
 	end
 	return out
 end
+function self:GetPositionUnpacked ()
+	return GCAD_Vector3d_Unpack (self.Position)
+end
 
 function self:SetPosition (pos)
 	self.Position       = GCAD_Vector3d_Clone          (pos, self.Position      )
@@ -98,6 +107,15 @@ end
 function self:SetPositionNative (pos)
 	self.Position = GCAD_Vector3d_FromNativeVector (pos, self.Position)
 	Vector_Set (self.PositionNative, pos)
+	
+	self:DispatchEvent ("PositionChanged", self.Position)
+	
+	return self
+end
+
+function self:SetPositionUnpacked (x, y, z)
+	self.Position:Set (x, y, z)
+	self.PositionnNative = GCAD_UnpackedVector3d_ToNativeVector (x, y, z, self.PositionNative)
 	
 	self:DispatchEvent ("PositionChanged", self.Position)
 	

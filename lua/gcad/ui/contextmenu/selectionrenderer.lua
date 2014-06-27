@@ -45,18 +45,8 @@ function self:ctor (selection)
 	self.SelectionPreviewOutlineColor = GLib.Colors.Orange
 	self.SelectionPreviewColor        = GLib.Color.FromColor (self.SelectionPreviewOutlineColor, 64)
 	
-	self.PerVertexColorMaterial = CreateMaterial ("GCAD.VertexColorMaterial", "UnlitGeneric",
-		{
-			["$vertexcolor"] = 1,
-			["$vertexalpha"] = 1,
-			["$translucent"] = 1
-		}
-	)
-	self.ColorMaterial          = CreateMaterial ("GCAD.SingleColorMaterial", "UnlitGeneric",
-		{
-			["$translucent"] = 1
-		}
-	)
+	self.PerVertexColorMaterial       = GCAD.Materials.CreateVertexColorMaterial ("GCAD.VertexColorMaterial")
+	self.ColorMaterial                = GCAD.Materials.CreateColorMaterial       ("GCAD.SingleColorMaterial")
 	
 	self.RenderCache = GCAD.MapCache (
 		function ()

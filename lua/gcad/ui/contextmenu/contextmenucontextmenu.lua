@@ -11,7 +11,8 @@ function GCAD.UI.ContextMenuContextMenu (self)
 		:SetIcon ("icon16/vector.png")
 		:AddEventListener ("Click",
 			function (_)
-				GCAD.NavigationGraph:CreateNode (contextMenu.WorldIntersectionPosition)
+				local navigationGraphNode = GCAD.NavigationGraph:CreateNode (contextMenu.WorldIntersectionPosition)
+				GCAD.NavigationGraphEdgeGenerator:AutolinkNode (navigationGraphNode)
 			end
 		)
 	creationMenu:AddItem ("Navigation Node (x100)")

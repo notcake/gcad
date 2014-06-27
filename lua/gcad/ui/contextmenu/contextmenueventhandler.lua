@@ -62,8 +62,6 @@ function self:ctor ()
 					self.TemporarySelectionSet:Clear ()
 					
 					if x1 == x2 and y1 == y2 then
-						GCAD.Profiler:Begin ("GCAD.ContextMenu : TraceRay")
-						
 						-- Add everything up to and excluding the world to the selection modifier set
 						local lineTraceResult = self:TraceRay (x1, y1)
 						
@@ -73,11 +71,7 @@ function self:ctor ()
 							self.TemporarySelectionSet:Add (object)
 							break
 						end
-						
-						GCAD.Profiler:End ()
 					else
-						GCAD.Profiler:Begin ("GCAD.ContextMenu : FindInFrustum")
-						
 						-- Add everything except the world to the selection modifier set
 						local spatialQueryResult = self:FindInFrustum (x1, y1, x2, y2)
 						for object in spatialQueryResult:GetEnumerator () do
@@ -86,8 +80,6 @@ function self:ctor ()
 								self.TemporarySelectionSet:Add (object)
 							end
 						end
-						
-						GCAD.Profiler:End ()
 					end
 					
 					local temporarySelectionSet = self.Selection:GetModifyingSet ()
@@ -224,8 +216,6 @@ end
 local frustum3d = GCAD.Frustum3d ()
 local spatialQueryResult = GCAD.SpatialQueryResult ()
 function self:FindInFrustum (x1, y1, x2, y2, out)
-	ents.GetAll ()
-	
 	out = out or spatialQueryResult
 	
 	frustum3d = GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, frustum3d)
@@ -239,8 +229,6 @@ end
 local line3d = GCAD.Line3d ()
 local lineTraceResult = GCAD.LineTraceResult ()
 function self:TraceRay (x, y, out)
-	ents.GetAll ()
-	
 	out = out or lineTraceResult
 	
 	line3d = GCAD.Line3d.FromPositionAndDirection (GCAD.ViewRenderInfo.CurrentViewRender:GetCameraPositionNative (), gui.ScreenToVector (x, y), line3d)

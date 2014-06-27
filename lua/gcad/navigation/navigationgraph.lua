@@ -47,8 +47,20 @@ function self:CreateNode (position)
 	return navigationGraphNode
 end
 
+function self:GetNode (id)
+	return self.Graph:GetVertexById (id)
+end
+
+function self:GetNodeCount ()
+	return self.Graph:GetVertexCount ()
+end
+
 function self:GetNodeEnumerator ()
 	return self.Graph:GetVertexEnumerator ()
+end
+
+function self:GetNodeId (navigationGraphNode)
+	return self.Graph:GetVertexId (navigationGraphNode)
 end
 
 function self:DestroyNode (navigationGraphNode)
@@ -87,6 +99,18 @@ function self:AddEdge (sourceNode, destinationNode)
 	self:DispatchEvent ("EdgeAdded", sourceNode, destinationNode, navigationGraphEdge)
 	
 	return navigationGraphEdge
+end
+
+function self:GetEdgeEnumerator ()
+	return self.Graph:GetEdgeEnumerator ()
+end
+
+function self:GetNodeInboundEdgeEnumerator (navigationGraphNode)
+	return self.Graph:GetVertexInboundEdgeEnumerator (navigationGraphNode)
+end
+
+function self:GetNodeOutboundEdgeEnumerator (navigationGraphNode)
+	return self.Graph:GetVertexOutboundEdgeEnumerator (navigationGraphNode)
 end
 
 function self:RemoveEdge (sourceNode, destinationNode)

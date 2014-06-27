@@ -36,7 +36,7 @@ function self:AddVertex (vertex, vertexId)
 		self:RemoveVertex (self.Vertices [vertexId])
 	end
 	
-	self.Vertices [vertexId] = true
+	self.Vertices [vertexId] = vertex
 	self.VertexIds [vertex] = vertexId
 	self.VertexCount = self.VertexCount + 1
 end
@@ -99,7 +99,7 @@ function self:GetDirectedEdgeEnumerator ()
 			sourceVertexId = self.VertexIds [sourceVertex]
 			if not sourceVertex then return nil, nil, nil end
 			
-			vertexEdgeEnumerator = self:GetVertexEdgeEnumator (sourceVertex)
+			vertexEdgeEnumerator = self:GetVertexEdgeEnumerator (sourceVertex)
 		end
 	end
 end
@@ -134,7 +134,7 @@ function self:GetUndirectedEdgeEnumerator ()
 			sourceVertexId = self.VertexIds [sourceVertex]
 			if not sourceVertex then return nil, nil end
 			
-			vertexEdgeEnumerator = self:GetVertexEdgeEnumator (sourceVertex)
+			vertexEdgeEnumerator = self:GetVertexEdgeEnumerator (sourceVertex)
 		end
 	end
 end

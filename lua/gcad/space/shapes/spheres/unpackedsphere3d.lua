@@ -130,6 +130,26 @@ function GCAD.UnpackedSphere3d.IntersectsUnpackedSphere (x, y, z, r, x1, y1, z1,
 	return false, false
 end
 
+-- Line
+function GCAD.UnpackedSphere3d.IntersectsLine (x, y, z, r, line3d)
+	return line3d:DistanceToUnpackedPoint (x, y, z) <= r
+end
+
+function GCAD.UnpackedSphere3d.IntersectLine (x, y, z, r, line3d)
+	local directionLength = line3d:GetDirectionLength ()
+	local x, y, z = GCAD_UnpackedVector3d_Subtract (x, y, z, line3d:GetPositionUnpacked ())
+	
+	local parallelDistance      = GCAD_UnpackedVector3d_Dot (x, y, z, line3d:GetDirectionUnpacked ()) / directionLength
+	local perpendicularDistance = math_sqrt (GCAD_UnpackedVector3d_LengthSquared (x, y, z) - parallelDistance * parallelDistance)
+	
+	if perpendicularDistance > r then return nil end
+	
+	local t  = parallelDistance / directionLength
+	local dt = math_sqrt (r * r - perpendicularDistance * perpendicularDistance) / directionLength
+	
+	return t - dt, t + dt
+end
+
 -- Conversion
 function GCAD.UnpackedSphere3d.FromNativeSphere3d (nativeSphere3d)
 	local x, y, z = nativeSphere3d:GetPositionUnpacked ()

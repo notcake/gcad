@@ -126,6 +126,14 @@ function self:GetWorldToLocalMatrixNative ()
 end
 
 -- Rendering
+function self:IsVisible ()
+	GCAD.Error ("ISceneGraphNode:IsVisible : Not implemented.")
+end
+
+function self:SetVisible (visible)
+	GCAD.Error ("ISceneGraphNode:SetVisible : Not implemented.")
+end
+
 function self:GetRenderComponent ()
 	GCAD.Error ("ISceneGraphNode:GetRenderComponent : Not implemented.")
 end

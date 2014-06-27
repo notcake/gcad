@@ -95,14 +95,14 @@ function GCAD.Vector3d.Normalize (self, out)
 end
 
 -- Vector queries
-function GCAD.Vector2d.DistanceTo (a, b)
+function GCAD.Vector3d.DistanceTo (a, b)
 	local dx = a [1] - b [1]
 	local dy = a [2] - b [2]
 	local dz = a [3] - b [3]
 	return math_sqrt (dx * dx + dy * dy + dz * dz)
 end
 
-function GCAD.Vector2d.DistanceToSquared (a, b)
+function GCAD.Vector3d.DistanceToSquared (a, b)
 	local dx = a [1] - b [1]
 	local dy = a [2] - b [2]
 	local dz = a [3] - b [3]

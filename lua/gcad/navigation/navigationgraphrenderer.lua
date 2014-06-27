@@ -1,6 +1,8 @@
 local self = {}
 GCAD.Navigation.NavigationGraphRenderer = GCAD.MakeConstructor (self)
 
+local gcad_show_navigation_graph = CreateClientConVar ("gcad_show_navigation_graph", 0, true, false)
+
 function self:ctor (navigationGraph, sceneGraph, navigationGraphEntityList)
 	self.NavigationGraph               = navigationGraph
 	self.NavigationGraphEntityList     = navigationGraphEntityList
@@ -9,16 +11,30 @@ function self:ctor (navigationGraph, sceneGraph, navigationGraphEntityList)
 	self.SceneGraph                = sceneGraph
 	
 	self.RootSceneGraphNode = self.SceneGraph:CreateGroupNode ()
+	self.RootSceneGraphNode:SetVisible (gcad_show_navigation_graph:GetBool ())
 	self.SceneGraph:GetRootNode ():AddChild (self.RootSceneGraphNode)
 	
 	self:HookNavigationGraph (self.NavigationGraph)
 	
 	self.NavigationGraphNodeSceneGraphNodes = {}
 	self.NavigationGraphEdgeSceneGraphNodes = {}
+	
+	self.CvarChangeCallback = function ()
+		self.RootSceneGraphNode:SetVisible (gcad_show_navigation_graph:GetBool ())
+	end
+	cvars.AddChangeCallback ("gcad_show_navigation_graph", self.CvarChangeCallback)
 end
 
 function self:dtor ()
 	self.RootSceneGraphNode:Remove ()
+	
+	local callbacks = cvars.GetConVarCallbacks ("gcad_show_navigation_graph")
+	for i = 1, #callbacks do
+		if callbacks [i] == self.CvarChangeCallback then
+			table.remove (callbacks, i)
+			break
+		end
+	end
 end
 
 -- Internal, do not call

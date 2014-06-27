@@ -1,5 +1,5 @@
 local self = {}
-GCAD.Navigation.NavigationGraphNodeEntity = GCAD.MakeConstructor (self,
+GCAD.Navigation.NavigationGraphEdgeEntity = GCAD.MakeConstructor (self,
 	GCAD.VEntities.VEntity,
 	GCAD.SpatialNode3d,
 	GCAD.Rendering.IRenderComponent
@@ -14,9 +14,15 @@ local IMesh_Draw              = CLIENT and debug.getregistry ().IMesh.Draw
 if CLIENT then
 	self.OutlineColor = GLib.Colors.White
 	self.Color        = GLib.Color.FromColor (self.OutlineColor, 64)
+
+	self.OutlineColorVector, self.OutlineColorAlpha = GLib.Color.ToVector (self.OutlineColor)
+	self.ColorVector,        self.ColorAlpha        = GLib.Color.ToVector (self.Color)
 	
-	self.ColorMaterial          = GCAD.Materials.CreateColorMaterial ("GCAD.NavigationGraphNodeEntity.ColorMaterial"         )-- self.Color       )
-	self.WireframeColorMaterial = GCAD.Materials.CreateColorMaterial ("GCAD.NavigationGraphNodeEntity.WireframeColorMaterial")-- self.OutlineColor)
+	self.ColorMaterial = CreateMaterial ("GCAD.SingleColorMaterial", "UnlitGeneric",
+		{
+			["$translucent"] = 1
+		}
+	)
 end
 
 -- Box mesh
@@ -32,30 +38,19 @@ if CLIENT then
 	self.WireframeBoxMesh = GCAD.Meshes.CreateAxisAlignedWireframeCube (-self.HalfBoxSize, self.HalfBoxSize)
 end
 
-function self:ctor (navigationGraphNode)
-	self.NavigationGraphNode = navigationGraphNode
+function self:ctor (navigationGraphEdge)
+	self.NavigationGraphEdge = navigationGraphEdge
 	
 	-- IComponentHost
 	self:SetRenderComponent (self)
 	self:SetSpatialNode3d (self)
 	
 	self:InitializeSpatialNode3d ()
-	self:HookNavigationGraphNode (self.NavigationGraphNode)
-	
-	-- Initialize materials
-	if CLIENT then
-		local v, alpha = GLib.Color.ToVector (self.Color)
-		self.ColorMaterial:SetVector ("$color", v)
-		self.ColorMaterial:SetFloat  ("$alpha", alpha)
-		
-		v, alpha = GLib.Color.ToVector (self.OutlineColor, v)
-		self.WireframeColorMaterial:SetVector ("$color", v)
-		self.WireframeColorMaterial:SetFloat  ("$alpha", alpha)
-	end
+	self:HookNavigationGraphEdge (self.NavigationGraphEdge)
 end
 
 function self:dtor ()
-	self:UnhookNavigationGraphNode (self.NavigationGraphNode)
+	self:UnhookNavigationGraphEdge (self.NavigationGraphEdge)
 end
 
 -- IRenderComponent
@@ -68,11 +63,15 @@ function self:HasTranslucentRendering ()
 end
 
 function self:RenderOpaque (renderContext)
-	render_SetMaterial (self.WireframeColorMaterial)
+	IMaterial_SetVector (self.ColorMaterial, "$color", self.OutlineColorVector)
+	IMaterial_SetFloat  (self.ColorMaterial, "$alpha", self.OutlineColorAlpha )
+	render_SetMaterial (self.ColorMaterial)
 	IMesh_Draw (self.WireframeBoxMesh)
 end
 
 function self:RenderTranslucent (renderContext)
+	IMaterial_SetVector (self.ColorMaterial, "$color", self.ColorVector)
+	IMaterial_SetFloat  (self.ColorMaterial, "$alpha", self.ColorAlpha )
 	render_SetMaterial (self.ColorMaterial)
 	IMesh_Draw (self.BoxMesh)
 end
@@ -81,7 +80,7 @@ end
 function self:ComputeAABB ()
 	self.AABBValid = true
 	
-	local position = self.NavigationGraphNode:GetPosition ()
+	local position = self.NavigationGraphEdge:GetFirstNode ():GetPosition ()
 	self.AABB:SetMinUnpacked (position - self.HalfBoxSize, position - self.HalfBoxSize, position - self.HalfBoxSize)
 	self.AABB:SetMaxUnpacked (position + self.HalfBoxSize, position + self.HalfBoxSize, position + self.HalfBoxSize)
 end
@@ -89,19 +88,25 @@ end
 function self:ComputeBoundingSphere ()
 	self.BoundingSphereValid = true
 	
-	self.BoundingSphere:SetPosition (self.NavigationGraphNode:GetPosition ())
+	self.BoundingSphere:SetPosition (self.NavigationGraphEdge:GetFirstNode ():GetPosition ())
 end
 
 function self:ComputeOBB ()
 	self.OBBValid = true
 	
-	self.OBB:SetPosition (self.NavigationGraphNode:GetPosition ())
+	local x1, y1, z1 = self.NavigationGraphEdge:GetFirstNode  ():GetPositionUnpacked ()
+	local x2, y2, z2 = self.NavigationGraphEdge:GetSecondNode ():GetPositionUnpacked ()
+	local dx, dy, dz = GCAD.UnpackedVector3d.Subtract (x2, y2, z2, x1, y1, z1)
+	self.OBB:SetPositionUnpacked (x1, y1, z1)
+	self.OBB:SetAngleUnpacked (GCAD.UnpackedEulerAngle.FromUnpackedDirection (dx, dy, dz))
+	self.OBB:SetMinUnpacked (0, -4, -4)
+	self.OBB:SetMaxUnpacked (GCAD.UnpackedVector3d.Length (dx, dy, dz), 4, 4)
 end
 
 function self:ComputeNativeOBB ()
-	self.NativeOBBValid = true
+	self.NativeValid = true
 	
-	self.NativeOBB:SetPosition (self.NavigationGraphNode:GetPositionNative ())
+	self.NativeOBB = GCAD.NativeOBB3d.FromOBB3d (self:GetOBB (), self.NativeOBB)
 end
 
 -- VEntity
@@ -110,12 +115,12 @@ function self:GetIcon ()
 end
 
 function self:GetTypeDisplayString ()
-	return "Navigation Node"
+	return "Navigation Edge"
 end
 
--- NavigationGraphNodeEntity
-function self:GetNavigationGraphNode ()
-	return self.NavigationGraphNode
+-- NavigationGraphEdgeEntity
+function self:GetNavigationGraphEdge ()
+	return self.NavigationGraphEdge
 end
 
 -- Internal, do not call
@@ -129,18 +134,18 @@ function self:InitializeSpatialNode3d ()
 	self.NativeOBB:SetMax (self.BoxMaxNative)
 end
 
-function self:HookNavigationGraphNode (navigationGraphNode)
-	if not navigationGraphNode then return self end
+function self:HookNavigationGraphEdge (navigationGraphEdge)
+	if not navigationGraphEdge then return self end
 	
-	navigationGraphNode:AddEventListener ("PositionChanged", "GCAD.NavigationGraphNodeEntity." .. self:GetHashCode (),
-		function (_, position)
-			self:InvalidateBoundingVolumes ()
-		end
-	)
+	-- navigationGraphEdge:AddEventListener ("PositionChanged", "GCAD.NavigationGraphEdgeEntity." .. self:GetHashCode (),
+	-- 	function (_, position)
+	-- 		self:InvalidateBoundingVolumes ()
+	-- 	end
+	-- )
 end
 
-function self:UnhookNavigationGraphNode (navigationGraphNode)
-	if not navigationGraphNode then return self end
+function self:UnhookNavigationGraphEdge (navigationGraphEdge)
+	if not navigationGraphEdge then return self end
 	
-	navigationGraphNode:RemoveEventListener ("PositionChanged", "GCAD.NavigationGraphNodeEntity." .. self:GetHashCode ())
+	-- navigationGraphEdge:RemoveEventListener ("PositionChanged", "GCAD.NavigationGraphEdgeEntity." .. self:GetHashCode ())
 end

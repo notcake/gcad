@@ -14,8 +14,8 @@ GLib.AddCSLuaPackFolderRecursive ("gcad")
 -- Profiling
 include ("profiling/profilersectionentry.lua")
 include ("profiling/profiler.lua")
+include ("profiling/entityprofiling.lua")
 if CLIENT then
-	include ("profiling/entityprofiling.lua")
 	include ("profiling/panelprofiling.lua")
 	include ("profiling/profilingstatisticsrenderer.lua")
 end
@@ -107,6 +107,10 @@ include ("space/queries/ispatialqueryable3d.lua")
 include ("space/queries/obbspatialqueryable3d.lua")
 include ("space/queries/aggregatespatialqueryable2d.lua")
 include ("space/queries/aggregatespatialqueryable3d.lua")
+
+-- Materials
+GCAD.Materials = {}
+include ("materials/utility.lua")
 
 -- Meshes
 GCAD.Meshes = {}
@@ -215,22 +219,38 @@ GCAD.Navigation = {}
 include ("navigation/navigationgraph.lua")
 include ("navigation/navigationgraphedge.lua")
 include ("navigation/navigationgraphnode.lua")
+
 include ("navigation/navigationgraphedgegenerator.lua")
+
+include ("navigation/navigationgraphentitylist.lua")
 include ("navigation/navigationgraphnodeentitylist.lua")
 include ("navigation/navigationgraphedgeentitylist.lua")
-include ("navigation/navigationgraphentitylist.lua")
 include ("navigation/navigationgraphnodeentity.lua")
+include ("navigation/navigationgraphedgeentity.lua")
+
 include ("navigation/navigationgraphactions.lua")
+include ("navigation/navigationgraphserializer.lua")
+
 if CLIENT then
 	include ("navigation/navigationgraphedgerendercomponent.lua")
 	include ("navigation/navigationgraphrenderer.lua")
 end
 
+include ("autopilot.lua")
+
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 
 -- Fun starts here
+GCAD.DestructorInvoker              = GCAD.Invoker ()
+GCAD:AddEventListener ("Unloaded",
+	function ()
+		GCAD.DestructorInvoker:Invoke ()
+	end
+)
+
 GCAD.RootSceneGraph                 = GCAD.SceneGraph.SceneGraph ()
 GCAD.RootSceneGraphRenderer         = GCAD.SceneGraph.SceneGraphRenderer (GCAD.RootSceneGraph)
+GCAD.DestructorInvoker:AddDestructor (GCAD.RootSceneGraphRenderer)
 
 GCAD.NavigationGraph                = GCAD.Navigation.NavigationGraph ()
 GCAD.NavigationGraphEntityList      = GCAD.Navigation.NavigationGraphEntityList (GCAD.NavigationGraph)
@@ -238,6 +258,9 @@ GCAD.NavigationGraphEdgeGenerator   = GCAD.Navigation.NavigationGraphEdgeGenerat
 if CLIENT then
 	GCAD.NavigationGraphRenderer    = GCAD.Navigation.NavigationGraphRenderer (GCAD.NavigationGraph, GCAD.RootSceneGraph, GCAD.NavigationGraphEntityList)
 end
+GCAD.NavigationGraphSerializer      = GCAD.Navigation.NavigationGraphSerializer (GCAD.NavigationGraph)
+GCAD.NavigationGraphSerializer:Load ()
+GCAD.DestructorInvoker:AddDestructor (GCAD.NavigationGraphSerializer)
 
 GCAD.NativeEntityList               = GCAD.NativeEntityList ()
 GCAD.PACPartList                    = GCAD.PACPartList ()
@@ -248,6 +271,10 @@ GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NativeEntityList       
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartList                   )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntityList     )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
+
+if CLIENT then
+	GCAD.Autopilot = GCAD.Autopilot ()
+end
 
 if CLIENT then
 	GCAD.UI = {}

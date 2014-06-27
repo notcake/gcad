@@ -104,7 +104,7 @@ function GCAD.NativeOBB3d.SetAngleUnpacked    (self, p, y, r) self.Angle    = GC
 -- Line
 
 -- Conversion
-function GCAD.OBB3d.FromOBB3d (obb3d, out)
+function GCAD.NativeOBB3d.FromOBB3d (obb3d, out)
 	out = out or GCAD.NativeOBB3d ()
 	
 	out.Position = GCAD_Vector3d_ToNativeVector  (obb3d.Position, out.Position)
@@ -118,7 +118,7 @@ function GCAD.OBB3d.FromOBB3d (obb3d, out)
 	return out
 end
 
-function GCAD.OBB3d.ToOBB3d (self, out)
+function GCAD.NativeOBB3d.ToOBB3d (self, out)
 	out = out or GCAD.OBB3d ()
 	
 	out.Position = GCAD_Vector3d_FromNativeVector  (self.Position, out.Position)
