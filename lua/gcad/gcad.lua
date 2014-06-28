@@ -19,6 +19,7 @@ if CLIENT then
 	include ("profiling/panelprofiling.lua")
 	include ("profiling/profilingstatisticsrenderer.lua")
 end
+include ("profiling/profilingstatisticsprinter.lua")
 
 -- Utility
 include ("util/mapcache.lua")
@@ -237,6 +238,17 @@ if CLIENT then
 end
 
 include ("autopilot.lua")
+
+function GCAD.CanRunConCommand (ply)
+	if CLIENT then return true end
+	if SERVER then
+		if not ply            then return true end
+		if not ply:IsValid () then return true end
+		if ply:IsAdmin ()     then return true end
+	end
+	
+	return false
+end
 
 GCAD.AddReloadCommand ("gcad/gcad.lua", "gcad", "GCAD")
 

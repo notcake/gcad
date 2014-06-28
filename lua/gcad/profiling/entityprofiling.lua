@@ -4,10 +4,10 @@ GCAD.EntityProfiling = GCAD.MakeConstructor (self)
 function self:ctor ()
 	self.Enabled = false
 	
-	concommand.Add ("gcad_entity_profiling_enable",  function () self:SetEnabled (true ) end)
-	concommand.Add ("gcad_entity_profiling_disable", function () self:SetEnabled (false) end)
-	concommand.Add ("+gcad_entity_profiling",        function () self:SetEnabled (true ) end)
-	concommand.Add ("-gcad_entity_profiling",        function () self:SetEnabled (false) end)
+	concommand.Add ("gcad_entity_profiling_enable",  function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (true ) end)
+	concommand.Add ("gcad_entity_profiling_disable", function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (false) end)
+	concommand.Add ("+gcad_entity_profiling",        function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (true ) end)
+	concommand.Add ("-gcad_entity_profiling",        function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (false) end)
 	
 	GCAD:AddEventListener ("Unloaded", "GCAD.EntityProfiling",
 		function ()

@@ -10,6 +10,25 @@ function self:ctor ()
 	self.SectionStackRefCount = {}
 	
 	self.NonRecursiveSections = {}
+	
+	concommand.Add ("gcad_profiler_clear",
+		function (ply, _, _)
+			if not GCAD.CanRunConCommand (ply) then return end
+			
+			GCAD.Profiler:Clear ()
+		end
+	)
+end
+
+function self:Clear ()
+	self.RootSection = GCAD.ProfilerSectionEntry ("<root>")
+	self.RootSection:SetDepth (-1)
+	
+	self.SectionStack = {}
+	self.SectionStackSet = {}
+	self.SectionStackRefCount = {}
+	
+	self.NonRecursiveSections = {}
 end
 
 function self:Begin (sectionName, note)
