@@ -95,9 +95,9 @@ function self:Print (showOldEntries, showSmallEntries)
 	for i = 1, #names do
 		maximumDepth                        = math.max (maximumDepth,                         depths                  [i])
 		maximumNameLength                   = math.max (maximumNameLength,                   #names                   [i])
-		maximumFormattedDurationLength      = math.max (maximumFormattedDurationLength,      #formattedDurations      [i])
+		maximumFormattedDurationLength      = math.max (maximumFormattedDurationLength,      GLib.UTF8.Length (formattedDurations      [i]))
 		maximumFormattedEntryCountLength    = math.max (maximumFormattedEntryCountLength,    #formattedEntryCounts    [i])
-		maximumFormattedFrameDurationLength = math.max (maximumFormattedFrameDurationLength, #formattedFrameDurations [i])
+		maximumFormattedFrameDurationLength = math.max (maximumFormattedFrameDurationLength, GLib.UTF8.Length (formattedFrameDurations [i]))
 	end
 	
 	-- Print header
@@ -126,11 +126,11 @@ function self:Print (showOldEntries, showSmallEntries)
 		MsgC (colors [i], string.rep ("    ", depths [i]))
 		MsgC (colors [i], names [i] .. string.rep (" ", maximumNameLength - #names [i]))
 		MsgC (colors [i], "        ")
-		MsgC (colors [i], string.rep (" ", maximumFormattedDurationLength      - #formattedDurations      [i]) .. formattedDurations      [i])
+		MsgC (colors [i], string.rep (" ", maximumFormattedDurationLength      - GLib.UTF8.Length (formattedDurations      [i])) .. formattedDurations      [i])
 		MsgC (colors [i], "        ")
 		MsgC (colors [i], string.rep (" ", maximumFormattedEntryCountLength    - #formattedEntryCounts    [i]) .. formattedEntryCounts    [i])
 		MsgC (colors [i], "        ")
-		MsgC (colors [i], string.rep (" ", maximumFormattedFrameDurationLength - #formattedFrameDurations [i]) .. formattedFrameDurations [i])
+		MsgC (colors [i], string.rep (" ", maximumFormattedFrameDurationLength - GLib.UTF8.Length (formattedFrameDurations [i])) .. formattedFrameDurations [i])
 		MsgN ("")
 	end
 end
