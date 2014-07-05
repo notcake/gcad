@@ -75,11 +75,10 @@ include ("space/shapes/spheres/nativesphere3d.lua")
 -- Boxes
 -- include ("space/shapes/boxes/aabb2d.lua")
 include ("space/shapes/boxes/aabb3d.lua")
+-- include ("space/shapes/boxes/nativeaabb3d.lua")
 -- include ("space/shapes/boxes/obb2d.lua")
 include ("space/shapes/boxes/obb3d.lua")
 include ("space/shapes/boxes/nativeobb3d.lua")
-
-include ("space/shapes/boxes/legacyaabb3d.lua")
 
 -- Lines
 -- include ("space/shapes/lines/line2d.lua")

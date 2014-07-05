@@ -6,12 +6,10 @@ local gcad_autopilot = CreateClientConVar ("gcad_autopilot", 0, true, false)
 function self:ctor ()
 	self.SourceNode      = nil
 	self.DestinationNode = nil
-	self.State           = nil
+	self.State           = "Initializing"
 	
-	self.LastMovementCheckPosition = LocalPlayer ():GetPos ()
-	self.NextMovementCheckTime = CurTime () + 5
-	
-	self:Initialize ()
+	self.LastMovementCheckPosition = Vector (0, 0, 0)
+	self.NextMovementCheckTime     = CurTime () + 5
 	
 	hook.Add ("CreateMove", "GCAD.Autopilot." .. self:GetHashCode (),
 		function (usercmd)
@@ -39,6 +37,10 @@ end
 function self:dtor ()
 	hook.Remove ("CreateMove", "GCAD.Autopilot." .. self:GetHashCode ())
 	hook.Remove ("HUDPaint",   "GCAD.Autopilot." .. self:GetHashCode ())
+end
+
+function self:HandleInitializing ()
+	self:Initialize ()
 end
 
 function self:Initialize ()

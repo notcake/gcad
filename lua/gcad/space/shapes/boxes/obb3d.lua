@@ -23,6 +23,7 @@ local GCAD_Vector3d_Unpack                        = GCAD.Vector3d.Unpack
 local GCAD_UnpackedRange1d_IntersectTriple        = GCAD.UnpackedRange1d.IntersectTriple
 local GCAD_UnpackedRange1d_IsEmpty                = GCAD.UnpackedRange1d.IsEmpty
 local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
+local GCAD_UnpackedVector3d_FromNativeVector      = GCAD.UnpackedVector3d.FromNativeVector
 local GCAD_UnpackedVector3d_Subtract              = GCAD.UnpackedVector3d.Subtract
 
 function GCAD.OBB3d.FromEntity (ent, out)
@@ -135,8 +136,8 @@ GCAD.OBB3d.GetVertex           = GCAD.OBB3d.GetCorner
 GCAD.OBB3d.GetVertexUnpacked   = GCAD.OBB3d.GetCornerUnpacked
 GCAD.OBB3d.GetVertexEnumerator = GCAD.OBB3d.GetCornerEnumerator
 
-local edgeCornerIds1 = { 1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8 }
-local edgeCornerIds2 = { 2, 3, 4, 1, 5, 6, 7, 8, 6, 7, 8, 5 }
+local edgeCornerIds1 = { 1, 2, 4, 3, 1, 2, 4, 3, 5, 6, 8, 7 }
+local edgeCornerIds2 = { 2, 4, 3, 1, 5, 6, 8, 7, 6, 8, 7, 5 }
 function GCAD.OBB3d.GetEdgeEnumerator (self, out1, out2)
 	local i = 0
 	
@@ -150,14 +151,14 @@ end
 
 local oppositeCornerIds =
 {
-	[1] = 7,
-	[2] = 8,
-	[3] = 5,
-	[4] = 6,
-	[5] = 3,
-	[6] = 4,
-	[7] = 1,
-	[8] = 2
+	[1] = 8,
+	[2] = 7,
+	[3] = 6,
+	[4] = 5,
+	[5] = 4,
+	[6] = 3,
+	[7] = 2,
+	[8] = 1
 }
 
 function GCAD.OBB3d.GetOppositeCorner (self, cornerId, out)
@@ -387,12 +388,12 @@ function self:ComputeCorners ()
 	local c
 	c = self.Corners [1] c [1] = x1 c [2] = y1 c [3] = z1
 	c = self.Corners [2] c [1] = x2 c [2] = y1 c [3] = z1
-	c = self.Corners [3] c [1] = x2 c [2] = y2 c [3] = z1
-	c = self.Corners [4] c [1] = x1 c [2] = y2 c [3] = z1
+	c = self.Corners [3] c [1] = x1 c [2] = y2 c [3] = z1
+	c = self.Corners [4] c [1] = x2 c [2] = y2 c [3] = z1
 	c = self.Corners [5] c [1] = x1 c [2] = y1 c [3] = z2
 	c = self.Corners [6] c [1] = x2 c [2] = y1 c [3] = z2
-	c = self.Corners [7] c [1] = x2 c [2] = y2 c [3] = z2
-	c = self.Corners [8] c [1] = x1 c [2] = y2 c [3] = z2
+	c = self.Corners [7] c [1] = x1 c [2] = y2 c [3] = z2
+	c = self.Corners [8] c [1] = x2 c [2] = y2 c [3] = z2
 	GCAD.Profiler:End ()
 	
 	GCAD.Profiler:Begin ("OBB3d:ComputeCorners : Rotate corners")

@@ -1,15 +1,91 @@
 local self = {}
 GCAD.AABB3d = GCAD.MakeConstructor (self)
 
+local Entity_IsValid                              = debug.getregistry ().Entity.IsValid
+local Entity_WorldSpaceAABB                       = debug.getregistry ().Entity.WorldSpaceAABB
+
+local GCAD_Vector3d_Clone                         = GCAD.Vector3d.Clone
+local GCAD_Vector3d_Copy                          = GCAD.Vector3d.Copy
+local GCAD_Vector3d_FromNativeVector              = GCAD.Vector3d.FromNativeVector
+local GCAD_Vector3d_ToNativeVector                = GCAD.Vector3d.ToNativeVector
+local GCAD_Vector3d_Unpack                        = GCAD.Vector3d.Unpack
+local GCAD_UnpackedRange1d_IntersectTriple        = GCAD.UnpackedRange1d.IntersectTriple
+local GCAD_UnpackedRange1d_IsEmpty                = GCAD.UnpackedRange1d.IsEmpty
+local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
+local GCAD_UnpackedVector3d_FromNativeVector      = GCAD.UnpackedVector3d.FromNativeVector
+
+function GCAD.AABB3d.FromEntity (ent, out)
+	out = out or GCAD.AABB3d ()
+	
+	if not Entity_IsValid (ent) then return out end
+	
+	local min, max = Entity_WorldSpaceAABB (ent)
+	out.Min = GCAD_Vector3d_FromNativeVector (min)
+	out.Max = GCAD_Vector3d_FromNativeVector (max)
+	
+	return out
+end
+-- GCAD.AABB3d.FromEntity = GCAD.Profiler:Wrap (GCAD.AABB3d.FromEntity, "AABB3d.FromEntity")
+
+-- Copying
+function GCAD.AABB3d.Clone (self, out)
+	out = out or GCAD.AABB3d ()
+	
+	out.Min = GCAD_Vector3d_Clone (self.Min, out.Min)
+	out.Max = GCAD_Vector3d_Clone (self.Max, out.Max)
+	
+	return out
+end
+
+function GCAD.AABB3d.Copy (self, source)
+	self.Min = GCAD_Vector3d_Copy (self.Min, out.Min )
+	self.Max = GCAD_Vector3d_Copy (self.Max, out.Max )
+	
+	return self
+end
+
+-- AABB properties
+function GCAD.AABB3d.GetMin              (self, out)     return GCAD_Vector3d_Clone          (self.Min, out) end
+function GCAD.AABB3d.GetMax              (self, out)     return GCAD_Vector3d_Clone          (self.Max, out) end
+
+function GCAD.AABB3d.GetMinNative        (self, out)     return GCAD_Vector3d_ToNativeVector (self.Min, out) end
+function GCAD.AABB3d.GetMaxNative        (self, out)     return GCAD_Vector3d_ToNativeVector (self.Max, out) end
+
+function GCAD.AABB3d.GetMinUnpacked      (self)          return GCAD_Vector3d_Unpack         (self.Min     ) end
+function GCAD.AABB3d.GetMaxUnpacked      (self)          return GCAD_Vector3d_Unpack         (self.Max     ) end
+
+function GCAD.AABB3d.SetMin              (self, pos)     self.Min = GCAD_Vector3d_Copy (self.Min, pos)             return self end
+function GCAD.AABB3d.SetMax              (self, pos)     self.Max = GCAD_Vector3d_Copy (self.Max, pos)             return self end
+
+function GCAD.AABB3d.SetMinNative        (self, pos)     self.Min = GCAD_Vector3d_FromNativeVector (pos, self.Min) return self end
+function GCAD.AABB3d.SetMaxNative        (self, pos)     self.Max = GCAD_Vector3d_FromNativeVector (pos, self.Max) return self end
+
+function GCAD.AABB3d.SetMinUnpacked      (self, x, y, z) self.Min:Set (x, y, z)                                    return self end
+function GCAD.AABB3d.SetMaxUnpacked      (self, x, y, z) self.Max:Set (x, y, z)                                    return self end
+
 -- AABB corner queries
 function GCAD.AABB3d.GetCorner (self, cornerId, out)
 	out = out or GCAD.Vector3d ()
 	
-	GCAD.Error ("AABB3d:GetCorner : Not implemented.")
+	cornerId = cornerId - 1
+	out [1] = cornerId % 2 < 1 and self.Min [1] or self.Max [1]
+	out [2] = cornerId % 4 < 2 and self.Min [2] or self.Max [2]
+	out [3] = cornerId % 8 < 4 and self.Min [3] or self.Max [3]
 end
 
 function GCAD.AABB3d.GetCornerUnpacked (self, cornerId)
-	GCAD.Error ("AABB3d:GetCornerUnpacked : Not implemented.")
+	cornerId = cornerId - 1
+	return cornerId % 2 < 1 and self.Min [1] or self.Max [1],
+	       cornerId % 4 < 2 and self.Min [2] or self.Max [2],
+	       cornerId % 8 < 4 and self.Min [3] or self.Max [3]
+end
+
+local bit_band = bit.band
+function GCAD.AABB3d.GetCornerUnpacked2 (self, cornerId)
+	cornerId = cornerId - 1
+	return bit_band (cornerId, 1) == 0 and self.Min [1] or self.Max [1],
+	       bit_band (cornerId, 2) == 0 and self.Min [2] or self.Max [2],
+	       bit_band (cornerId, 4) == 0 and self.Min [3] or self.Max [3]
 end
 
 local GCAD_AABB3d_GetCorner = GCAD.AABB3d.GetCorner
@@ -28,8 +104,8 @@ GCAD.AABB3d.GetVertex           = GCAD.AABB3d.GetCorner
 GCAD.AABB3d.GetVertexUnpacked   = GCAD.AABB3d.GetCornerUnpacked
 GCAD.AABB3d.GetVertexEnumerator = GCAD.AABB3d.GetCornerEnumerator
 
-local edgeCornerIds1 = { 1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8 }
-local edgeCornerIds2 = { 2, 3, 4, 1, 5, 6, 7, 8, 6, 7, 8, 5 }
+local edgeCornerIds1 = { 1, 2, 4, 3, 1, 2, 4, 3, 5, 6, 8, 7 }
+local edgeCornerIds2 = { 2, 4, 3, 1, 5, 6, 8, 7, 6, 8, 7, 5 }
 function GCAD.AABB3d.GetEdgeEnumerator (self, out1, out2)
 	local i = 0
 	
@@ -43,14 +119,14 @@ end
 
 local oppositeCornerIds =
 {
-	[1] = 7,
-	[2] = 8,
-	[3] = 5,
-	[4] = 6,
-	[5] = 3,
-	[6] = 4,
-	[7] = 1,
-	[8] = 2
+	[1] = 8,
+	[2] = 7,
+	[3] = 6,
+	[4] = 5,
+	[5] = 4,
+	[6] = 3,
+	[7] = 2,
+	[8] = 1
 }
 
 function GCAD.AABB3d.GetOppositeCorner (self, cornerId, out)
@@ -66,13 +142,13 @@ function GCAD.AABB3d.GetExtremeCornerIdsUnpacked (self, x, y, z)
 		if y < 0 then
 			extremeCornerId = x < 0 and 1 or 2
 		else
-			extremeCornerId = x < 0 and 4 or 3
+			extremeCornerId = x < 0 and 3 or 4
 		end
 	else
 		if y < 0 then
 			extremeCornerId = x < 0 and 5 or 6
 		else
-			extremeCornerId = x < 0 and 8 or 7
+			extremeCornerId = x < 0 and 7 or 8
 		end
 	end
 	
@@ -93,3 +169,136 @@ local GCAD_AABB3d_GetExtremeCornerId = GCAD.AABB3d.GetExtremeCornerId
 function GCAD.AABB3d.GetExtremeCorner (self, direction, out)
 	return GCAD_AABB3d_GetCorner (GCAD_AABB3d_GetExtremeCornerId (self, direction), out)
 end
+
+-- Intersection tests
+-- Point
+function GCAD.AABB3d.ContainsUnpackedPoint (self, x, y, z)
+	return GCAD_UnpackedRange3d_ContainsUnpackedPoint (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], x, y, z)
+end
+
+local GCAD_AABB3d_ContainsUnpackedPoint = GCAD.AABB3d.ContainsUnpackedPoint
+function GCAD.AABB3d.ContainsPoint (self, v3d)
+	return GCAD_AABB3d_ContainsUnpackedPoint (self, v3d [1], v3d [2], v3d [3])
+end
+
+function GCAD.AABB3d.ContainsNativePoint (self, v)
+	return GCAD_AABB3d_ContainsUnpackedPoint (self, GCAD_UnpackedVector3d_FromNativeVector (v))
+end
+
+-- Line
+function GCAD.AABB3d.IntersectLine (self, line3d)
+	local dx, dy, dz = line3d:GetDirectionUnpacked ()
+	
+	local px, py, pz = line3d:GetPositionUnpacked ()
+	
+	local x1, x2 = (self.Min [1] - px) / dx, (self.Max [1] - px) / dx
+	local y1, y2 = (self.Min [2] - py) / dy, (self.Max [2] - py) / dy
+	local z1, z2 = (self.Min [3] - pz) / dz, (self.Max [3] - pz) / dz
+	
+	if x1 > x2 then x1, x2 = x2, x1 end
+	if y1 > y2 then y1, y2 = y2, y1 end
+	if z1 > z2 then z1, z2 = z2, z1 end
+	
+	local t1, t2 = GCAD_UnpackedRange1d_IntersectTriple (
+		x1, x2,
+		y1, y2,
+		z1, z2
+	)
+	
+	if GCAD_UnpackedRange1d_IsEmpty (t1, t2) then return nil end
+	return t1, t2
+end
+GCAD.AABB3d.IntersectLine = GCAD.Profiler:Wrap (GCAD.AABB3d.IntersectLine, "AABB3d:IntersectLine")
+
+local GCAD_AABB3d_IntersectLine = GCAD.AABB3d.IntersectLine
+function GCAD.AABB3d.IntersectsLine (self, line3d)
+	return GCAD_AABB3d_IntersectLine (self, line3d) ~= nil
+end
+
+-- Conversion
+function GCAD.AABB3d.FromNativeAABB3d (nativeAABB3d, out)
+	out = out or GCAD.AABB3d ()
+	
+	out.Min = GCAD_Vector3d_FromNativeVector (nativeAABB3d.Min, out.Min)
+	out.Max = GCAD_Vector3d_FromNativeVector (nativeAABB3d.Max, out.Max)
+	
+	return out
+end
+
+function GCAD.AABB3d.ToNativeAABB3d (self, out)
+	out = out or GCAD.NativeAABB3d ()
+	
+	out.Min = GCAD_Vector3d_ToNativeVector (self.Min, out.Min)
+	out.Max = GCAD_Vector3d_ToNativeVector (self.Max, out.Max)
+	
+	return out
+end
+
+-- Construction
+function self:ctor (min, max)
+	self.Min = GCAD.Vector3d ()
+	self.Max = GCAD.Vector3d ()
+	
+	if min then self:SetMin (min) end
+	if max then self:SetMax (max) end
+end
+
+-- Initialization
+function self:Set (min, max)
+	self:SetMin (min)
+	self:SetMax (max)
+end
+
+-- Copying
+self.Clone                       = GCAD.AABB3d.Clone
+self.Copy                        = GCAD.AABB3d.Copy
+
+-- AABB properties
+self.GetMin                      = GCAD.AABB3d.GetMin
+self.GetMax                      = GCAD.AABB3d.GetMax
+
+self.GetMinNative                = GCAD.AABB3d.GetMinNative
+self.GetMaxNative                = GCAD.AABB3d.GetMaxNative
+
+self.GetMinUnpacked              = GCAD.AABB3d.GetMinUnpacked
+self.GetMaxUnpacked              = GCAD.AABB3d.GetMaxUnpacked
+
+self.SetMin                      = GCAD.AABB3d.SetMin
+self.SetMax                      = GCAD.AABB3d.SetMax
+
+self.SetMinNative                = GCAD.AABB3d.SetMinNative
+self.SetMaxNative                = GCAD.AABB3d.SetMaxNative
+
+self.SetMinUnpacked              = GCAD.AABB3d.SetMinUnpacked
+self.SetMaxUnpacked              = GCAD.AABB3d.SetMaxUnpacked
+
+-- AABB corner queries
+self.GetCorner                   = GCAD.AABB3d.GetCorner
+self.GetCornerUnpacked           = GCAD.AABB3d.GetCornerUnpacked
+self.GetCornerEnumerator         = GCAD.AABB3d.GetCornerEnumerator
+self.GetVertex                   = GCAD.AABB3d.GetVertex
+self.GetVertexUnpacked           = GCAD.AABB3d.GetVertexUnpacked
+self.GetVertexEnumerator         = GCAD.AABB3d.GetVertexEnumerator
+self.GetEdgeEnumerator           = GCAD.AABB3d.GetEdgeEnumerator
+self.GetOppositeCorner           = GCAD.AABB3d.GetOppositeCorner
+self.GetOppositeCornerId         = GCAD.AABB3d.GetOppositeCornerId
+self.GetExtremeCorner            = GCAD.AABB3d.GetExtremeCorner
+self.GetExtremeCornerId          = GCAD.AABB3d.GetExtremeCornerId
+self.GetExtremeCornerIdUnpacked  = GCAD.AABB3d.GetExtremeCornerIdUnpacked
+self.GetExtremeCornerIds         = GCAD.AABB3d.GetExtremeCornerIds
+self.GetExtremeCornerIdsUnpacked = GCAD.AABB3d.GetExtremeCornerIdsUnpacked
+
+-- Intersection tests
+-- Point
+self.ContainsPoint               = GCAD.AABB3d.ContainsPoint
+self.ContainsNativePoint         = GCAD.AABB3d.ContainsNativePoint
+self.ContainsUnpackedPoint       = GCAD.AABB3d.ContainsUnpackedPoint
+
+-- Line
+self.IntersectsLine              = GCAD.AABB3d.IntersectsLine
+self.IntersectLine               = GCAD.AABB3d.IntersectLine
+
+-- Conversion
+self.ToNativeAABB3d              = GCAD.AABB3d.ToNativeAABB3d
+
+-- Utility

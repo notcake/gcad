@@ -1,6 +1,9 @@
 local self = {}
 GCAD.SceneGraph.SceneGraphRenderer = GCAD.MakeConstructor (self)
 
+local cam_PushModelMatrix = cam._PushModelMatrix or cam.PushModelMatrix
+local cam_PopModelMatrix  = cam._PopModelMatrix  or cam.PopModelMatrix
+
 function self:ctor (sceneGraph)
 	self.SceneGraph = sceneGraph
 	
@@ -63,9 +66,9 @@ function self:RenderNodeOpaque (viewRenderInfo, sceneGraphNode)
 	end
 	
 	if renderComponent:HasOpaqueRendering () then
-		cam.PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
+		cam_PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
 		renderComponent:RenderOpaque ()
-		cam.PopModelMatrix ()
+		cam_PopModelMatrix ()
 	end
 	
 	if renderModifierComponent:HasPostRenderModifier () then
@@ -88,9 +91,9 @@ function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 	
 	local renderComponent = sceneGraphNode:GetRenderComponent ()
 	if renderComponent:HasTranslucentRendering () then
-		cam.PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
+		cam_PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
 		renderComponent:RenderTranslucent ()
-		cam.PopModelMatrix ()
+		cam_PopModelMatrix ()
 	end
 	
 	if renderModifierComponent:HasPostRenderModifier () then
