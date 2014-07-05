@@ -51,7 +51,7 @@ if CLIENT then
 		out:SetSkyboxRender (false)
 		
 		-- Frustum
-		GCAD_Frustum3d_FromScreen (frustum3d)
+		frustum3d = GCAD_Frustum3d_FromScreen (frustum3d)
 		out:SetFrustum (frustum3d)
 		
 		return out
@@ -71,7 +71,7 @@ if CLIENT then
 		out:SetCameraAngleNative (EyeAngles ())
 		
 		-- Frustum
-		GCAD_Frustum3d_FromScreen (frustum3d)
+		frustum3d = GCAD_Frustum3d_FromScreen (frustum3d)
 		out:SetFrustum (frustum3d)
 		
 		return out

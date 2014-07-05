@@ -12,6 +12,8 @@ local Vector___unm                                       = debug.getregistry ().
 
 local gui_ScreenToVector                                 = gui and gui.ScreenToVector
 
+local GCAD_EulerAngle_ToMatrix3x3                        = GCAD.EulerAngle.ToMatrix3x3
+local GCAD_Matrix3x3_GetColumn                           = GCAD.Matrix3x3.GetColumn
 local GCAD_NormalizedPlane3d_Clone                       = GCAD.NormalizedPlane3d.Clone
 local GCAD_NormalizedPlane3d_ContainsNativePoint         = GCAD.NormalizedPlane3d.ContainsNativePoint
 local GCAD_NormalizedPlane3d_ContainsNativeSphere        = GCAD.NormalizedPlane3d.ContainsNativeSphere
@@ -26,7 +28,9 @@ local GCAD_NormalizedPlane3d_IntersectsOBB               = GCAD.NormalizedPlane3
 local GCAD_NormalizedPlane3d_IntersectsSphere            = GCAD.NormalizedPlane3d.IntersectsSphere
 local GCAD_NormalizedPlane3d_Maximum                     = GCAD.NormalizedPlane3d.Maximum
 local GCAD_NormalizedPlane3d_ToNativeNormalizedPlane3d   = GCAD.NormalizedPlane3d.ToNativeNormalizedPlane3d
+local GCAD_Vector3d_Cross                                = GCAD.Vector3d.Cross
 local GCAD_Vector3d_FromNativeVector                     = GCAD.Vector3d.FromNativeVector
+local GCAD_Vector3d_Negate                               = GCAD.Vector3d.Negate
 
 if CLIENT then
 	function GCAD.Frustum3d.FromScreen (out)
@@ -35,36 +39,48 @@ if CLIENT then
 		return GCAD.Frustum3d.FromScreenAABB (0, 0, ScrW (), ScrH (), out)
 	end
 	
-	local position  = GCAD.Vector3d ()
-	local direction = GCAD.Vector3d ()
+	local position    = GCAD.Vector3d ()
+	local angle       = GCAD.EulerAngle ()
+	
+	local matrix      = GCAD.Matrix3x3 ()
+	local forward     = GCAD.Vector3d ()
+	local left        = GCAD.Vector3d ()
+	local up          = GCAD.Vector3d ()
+	
+	local topLeft     = GCAD.Vector3d ()
+	local bottomRight = GCAD.Vector3d ()
+	
+	local direction   = GCAD.Vector3d ()
+	
 	function GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, out)
 		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB")
 		
 		out = out or GCAD.Frustum3d ()
 		
-		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Get camera data")
-		local pos     = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraPositionNative ()
-		local ang     = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraAngleNative    ()
-		local forward = Angle_Forward (ang)
-		local right   = Angle_Right   (ang)
-		local up      = Angle_Up      (ang)
+		-- GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Get camera data")
+		position = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraPosition (position)
+		angle    = GCAD.ViewRenderInfo.CurrentViewRender:GetCameraAngle (angle)
+		matrix   = GCAD_EulerAngle_ToMatrix3x3 (angle, matrix)
+		forward  = GCAD_Matrix3x3_GetColumn (matrix, 1, forward)
+		left     = GCAD_Matrix3x3_GetColumn (matrix, 2, left   )
+		up       = GCAD_Matrix3x3_GetColumn (matrix, 3, up     )
+		-- GCAD.Profiler:End ()
+		
+		-- GCAD.Profiler:Begin ("gui.ScreenToVector")
+		topLeft     = GCAD_Vector3d_FromNativeVector (gui_ScreenToVector (x1, y1), topLeft    )
+		bottomRight = GCAD_Vector3d_FromNativeVector (gui_ScreenToVector (x2, y2), bottomRight)
+		-- GCAD.Profiler:End ()
+		
+		-- GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Construct planes")
+		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_Cross  (up,          topLeft,     direction), out.LeftPlane  )
+		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_Cross  (bottomRight, up,          direction), out.RightPlane )
+		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_Cross  (topLeft,     left,        direction), out.TopPlane   )
+		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_Cross  (left,        bottomRight, direction), out.BottomPlane)
+		out.NearPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_Negate (forward,                  direction), out.NearPlane  )
+		-- GCAD.Profiler:End ()
+		
 		GCAD.Profiler:End ()
 		
-		GCAD.Profiler:Begin ("gui.ScreenToVector")
-		local topLeft     = gui_ScreenToVector (x1, y1)
-		local bottomRight = gui_ScreenToVector (x2, y2)
-		GCAD.Profiler:End ()
-		
-		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Construct planes")
-		position = GCAD_Vector3d_FromNativeVector (pos, position)
-		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (up,          topLeft), temp), out.LeftPlane  )
-		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (bottomRight, up     ), temp), out.RightPlane )
-		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (right,       topLeft), temp), out.TopPlane   )
-		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (bottomRight, right  ), temp), out.BottomPlane)
-		out.NearPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector___unm (forward             ), temp), out.NearPlane  )
-		GCAD.Profiler:End ()
-		
-		GCAD.Profiler:End ()
 		return out
 	end
 end
