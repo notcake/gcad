@@ -141,7 +141,16 @@ include ("space/ispatialnode3d.lua")
 include ("space/spatialnode3d.lua")
 
 -- Space
-include ("space/space3d.lua")
+include ("space/partitioning/ispace3d.lua")
+include ("space/partitioning/ispatialpartitionnode3d.lua")
+include ("space/partitioning/ispatialpartitionitemnode3d.lua")
+include ("space/partitioning/space3d.lua")
+
+-- Octree
+include ("space/partitioning/octree/octree.lua")
+include ("space/partitioning/octree/octreenode.lua")
+include ("space/partitioning/octree/octreerootnode.lua")
+include ("space/partitioning/octree/octreeitemnode.lua")
 
 -- Actions
 GCAD.Actions = {}
