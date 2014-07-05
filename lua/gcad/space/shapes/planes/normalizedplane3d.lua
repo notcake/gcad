@@ -135,7 +135,7 @@ function GCAD.NormalizedPlane3d.FromNativeNormalizedPlane3d (nativeNormalizedPla
 	return out
 end
 
-function GCAD.Plane3d.ToNativeNormalizedPlane3d (self, out)
+function GCAD.NormalizedPlane3d.ToNativeNormalizedPlane3d (self, out)
 	out = out or GCAD.NativeNormalizedPlane3d ()
 	
 	out:SetNormalUnpacked (self [1], self [2], self [3])

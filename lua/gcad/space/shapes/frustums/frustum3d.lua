@@ -1,6 +1,9 @@
 local self = {}
 GCAD.Frustum3d = GCAD.MakeConstructor (self)
 
+local ScrW                                               = ScrW
+local ScrH                                               = ScrH
+
 local Angle_Forward                                      = debug.getregistry ().Angle.Forward
 local Angle_Right                                        = debug.getregistry ().Angle.Right
 local Angle_Up                                           = debug.getregistry ().Angle.Up
@@ -26,6 +29,12 @@ local GCAD_NormalizedPlane3d_ToNativeNormalizedPlane3d   = GCAD.NormalizedPlane3
 local GCAD_Vector3d_FromNativeVector                     = GCAD.Vector3d.FromNativeVector
 
 if CLIENT then
+	function GCAD.Frustum3d.FromScreen (out)
+		out = out or GCAD.Frustum3d ()
+		
+		return GCAD.Frustum3d.FromScreenAABB (0, 0, ScrW (), ScrH (), out)
+	end
+	
 	local position  = GCAD.Vector3d ()
 	local direction = GCAD.Vector3d ()
 	function GCAD.Frustum3d.FromScreenAABB (x1, y1, x2, y2, out)
@@ -48,11 +57,11 @@ if CLIENT then
 		
 		GCAD.Profiler:Begin ("Frustum3d.FromScreenAABB : Construct planes")
 		position = GCAD_Vector3d_FromNativeVector (pos, position)
-		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (up,          topLeft), temp), out.LeftPlane  )
-		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (bottomRight, up     ), temp), out.RightPlane )
-		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (right,       topLeft), temp), out.TopPlane   )
-		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector_Cross (bottomRight, right  ), temp), out.BottomPlane)
-		out.NearPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector(Vector___unm (forward             ), temp), out.NearPlane  )
+		out.LeftPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (up,          topLeft), temp), out.LeftPlane  )
+		out.RightPlane  = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (bottomRight, up     ), temp), out.RightPlane )
+		out.TopPlane    = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (right,       topLeft), temp), out.TopPlane   )
+		out.BottomPlane = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector_Cross (bottomRight, right  ), temp), out.BottomPlane)
+		out.NearPlane   = GCAD_NormalizedPlane3d_FromPositionAndNormal (position, GCAD_Vector3d_FromNativeVector (Vector___unm (forward             ), temp), out.NearPlane  )
 		GCAD.Profiler:End ()
 		
 		GCAD.Profiler:End ()

@@ -1,18 +1,26 @@
 local self = {}
 GCAD.ViewRenderInfo = GCAD.MakeConstructor (self)
 
-local Angle  = Angle
-local Vector = Vector
+local EyeAngles                        = EyeAngles
+local EyePos                           = EyePos
 
-local Angle_Set                       = debug.getregistry ().Angle.Set
-local Vector_Set                      = debug.getregistry ().Vector.Set
+local Angle                            = Angle
+local Vector                           = Vector
 
-local GCAD_EulerAngle_Clone           = GCAD.EulerAngle.Clone
-local GCAD_EulerAngle_Copy            = GCAD.EulerAngle.Copy
-local GCAD_EulerAngle_FromNativeAngle = GCAD.EulerAngle.FromNativeAngle
-local GCAD_Vector3d_Clone             = GCAD.Vector3d.Clone
-local GCAD_Vector3d_Copy              = GCAD.Vector3d.Copy
-local GCAD_Vector3d_FromNativeVector  = GCAD.Vector3d.FromNativeVector
+local Angle_Set                        = debug.getregistry ().Angle.Set
+local Vector_Set                       = debug.getregistry ().Vector.Set
+
+local GCAD_EulerAngle_Clone            = GCAD.EulerAngle.Clone
+local GCAD_EulerAngle_Copy             = GCAD.EulerAngle.Copy
+local GCAD_EulerAngle_FromNativeAngle  = GCAD.EulerAngle.FromNativeAngle
+local GCAD_Frustum3d_Clone             = GCAD.Frustum3d.Clone
+local GCAD_Frustum3d_FromScreen        = GCAD.Frustum3d.FromScreen
+local GCAD_Frustum3d_ToNativeFrustum3d = GCAD.Frustum3d.ToNativeFrustum3d
+local GCAD_NativeFrustum3d_Clone       = GCAD.NativeFrustum3d.Clone
+local GCAD_NativeFrustum3d_ToFrustum3d = GCAD.NativeFrustum3d.ToFrustum3d
+local GCAD_Vector3d_Clone              = GCAD.Vector3d.Clone
+local GCAD_Vector3d_Copy               = GCAD.Vector3d.Copy
+local GCAD_Vector3d_FromNativeVector   = GCAD.Vector3d.FromNativeVector
 
 if CLIENT then
 	hook.Add ("RenderScene", "GCAD.ViewRenderInfo",
@@ -31,6 +39,8 @@ if CLIENT then
 		end
 	)
 	
+	local frustum3d = GCAD.Frustum3d ()
+	
 	function GCAD.ViewRenderInfo.FromCurrentScene (out)
 		out = out or GCAD.ViewRenderInfo ()
 		
@@ -39,6 +49,10 @@ if CLIENT then
 		out:SetFrameId (FrameNumber ())
 		out:SetDepthRender (false)
 		out:SetSkyboxRender (false)
+		
+		-- Frustum
+		GCAD_Frustum3d_FromScreen (frustum3d)
+		out:SetFrustum (frustum3d)
 		
 		return out
 	end
@@ -51,6 +65,14 @@ if CLIENT then
 		out:SetFrameId (FrameNumber ())
 		out:SetDepthRender (depthRender)
 		out:SetSkyboxRender (skyboxRender)
+		
+		-- Camera
+		out:SetCameraPositionNative (EyePos ())
+		out:SetCameraAngleNative (EyeAngles ())
+		
+		-- Frustum
+		GCAD_Frustum3d_FromScreen (frustum3d)
+		out:SetFrustum (frustum3d)
 		
 		return out
 	end
@@ -67,6 +89,9 @@ function self:ctor ()
 	
 	self.SkyboxRender         = false
 	self.DepthRender          = false
+	
+	self.Frustum3d            = GCAD.Frustum3d ()
+	self.NativeFrustum3d      = GCAD.NativeFrustum3d ()
 end
 
 -- Copying
@@ -194,6 +219,31 @@ end
 
 function self:SetSkyboxRender (skyboxRender)
 	self.SkyboxRender = skyboxRender
+	
+	return self
+end
+
+-- Frustum
+function self:GetFrustum (out)
+	if not out then return self.Frustum3d end
+	return GCAD_Frustum3d_Clone (self.Frustum3d, out)
+end
+
+function self:GetNativeFrustum (out)
+	if not out then return self.NativeFrustum3d end
+	return GCAD_NativeFrustum3d_Clone (self.NativeFrustum3d, out)
+end
+
+function self:SetFrustum (frustum3d)
+	self.Frustum3d       = GCAD_Frustum3d_Clone (frustum3d, self.Frustum3d)
+	self.NativeFrustum3d = GCAD_Frustum3d_ToNativeFrustum3d (frustum3d, self.NativeFrustum3d)
+	
+	return self
+end
+
+function self:SetNativeFrustum (nativeFrustum3d)
+	self.Frustum3d       = GCAD_NativeFrustum3d_ToFrustum3d (nativeFrustum3d, self.Frustum3d)
+	self.NativeFrustum3d = GCAD_NativeFrustum3d_Clone (nativeFrustum3d, self.NativeFrustum3d)
 	
 	return self
 end

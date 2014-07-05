@@ -1,6 +1,9 @@
 local self = {}
 GCAD.NativeFrustum3d = GCAD.MakeConstructor (self)
 
+local ScrW                                               = ScrW
+local ScrH                                               = ScrH
+
 local Angle_Forward                                      = debug.getregistry ().Angle.Forward
 local Angle_Right                                        = debug.getregistry ().Angle.Right
 local Angle_Up                                           = debug.getregistry ().Angle.Up
@@ -25,6 +28,12 @@ local GCAD_NativeNormalizedPlane3d_Maximum                = GCAD.NativeNormalize
 local GCAD_NativeNormalizedPlane3d_ToNormalizedPlane3d    = GCAD.NativeNormalizedPlane3d.ToNormalizedPlane3d
 
 if CLIENT then
+	function GCAD.NativeFrustum3d.FromScreen (out)
+		out = out or GCAD.NativeFrustum3d ()
+		
+		return GCAD.NativeFrustum3d.FromScreenAABB (0, 0, ScrW (), ScrH (), out)
+	end
+	
 	function GCAD.NativeFrustum3d.FromScreenAABB (x1, y1, x2, y2, out)
 		GCAD.Profiler:Begin ("NativeFrustum3d.FromScreenAABB")
 		
