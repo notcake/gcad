@@ -11,6 +11,14 @@ local Vector            = Vector
 local Vector___index    = debug.getregistry ().Vector.__index
 local Vector___newindex = debug.getregistry ().Vector.__newindex
 
+-- Equality
+function GCAD.UnpackedVector4d.Equals (x1, y1, z1, w1, x2, y2, z2, w2)
+	return x1 == x2 and
+	       y1 == y2 and
+	       z1 == z2 and
+	       w1 == w2
+end
+
 -- Vector products
 function GCAD.UnpackedVector4d.Dot (x1, y1, z1, w1, x2, y2, z2, w2)
 	return x1 * x2 + y1 * y2 + z1 * z2 + w1 * w2
@@ -21,22 +29,10 @@ GCAD.UnpackedVector4d.InnerProduct = GCAD.UnpackedVector4d.Dot
 function GCAD.UnpackedVector4d.OuterProduct (x1, y1, z1, w1, x2, y2, z2, w2, out)
 	out = out or GCAD.Matrix4x4 ()
 	
-	out [ 1] = x1 * x2
-	out [ 2] = x1 * y2
-	out [ 3] = x1 * z2
-	out [ 4] = x1 * w2
-	out [ 5] = y1 * x2
-	out [ 6] = y1 * y2
-	out [ 7] = y1 * z2
-	out [ 8] = y1 * w2
-	out [ 9] = z1 * x2
-	out [10] = z1 * y2
-	out [11] = z1 * z2
-	out [12] = z1 * w2
-	out [13] = w1 * x2
-	out [14] = w1 * y2
-	out [15] = w1 * z2
-	out [16] = w1 * w2
+	out [ 1], out [ 2], out [ 3], out [ 4] = x1 * x2, x1 * y2, x1 * z2, x1 * w2
+	out [ 5], out [ 6], out [ 7], out [ 8] = y1 * x2, y1 * y2, y1 * z2, y1 * w2
+	out [ 9], out [10], out [11], out [12] = z1 * x2, z1 * y2, z1 * z2, z1 * w2
+	out [13], out [14], out [15], out [16] = w1 * x2, w1 * y2, w1 * z2, w1 * w2
 	
 	return out
 end

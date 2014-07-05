@@ -24,6 +24,12 @@ function GCAD.Vector2d.Copy (self, source)
 	return self
 end
 
+-- Equality
+function GCAD.Vector2d.Equals (a, b)
+	return a [1] == b [1] and
+	       a [2] == b [2]
+end
+
 -- Vector products
 function GCAD.Vector2d.Cross (a, b)
 	return a [1] * b [2] - a [2] * b [1]
@@ -38,10 +44,8 @@ GCAD.Vector2d.InnerProduct = GCAD.Vector2d.Dot
 function GCAD.Vector2d.OuterProduct (a, b, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = a [1] * b [1]
-	out [2] = a [1] * b [2]
-	out [3] = a [2] * b [1]
-	out [4] = a [2] * b [2]
+	out [1], out [2] = a [1] * b [1], a [1] * b [2]
+	out [3], out [4] = a [2] * b [1], a [2] * b [2]
 	
 	return out
 end
@@ -211,6 +215,10 @@ end
 -- Copying
 self.Clone             = GCAD.Vector2d.Clone
 self.Copy              = GCAD.Vector2d.Copy
+
+-- Equality
+self.Equals            = GCAD.Vector2d.Equals
+self.__eq              = GCAD.Vector2d.Equals
 
 -- Vector products
 self.Cross             = GCAD.Vector2d.Cross

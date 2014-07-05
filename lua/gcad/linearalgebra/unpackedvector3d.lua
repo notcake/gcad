@@ -11,6 +11,13 @@ local Vector            = Vector
 local Vector___index    = debug.getregistry ().Vector.__index
 local Vector___newindex = debug.getregistry ().Vector.__newindex
 
+-- Equality
+function GCAD.UnpackedVector3d.Equals (x1, y1, z1, x2, y2, z2)
+	return x1 == x2 and
+	       y1 == y2 and
+	       z1 == z2
+end
+
 -- Vector products
 function GCAD.UnpackedVector3d.Cross (x1, y1, z1, x2, y2, z2)
 	return y1 * z2 - z1 * y2,
@@ -27,15 +34,9 @@ GCAD.UnpackedVector3d.InnerProduct = GCAD.UnpackedVector3d.Dot
 function GCAD.UnpackedVector3d.OuterProduct (x1, y1, z1, x2, y2, z2, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = x1 * x2
-	out [2] = x1 * y2
-	out [3] = x1 * z2
-	out [4] = y1 * x2
-	out [5] = y1 * y2
-	out [6] = y1 * z2
-	out [7] = z1 * x2
-	out [8] = z1 * y2
-	out [9] = z1 * z2
+	out [1], out [2], out [3] = x1 * x2, x1 * y2, x1 * z2
+	out [4], out [5], out [6] = y1 * x2, y1 * y2, y1 * z2
+	out [7], out [8], out [9] = z1 * x2, z1 * y2, z1 * z2
 	
 	return out
 end

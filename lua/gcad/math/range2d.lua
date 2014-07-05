@@ -95,6 +95,16 @@ function GCAD.Range2d.ContainsUnpackedPoint (self, x, y)
 	       self [3] <= y and y <= self [4]
 end
 
+function GCAD.Range2d.ContainsPoint2 (self, v)
+	return self [1] <= v [1] and v [1] <= self [2],
+	       self [3] <= v [2] and v [2] <= self [4]
+end
+
+function GCAD.Range2d.ContainsUnpackedPoint2 (self, x, y)
+	return self [1] <= x and x <= self [2],
+	       self [3] <= y and y <= self [4]
+end
+
 function GCAD.Range2d.ContainsRange (a, b)
 	return a [1] <= b [1] and b [2] <= a [2] and
 	       a [3] <= b [3] and b [4] <= a [4]
@@ -175,27 +185,29 @@ function self:Minimize () return GCAD_Range2d_Minimum (self) end
 function self:Maximize () return GCAD_Range2d_Maximum (self) end
 
 -- Copying
-self.Clone                 = GCAD.Range2d.Clone
-self.Copy                  = GCAD.Range2d.Copy
+self.Clone                  = GCAD.Range2d.Clone
+self.Copy                   = GCAD.Range2d.Copy
 
 -- Range size
-self.IsEmpty               = GCAD.Range2d.IsEmpty
-self.Length                = GCAD.Range2d.Length
+self.IsEmpty                = GCAD.Range2d.IsEmpty
+self.Length                 = GCAD.Range2d.Length
 
 -- Range operations
-self.Expand                = GCAD.Range2d.Expand
-self.ExpandUnpacked        = GCAD.Range2d.ExpandUnpacked
-self.Intersect             = GCAD.Range2d.Intersect
-self.Union                 = GCAD.Range2d.Union
+self.Expand                 = GCAD.Range2d.Expand
+self.ExpandUnpacked         = GCAD.Range2d.ExpandUnpacked
+self.Intersect              = GCAD.Range2d.Intersect
+self.Union                  = GCAD.Range2d.Union
 
 -- Range tests
-self.ContainsPoint         = GCAD.Range2d.ContainsPoint
-self.ContainsUnpackedPoint = GCAD.Range2d.ContainsUnpackedPoint
-self.ContainsRange         = GCAD.Range2d.ContainsRange
-self.Contains              = GCAD.Range2d.Contains
-self.IntersectsRange       = GCAD.Range2d.IntersectsRange
+self.ContainsPoint          = GCAD.Range2d.ContainsPoint
+self.ContainsUnpackedPoint  = GCAD.Range2d.ContainsUnpackedPoint
+self.ContainsPoint2         = GCAD.Range2d.ContainsPoint2
+self.ContainsUnpackedPoint2 = GCAD.Range2d.ContainsUnpackedPoint2
+self.ContainsRange          = GCAD.Range2d.ContainsRange
+self.Contains               = GCAD.Range2d.Contains
+self.IntersectsRange        = GCAD.Range2d.IntersectsRange
 
 -- Utility
-self.Unpack                = GCAD.Range2d.Unpack
-self.ToString              = GCAD.Range2d.ToString
-self.__tostring            = GCAD.Range2d.ToString
+self.Unpack                 = GCAD.Range2d.Unpack
+self.ToString               = GCAD.Range2d.ToString
+self.__tostring             = GCAD.Range2d.ToString

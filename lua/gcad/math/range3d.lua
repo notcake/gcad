@@ -1,8 +1,6 @@
 local self = {}
 GCAD.Range3d = GCAD.MakeConstructor (self)
 
-local math      = math
-
 local isnumber  = isnumber
 local math_huge = math.huge
 local math_min  = math.min
@@ -110,6 +108,18 @@ function GCAD.Range3d.ContainsUnpackedPoint (self, x, y, z)
 	       self [5] <= y and y <= self [6]
 end
 
+function GCAD.Range3d.ContainsPoint3 (self, v)
+	return self [1] <= v [1] and v [1] <= self [2],
+	       self [3] <= v [2] and v [2] <= self [4],
+	       self [5] <= v [3] and v [3] <= self [6]
+end
+
+function GCAD.Range3d.ContainsUnpackedPoint3 (self, x, y, z)
+	return self [1] <= x and x <= self [2],
+	       self [3] <= y and y <= self [4],
+	       self [5] <= y and y <= self [6]
+end
+
 function GCAD.Range3d.ContainsRange (a, b)
 	return a [1] <= b [1] and b [2] <= a [2] and
 	       a [3] <= b [3] and b [4] <= a [4] and
@@ -149,12 +159,12 @@ end
 function GCAD.Range3d.Minimum (out)
 	out = out or GCAD.Range3d ()
 	
-	out [1] =  math.huge
-	out [2] = -math.huge
-	out [3] =  math.huge
-	out [4] = -math.huge
-	out [5] =  math.huge
-	out [6] = -math.huge
+	out [1] =  math_huge
+	out [2] = -math_huge
+	out [3] =  math_huge
+	out [4] = -math_huge
+	out [5] =  math_huge
+	out [6] = -math_huge
 	
 	return out
 end
@@ -162,12 +172,12 @@ end
 function GCAD.Range3d.Maximum (out)
 	out = out or GCAD.Range3d ()
 	
-	out [1] = -math.huge
-	out [2] =  math.huge
-	out [3] = -math.huge
-	out [4] =  math.huge
-	out [5] = -math.huge
-	out [6] =  math.huge
+	out [1] = -math_huge
+	out [2] =  math_huge
+	out [3] = -math_huge
+	out [4] =  math_huge
+	out [5] = -math_huge
+	out [6] =  math_huge
 	
 	return out
 end
@@ -200,27 +210,29 @@ function self:Minimize () return GCAD_Range3d_Minimum (self) end
 function self:Maximize () return GCAD_Range3d_Maximum (self) end
 
 -- Copying
-self.Clone                 = GCAD.Range3d.Clone
-self.Copy                  = GCAD.Range3d.Copy
+self.Clone                  = GCAD.Range3d.Clone
+self.Copy                   = GCAD.Range3d.Copy
 
 -- Range size
-self.IsEmpty               = GCAD.Range3d.IsEmpty
-self.Length                = GCAD.Range3d.Length
+self.IsEmpty                = GCAD.Range3d.IsEmpty
+self.Volume                 = GCAD.Range3d.Volume
 
 -- Range operations
-self.Expand                = GCAD.Range3d.Expand
-self.ExpandUnpacked        = GCAD.Range3d.ExpandUnpacked
-self.Intersect             = GCAD.Range3d.Intersect
-self.Union                 = GCAD.Range3d.Union
+self.Expand                 = GCAD.Range3d.Expand
+self.ExpandUnpacked         = GCAD.Range3d.ExpandUnpacked
+self.Intersect              = GCAD.Range3d.Intersect
+self.Union                  = GCAD.Range3d.Union
 
 -- Range tests
-self.ContainsPoint         = GCAD.Range3d.ContainsPoint
-self.ContainsUnpackedPoint = GCAD.Range3d.ContainsUnpackedPoint
-self.ContainsRange         = GCAD.Range3d.ContainsRange
-self.Contains              = GCAD.Range3d.Contains
-self.IntersectsRange       = GCAD.Range3d.IntersectsRange
+self.ContainsPoint          = GCAD.Range3d.ContainsPoint
+self.ContainsUnpackedPoint  = GCAD.Range3d.ContainsUnpackedPoint
+self.ContainsPoint3         = GCAD.Range3d.ContainsPoint3
+self.ContainsUnpackedPoint3 = GCAD.Range3d.ContainsUnpackedPoint3
+self.ContainsRange          = GCAD.Range3d.ContainsRange
+self.Contains               = GCAD.Range3d.Contains
+self.IntersectsRange        = GCAD.Range3d.IntersectsRange
 
 -- Utility
-self.Unpack                = GCAD.Range3d.Unpack
-self.ToString              = GCAD.Range3d.ToString
-self.__tostring            = GCAD.Range3d.ToString
+self.Unpack                 = GCAD.Range3d.Unpack
+self.ToString               = GCAD.Range3d.ToString
+self.__tostring             = GCAD.Range3d.ToString

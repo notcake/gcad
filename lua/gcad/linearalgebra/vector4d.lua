@@ -33,6 +33,14 @@ function GCAD.Vector4d.Copy (self, source)
 	return self
 end
 
+-- Equality
+function GCAD.Vector4d.Equals (a, b)
+	return a [1] == b [1] and
+	       a [2] == b [2] and
+	       a [3] == b [3] and
+	       a [4] == b [4]
+end
+
 -- Vector products
 function GCAD.Vector4d.Dot (a, b)
 	return a [1] * b [1] + a [2] * b [2] + a [3] * b [3] + a [4] * b [4]
@@ -43,22 +51,10 @@ GCAD.Vector4d.InnerProduct = GCAD.Vector4d.Dot
 function GCAD.Vector4d.OuterProduct (a, b, out)
 	out = out or GCAD.Matrix4x4 ()
 	
-	out [ 1] = a [1] * b [1]
-	out [ 2] = a [1] * b [2]
-	out [ 3] = a [1] * b [3]
-	out [ 4] = a [1] * b [4]
-	out [ 5] = a [2] * b [1]
-	out [ 6] = a [2] * b [2]
-	out [ 7] = a [2] * b [3]
-	out [ 8] = a [2] * b [4]
-	out [ 9] = a [3] * b [1]
-	out [10] = a [3] * b [2]
-	out [11] = a [3] * b [3]
-	out [12] = a [3] * b [4]
-	out [13] = a [4] * b [1]
-	out [14] = a [4] * b [2]
-	out [15] = a [4] * b [3]
-	out [16] = a [4] * b [4]
+	out [ 1], out [ 2], out [ 3], out [ 4] = a [1] * b [1], a [1] * b [2], a [1] * b [3], a [1] * b [4]
+	out [ 5], out [ 6], out [ 7], out [ 8] = a [2] * b [1], a [2] * b [2], a [2] * b [3], a [2] * b [4]
+	out [ 9], out [10], out [11], out [12] = a [3] * b [1], a [3] * b [2], a [3] * b [3], a [3] * b [4]
+	out [13], out [14], out [15], out [16] = a [4] * b [1], a [4] * b [2], a [4] * b [3], a [4] * b [4]
 	
 	return out
 end
@@ -275,6 +271,10 @@ end
 -- Copying
 self.Clone             = GCAD.Vector4d.Clone
 self.Copy              = GCAD.Vector4d.Copy
+
+-- Equality
+self.Equals            = GCAD.Vector4d.Equals
+self.__eq              = GCAD.Vector4d.Equals
 
 -- Vector products
 self.Dot               = GCAD.Vector4d.Dot

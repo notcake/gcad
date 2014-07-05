@@ -31,6 +31,13 @@ function GCAD.Vector3d.Copy (self, source)
 	return self
 end
 
+-- Equality
+function GCAD.Vector3d.Equals (a, b)
+	return a [1] == b [1] and
+	       a [2] == b [2] and
+	       a [3] == b [3]
+end
+
 -- Vector products
 function GCAD.Vector3d.Cross (a, b, out)
 	out = out or GCAD.Vector3d ()
@@ -51,15 +58,9 @@ GCAD.Vector3d.InnerProduct = GCAD.Vector3d.Dot
 function GCAD.Vector3d.OuterProduct (a, b, out)
 	out = out or GCAD.Matrix3x3 ()
 	
-	out [1] = a [1] * b [1]
-	out [2] = a [1] * b [2]
-	out [3] = a [1] * b [3]
-	out [4] = a [2] * b [1]
-	out [5] = a [2] * b [2]
-	out [6] = a [2] * b [3]
-	out [7] = a [3] * b [1]
-	out [8] = a [3] * b [2]
-	out [9] = a [3] * b [3]
+	out [1], out [2], out [3] = a [1] * b [1], a [1] * b [2], a [1] * b [3]
+	out [4], out [5], out [6] = a [2] * b [1], a [2] * b [2], a [2] * b [3]
+	out [7], out [8], out [9] = a [3] * b [1], a [3] * b [2], a [3] * b [3]
 	
 	return out
 end
@@ -261,6 +262,10 @@ end
 -- Copying
 self.Clone             = GCAD.Vector3d.Clone
 self.Copy              = GCAD.Vector3d.Copy
+
+-- Equality
+self.Equals            = GCAD.Vector3d.Equals
+self.__eq              = GCAD.Vector3d.Equals
 
 -- Vector products
 self.Cross             = GCAD.Vector3d.Cross

@@ -5,6 +5,12 @@ local math      = math
 local math_abs  = math.abs
 local math_sqrt = math.sqrt
 
+-- Equality
+function GCAD.UnpackedVector2d.Equals (x1, y1, x2, y2)
+	return x1 == x2 and
+	       y1 == y2
+end
+
 -- Vector products
 function GCAD.UnpackedVector2d.Cross (x1, y1, x2, y2)
 	return x1 * y2 - y1 * x2
@@ -19,10 +25,8 @@ GCAD.UnpackedVector2d.InnerProduct = GCAD.UnpackedVector2d.Dot
 function GCAD.UnpackedVector2d.OuterProduct (x1, y1, x2, y2, out)
 	out = out or GCAD.Matrix2x2 ()
 	
-	out [1] = x1 * x2
-	out [2] = x1 * y2
-	out [3] = y1 * x2
-	out [4] = y1 * y2
+	out [1], out [2] = x1 * x2, x1 * y2
+	out [3], out [4] = y1 * x2, y1 * y2
 	
 	return out
 end

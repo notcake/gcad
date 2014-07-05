@@ -49,6 +49,16 @@ function GCAD.UnpackedRange2d.ContainsUnpackedPoint (x1, y1, x2, y2, x, y)
 	       y1 <= y and y <= y2
 end
 
+function GCAD.UnpackedRange2d.ContainsPoint2 (x1, y1, x2, y2, v)
+	return x1 <= v [1] and v [1] <= x2,
+	       y1 <= v [2] and v [2] <= y2
+end
+
+function GCAD.UnpackedRange2d.ContainsUnpackedPoint2 (x1, y1, x2, y2, x, y)
+	return x1 <= x and x <= x2,
+	       y1 <= y and y <= y2
+end
+
 function GCAD.UnpackedRange2d.ContainsRange (ax1, ay1, ax2, ay2, bx1, by1, bx2, by2)
 	return ax1 <= bx1 and bx2 <= ax2 and
 	       ay1 <= by1 and ay2 <= by2
