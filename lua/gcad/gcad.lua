@@ -284,13 +284,11 @@ GCAD.DestructorInvoker:AddDestructor (GCAD.NavigationGraphSerializer)
 
 GCAD.NativeEntityList               = GCAD.NativeEntityList ()
 GCAD.PACPartList                    = GCAD.PACPartList ()
-GCAD.VSpace3d                       = GCAD.Space3d ()
 
 GCAD.AggregateSpatialQueryable      = GCAD.AggregateSpatialQueryable3d ()
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NativeEntityList              )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.PACPartList                   )
 GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.NavigationGraphEntityList     )
-GCAD.AggregateSpatialQueryable:AddSpatialQueryable (GCAD.VSpace3d                      )
 
 if CLIENT then
 	GCAD.Autopilot = GCAD.Autopilot ()
