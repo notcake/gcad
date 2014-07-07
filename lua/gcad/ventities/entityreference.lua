@@ -65,7 +65,7 @@ function self:GetDisplayString ()
 		return self:GetEntity ():Nick ()
 	end
 	
-	return self:GetEntity ():GetClass ()
+	return self:GetEntity ():GetClass () .. " [" .. self:GetEntity ():EntIndex () .. "]"
 end
 
 function self:GetIcon ()
