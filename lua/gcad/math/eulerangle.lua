@@ -195,9 +195,9 @@ end
 function GCAD.EulerAngle.FromNativeAngle (angle, out)
 	out = out or GCAD.EulerAngle ()
 	
-	out [1] = Angle___index (angle, "p")
-	out [2] = Angle___index (angle, "y")
-	out [3] = Angle___index (angle, "r")
+	out [1] = Angle___index (angle, 1)
+	out [2] = Angle___index (angle, 2)
+	out [3] = Angle___index (angle, 3)
 	
 	return out
 end
@@ -205,9 +205,9 @@ end
 function GCAD.EulerAngle.ToNativeAngle (self, out)
 	out = out or Angle ()
 	
-	Angle___newindex (out, "p", self [1])
-	Angle___newindex (out, "y", self [2])
-	Angle___newindex (out, "r", self [3])
+	Angle___newindex (out, 1, self [1])
+	Angle___newindex (out, 2, self [2])
+	Angle___newindex (out, 3, self [3])
 	
 	return out
 end

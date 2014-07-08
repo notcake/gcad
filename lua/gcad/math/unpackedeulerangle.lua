@@ -165,15 +165,15 @@ function GCAD.UnpackedEulerAngle.FromUnpackedDirection (x, y, z)
 end
 
 function GCAD.UnpackedEulerAngle.FromNativeAngle (angle)
-	return Angle___index (out, "p"), Angle___index (out, "y"), Angle___index (out, "r")
+	return Angle___index (out, 1), Angle___index (out, 2), Angle___index (out, 3)
 end
 
 function GCAD.UnpackedEulerAngle.ToNativeAngle (p, y, r, out)
 	out = out or Angle ()
 	
-	Angle___newindex (out, "p", p)
-	Angle___newindex (out, "y", y)
-	Angle___newindex (out, "r", r)
+	Angle___newindex (out, 1, p)
+	Angle___newindex (out, 2, y)
+	Angle___newindex (out, 3, r)
 	
 	return out
 end
