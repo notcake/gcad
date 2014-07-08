@@ -28,7 +28,7 @@ end
 
 function GCAD.UnpackedNormalizedPlane3d.SetNormalNative (a, b, c, d, normal)
 	local length = Vector_Length (normal)
-	return Vector___index (normal, "x") / length, Vector___index (normal, "y") / length, Vector___index (normal, "z") / length, d
+	return Vector___index (normal, 1) / length, Vector___index (normal, 2) / length, Vector___index (normal, 3) / length, d
 end
 
 function GCAD.UnpackedNormalizedPlane3d.SetNormalUnpacked (a, b, c, d, x, y, z)

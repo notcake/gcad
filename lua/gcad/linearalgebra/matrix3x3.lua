@@ -47,9 +47,9 @@ end
 function GCAD.Matrix3x3.GetColumnNative (self, column, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [column + 0])
-	Vector___newindex (out, "y", self [column + 3])
-	Vector___newindex (out, "z", self [column + 6])
+	Vector___newindex (out, 1, self [column + 0])
+	Vector___newindex (out, 2, self [column + 3])
+	Vector___newindex (out, 3, self [column + 6])
 	
 	return out
 end
@@ -71,9 +71,9 @@ end
 function GCAD.Matrix3x3.GetDiagonalNative (self, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [1])
-	Vector___newindex (out, "y", self [5])
-	Vector___newindex (out, "z", self [9])
+	Vector___newindex (out, 1, self [1])
+	Vector___newindex (out, 2, self [5])
+	Vector___newindex (out, 3, self [9])
 	
 	return out
 end
@@ -95,9 +95,9 @@ end
 function GCAD.Matrix3x3.GetRowNative (self, row, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [row * 3 - 3 + 1])
-	Vector___newindex (out, "y", self [row * 3 - 3 + 2])
-	Vector___newindex (out, "z", self [row * 3 - 3 + 3])
+	Vector___newindex (out, 1, self [row * 3 - 3 + 1])
+	Vector___newindex (out, 2, self [row * 3 - 3 + 2])
+	Vector___newindex (out, 3, self [row * 3 - 3 + 3])
 	
 	return out
 end
@@ -115,9 +115,9 @@ function GCAD.Matrix3x3.SetColumn (self, column, v3d)
 end
 
 function GCAD.Matrix3x3.SetColumnNative (self, column, v)
-	self [column + 0] = Vector___index (v, "x")
-	self [column + 3] = Vector___index (v, "y")
-	self [column + 6] = Vector___index (v, "z")
+	self [column + 0] = Vector___index (v, 1)
+	self [column + 3] = Vector___index (v, 2)
+	self [column + 6] = Vector___index (v, 3)
 	
 	return self
 end
@@ -139,9 +139,9 @@ function GCAD.Matrix3x3.SetDiagonal (self, v3d)
 end
 
 function GCAD.Matrix3x3.SetDiagonalNative (self, v)
-	self [1] = Vector___index (v, "x")
-	self [5] = Vector___index (v, "y")
-	self [9] = Vector___index (v, "z")
+	self [1] = Vector___index (v, 1)
+	self [5] = Vector___index (v, 2)
+	self [9] = Vector___index (v, 3)
 	
 	return self
 end
@@ -163,9 +163,9 @@ function GCAD.Matrix3x3.SetRow (self, row, v3d)
 end
 
 function GCAD.Matrix3x3.SetRowNative (self, row, v)
-	self [row * 3 - 3 + 1] = Vector___index (v, "x")
-	self [row * 3 - 3 + 2] = Vector___index (v, "y")
-	self [row * 3 - 3 + 3] = Vector___index (v, "z")
+	self [row * 3 - 3 + 1] = Vector___index (v, 1)
+	self [row * 3 - 3 + 2] = Vector___index (v, 2)
+	self [row * 3 - 3 + 3] = Vector___index (v, 3)
 	
 	return self
 end

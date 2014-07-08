@@ -101,9 +101,9 @@ function GCAD.Line3d.SetPosition (self, pos)
 end
 
 function GCAD.Line3d.SetPositionNative (self, pos)
-	self [1] = Vector___index (pos, "x")
-	self [2] = Vector___index (pos, "y")
-	self [3] = Vector___index (pos, "z")
+	self [1] = Vector___index (pos, 1)
+	self [2] = Vector___index (pos, 2)
+	self [3] = Vector___index (pos, 3)
 	
 	return self
 end
@@ -125,9 +125,9 @@ function GCAD.Line3d.SetDirection (self, direction)
 end
 
 function GCAD.Line3d.SetPositionNative (self, direction)
-	self [4] = Vector___index (direction, "x")
-	self [5] = Vector___index (direction, "y")
-	self [6] = Vector___index (direction, "z")
+	self [4] = Vector___index (direction, 1)
+	self [5] = Vector___index (direction, 2)
+	self [6] = Vector___index (direction, 3)
 	
 	return self
 end

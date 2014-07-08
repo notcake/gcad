@@ -193,11 +193,11 @@ end
 
 -- Utility
 function GCAD.NativeSphere3d.Unpack (self)
-	return Vector___index (self.Position, "x"), Vector___index (self.Position, "y"), Vector___index (self.Position, "z"), self [4]
+	return Vector___index (self.Position, 1), Vector___index (self.Position, 2), Vector___index (self.Position, 3), self [4]
 end
 
 function GCAD.NativeSphere3d.ToString (self)
-	return "Sphere [(" .. tostring (Vector___index (self.Position, "x")) .. ", " .. tostring (Vector___index (self.Position, "y")) .. ", " .. tostring (Vector___index (self.Position, "z")) .."), " .. tostring (self [4]) .. "]"
+	return "Sphere [(" .. tostring (Vector___index (self.Position, 1)) .. ", " .. tostring (Vector___index (self.Position, 2)) .. ", " .. tostring (Vector___index (self.Position, 3)) .."), " .. tostring (self [4]) .. "]"
 end
 
 -- Construction

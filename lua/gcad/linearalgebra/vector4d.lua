@@ -214,9 +214,9 @@ end
 function GCAD.Vector4d.FromNativeVector (v, w, out)
 	out = out or GCAD.Vector4d ()
 	
-	out [1] = Vector___index (v, "x")
-	out [2] = Vector___index (v, "y")
-	out [3] = Vector___index (v, "z")
+	out [1] = Vector___index (v, 1)
+	out [2] = Vector___index (v, 2)
+	out [3] = Vector___index (v, 3)
 	out [4] = w
 	
 	return out
@@ -225,9 +225,9 @@ end
 function GCAD.Vector4d.ToNativeVector (self, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [1])
-	Vector___newindex (out, "y", self [2])
-	Vector___newindex (out, "z", self [3])
+	Vector___newindex (out, 1, self [1])
+	Vector___newindex (out, 2, self [2])
+	Vector___newindex (out, 3, self [3])
 	
 	return out, self [4]
 end

@@ -43,9 +43,9 @@ end
 
 function GCAD.NormalizedPlane3d.SetNormalNative (self, normal)
 	local length = Vector_Length (normal)
-	self [1] = Vector___index (normal, "x") / length
-	self [2] = Vector___index (normal, "y") / length
-	self [3] = Vector___index (normal, "z") / length
+	self [1] = Vector___index (normal, 1) / length
+	self [2] = Vector___index (normal, 2) / length
+	self [3] = Vector___index (normal, 3) / length
 	
 	return self
 end

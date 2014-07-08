@@ -105,15 +105,15 @@ end
 -- Conversion
 function GCAD.UnpackedVector4d.FromNativeVector (v, w)
 	w = w or 0
-	return Vector___index (v, "x"), Vector___index (v, "y"), Vector___index (v, "z")
+	return Vector___index (v, 1), Vector___index (v, 2), Vector___index (v, 3)
 end
 
 function GCAD.UnpackedVector4d.ToNativeVector (x, y, z, w, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", x)
-	Vector___newindex (out, "y", y)
-	Vector___newindex (out, "z", z)
+	Vector___newindex (out, 1, x)
+	Vector___newindex (out, 2, y)
+	Vector___newindex (out, 3, z)
 	
 	return out, w
 end

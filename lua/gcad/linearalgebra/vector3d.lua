@@ -209,9 +209,9 @@ end
 function GCAD.Vector3d.FromNativeVector (v, out)
 	out = out or GCAD.Vector3d ()
 	
-	out [1] = Vector___index (v, "x")
-	out [2] = Vector___index (v, "y")
-	out [3] = Vector___index (v, "z")
+	out [1] = Vector___index (v, 1)
+	out [2] = Vector___index (v, 2)
+	out [3] = Vector___index (v, 3)
 	
 	return out
 end
@@ -219,9 +219,9 @@ end
 function GCAD.Vector3d.ToNativeVector (self, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [1])
-	Vector___newindex (out, "y", self [2])
-	Vector___newindex (out, "z", self [3])
+	Vector___newindex (out, 1, self [1])
+	Vector___newindex (out, 2, self [2])
+	Vector___newindex (out, 3, self [3])
 	
 	return out
 end

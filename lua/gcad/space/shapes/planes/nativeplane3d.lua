@@ -231,11 +231,11 @@ end
 
 -- Utility
 function GCAD.NativePlane3d.Unpack (self)
-	return Vector___index (self.Normal, "x"), Vector___index (self.Normal, "y"), Vector___index (self.Normal, "z"), self [4]
+	return Vector___index (self.Normal, 1), Vector___index (self.Normal, 2), Vector___index (self.Normal, 3), self [4]
 end
 
 function GCAD.NativePlane3d.ToString (self)
-	return "Plane [(" .. tostring (Vector___index (self.Normal, "x")) .. ", " .. tostring (Vector___index (self.Normal, "y")) .. ", " .. tostring (Vector___index (self.Normal, "z")) .. "), " .. tostring (self [4]) .. "]"
+	return "Plane [(" .. tostring (Vector___index (self.Normal, 1)) .. ", " .. tostring (Vector___index (self.Normal, 2)) .. ", " .. tostring (Vector___index (self.Normal, 3)) .. "), " .. tostring (self [4]) .. "]"
 end
 
 -- Construction

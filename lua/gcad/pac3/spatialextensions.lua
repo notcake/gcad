@@ -28,9 +28,9 @@ function GCAD.Sphere3d.FromPACPartBoundingSphere (part, out)
 	if not Entity_IsValid (ent) then return out end
 	
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
-	out [1] = Vector___index (pos, "x")
-	out [2] = Vector___index (pos, "y")
-	out [3] = Vector___index (pos, "z")
+	out [1] = Vector___index (pos, 1)
+	out [2] = Vector___index (pos, 2)
+	out [3] = Vector___index (pos, 3)
 	out [4] = Entity_BoundingRadius (ent) * math_max (GCAD_UnpackedVector3d_FromNativeVector (part.Scale)) * part.Size
 	return out
 end

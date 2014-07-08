@@ -50,9 +50,9 @@ end
 function GCAD.Matrix4x4.GetColumnNative (self, column, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [column +  0])
-	Vector___newindex (out, "y", self [column +  4])
-	Vector___newindex (out, "z", self [column +  8])
+	Vector___newindex (out, 1, self [column +  0])
+	Vector___newindex (out, 2, self [column +  4])
+	Vector___newindex (out, 3, self [column +  8])
 	
 	return out, self [column + 12]
 end
@@ -75,9 +75,9 @@ end
 function GCAD.Matrix4x4.GetDiagonalNative (self, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [ 1])
-	Vector___newindex (out, "y", self [ 6])
-	Vector___newindex (out, "z", self [11])
+	Vector___newindex (out, 1, self [ 1])
+	Vector___newindex (out, 2, self [ 6])
+	Vector___newindex (out, 3, self [11])
 	
 	return out, self [16]
 end
@@ -100,9 +100,9 @@ end
 function GCAD.Matrix4x4.GetRowNative (self, row, out)
 	out = out or Vector ()
 	
-	Vector___newindex (out, "x", self [row * 4 - 4 + 1])
-	Vector___newindex (out, "y", self [row * 4 - 4 + 2])
-	Vector___newindex (out, "z", self [row * 4 - 4 + 3])
+	Vector___newindex (out, 1, self [row * 4 - 4 + 1])
+	Vector___newindex (out, 2, self [row * 4 - 4 + 2])
+	Vector___newindex (out, 3, self [row * 4 - 4 + 3])
 	
 	return out, self [row * 4 - 4 + 4]
 end
@@ -121,9 +121,9 @@ function GCAD.Matrix4x4.SetColumn (self, column, v4d)
 end
 
 function GCAD.Matrix4x4.SetColumnNative (self, column, v, w)
-	self [column +  0] = Vector___index (v, "x")
-	self [column +  4] = Vector___index (v, "y")
-	self [column +  8] = Vector___index (v, "z")
+	self [column +  0] = Vector___index (v, 1)
+	self [column +  4] = Vector___index (v, 2)
+	self [column +  8] = Vector___index (v, 3)
 	self [column + 12] = w or self [column + 12]
 	
 	return self
@@ -148,9 +148,9 @@ function GCAD.Matrix4x4.SetDiagonal (self, v4d)
 end
 
 function GCAD.Matrix4x4.SetDiagonalNative (self, v, w)
-	self [ 1] = Vector___index (v, "x")
-	self [ 6] = Vector___index (v, "y")
-	self [11] = Vector___index (v, "z")
+	self [ 1] = Vector___index (v, 1)
+	self [ 6] = Vector___index (v, 2)
+	self [11] = Vector___index (v, 3)
 	self [16] = w or self [16]
 	
 	return self
@@ -175,9 +175,9 @@ function GCAD.Matrix4x4.SetRow (self, row, v4d)
 end
 
 function GCAD.Matrix4x4.SetRowNative (self, row, v, w)
-	self [row * 4 - 4 + 1] = Vector___index (v, "x")
-	self [row * 4 - 4 + 2] = Vector___index (v, "y")
-	self [row * 4 - 4 + 3] = Vector___index (v, "z")
+	self [row * 4 - 4 + 1] = Vector___index (v, 1)
+	self [row * 4 - 4 + 2] = Vector___index (v, 2)
+	self [row * 4 - 4 + 3] = Vector___index (v, 3)
 	self [row * 4 - 4 + 4] = w or self [row * 4 - 4 + 4]
 	
 	return self

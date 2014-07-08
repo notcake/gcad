@@ -23,9 +23,9 @@ function GCAD.Sphere3d.FromEntityBoundingSphere (ent, out)
 	if not Entity_IsValid (ent) then return out end
 	
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
-	out [1] = Vector___index (pos, "x")
-	out [2] = Vector___index (pos, "y")
-	out [3] = Vector___index (pos, "z")
+	out [1] = Vector___index (pos, 1)
+	out [2] = Vector___index (pos, 2)
+	out [3] = Vector___index (pos, 3)
 	out [4] = Entity_BoundingRadius (ent)
 	
 	return out
@@ -89,9 +89,9 @@ function GCAD.Sphere3d.SetPosition (self, pos)
 end
 
 function GCAD.Sphere3d.SetPositionNative (self, pos)
-	self [1] = Vector___index (pos, "x")
-	self [2] = Vector___index (pos, "y")
-	self [3] = Vector___index (pos, "z")
+	self [1] = Vector___index (pos, 1)
+	self [2] = Vector___index (pos, 2)
+	self [3] = Vector___index (pos, 3)
 	
 	return self
 end

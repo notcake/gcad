@@ -13,7 +13,7 @@ local GCAD_UnpackedVector3d_ToNativeVector   = GCAD.UnpackedVector3d.ToNativeVec
 
 function GCAD.UnpackedSphere3d.FromEntityBoundingSphere (ent)
 	local pos = Entity_LocalToWorld (ent, Entity_OBBCenter (ent))
-	return Vector___index (pos, "x"), Vector___index (pos, "y"), Vector___index (pos, "z"), Entity_BoundingRadius (ent)
+	return Vector___index (pos, 1), Vector___index (pos, 2), Vector___index (pos, 3), Entity_BoundingRadius (ent)
 end
 GCAD.UnpackedSphere3d.FromEntityBoundingSphere = GCAD.Profiler:Wrap (GCAD.UnpackedSphere3d.FromEntityBoundingSphere, "UnpackedSphere3d.FromEntityBoundingSphere")
 
@@ -49,7 +49,7 @@ function GCAD.UnpackedSphere3d.SetPosition (x, y, z, r, pos)
 end
 
 function GCAD.UnpackedSphere3d.SetPositionNative (x, y, z, r, pos)
-	return Vector___index (pos, "x"), Vector___index (pos, "y"), Vector___index (pos, "z"), r
+	return Vector___index (pos, 1), Vector___index (pos, 2), Vector___index (pos, 3), r
 end
 
 function GCAD.UnpackedSphere3d.SetPositionUnpacked (x, y, z, r, x1, y1, z1)

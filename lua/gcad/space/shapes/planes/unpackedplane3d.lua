@@ -41,7 +41,7 @@ function GCAD.UnpackedPlane3d.SetNormal (a, b, c, d, normal)
 end
 
 function GCAD.UnpackedPlane3d.SetNormalNative (a, b, c, d, normal)
-	return Vector___index (normal, "x"), Vector___index (normal, "y"), Vector___index (normal, "z"), d
+	return Vector___index (normal, 1), Vector___index (normal, 2), Vector___index (normal, 3), d
 end
 
 function GCAD.UnpackedPlane3d.SetNormalUnpacked (a, b, c, d, x, y, z)

@@ -69,9 +69,9 @@ function GCAD.Plane3d.SetNormal (self, normal)
 end
 
 function GCAD.Plane3d.SetNormalNative (self, normal)
-	self [1] = Vector___index (normal, "x")
-	self [2] = Vector___index (normal, "y")
-	self [3] = Vector___index (normal, "z")
+	self [1] = Vector___index (normal, 1)
+	self [2] = Vector___index (normal, 2)
+	self [3] = Vector___index (normal, 3)
 	
 	return self
 end
