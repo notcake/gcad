@@ -1,7 +1,20 @@
 local self = {}
-GCAD.SceneGraph.Components.NonTransformationNode = GCAD.MakeConstructor (self, GCAD.SceneGraph.SceneGraphNode)
+GCAD.SceneGraph.Components.NonTransformationComponent = GCAD.MakeConstructor (self, GCAD.SceneGraph.Components.BaseTransformationComponent)
+local base = self.__base
 
-function self:ctor ()
+function self:ctor (sceneGraphNode)
+end
+
+-- ITransformationComponent
+function self:Initialize ()
+	base.Initialize (self)
+	
+	-- Transformations
+	self.LocalToParentMatrixValid       = false
+	self.ParentToLocalMatrixValid       = false
+	
+	self.LocalToParentMatrixNativeValid = false
+	self.ParentToLocalMatrixNativeValid = false
 end
 
 -- Bounding volumes
@@ -20,6 +33,7 @@ end
 -- Transformations
 local identityMatrix       = GCAD.Matrix4x4.Identity ()
 local identityMatrixNative = Matrix ()
+
 function self:GetLocalToParentMatrix ()
 	return identityMatrix
 end
@@ -63,3 +77,14 @@ end
 function self:GetWorldToLocalMatrixNative ()
 	return self.Parent and self.Parent:GetWorldToLocalMatrixNative () or identityMatrixNative
 end
+
+-- Invalidation
+function self:InvalidateTransformation ()
+	-- Nothing to do here
+end
+
+function self:InvalidateParentSpaceBoundingVolumes ()
+	-- Nothing to do here
+end
+
+GCAD.SceneGraph.Components.NonTransformationComponent.Instance = GCAD.SceneGraph.Components.NonTransformationComponent ()

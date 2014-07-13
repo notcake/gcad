@@ -1,5 +1,5 @@
 local self = {}
-GCAD.SceneGraph.ISceneGraphNode = GCAD.MakeConstructor (self)
+GCAD.SceneGraph.ISceneGraphNode = GCAD.MakeConstructor (self, GCAD.ISpatialNode3d)
 
 function self:ctor ()
 end
@@ -46,13 +46,12 @@ function self:SetParent (parent)
 	GCAD.Error ("ISceneGraphNode:SetParent : Not implemented.")
 end
 
-function self:RemoveChild (sceneGraphNode)
-	GCAD.Error ("ISceneGraphNode:RemoveChild : Not implemented.")
-end
-
--- Scene graph
 function self:Remove ()
 	GCAD.Error ("ISceneGraphNode:Remove : Not implemented.")
+end
+
+function self:RemoveChild (sceneGraphNode)
+	GCAD.Error ("ISceneGraphNode:RemoveChild : Not implemented.")
 end
 
 -- Bounding volumes

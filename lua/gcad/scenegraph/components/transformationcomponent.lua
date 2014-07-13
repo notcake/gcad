@@ -1,7 +1,14 @@
 local self = {}
-GCAD.SceneGraph.Components.TransformationNode = GCAD.MakeConstructor (self, GCAD.SceneGraph.SceneGraphNode)
+GCAD.SceneGraph.Components.TransformationComponent = GCAD.MakeConstructor (self, GCAD.SceneGraph.Components.BaseTransformationComponent)
+local base = self.__base
 
-function self:ctor ()
+function self:ctor (sceneGraphNode)
+end
+
+-- ITransformationComponent
+function self:Initialize ()
+	base.Initialize (self)
+	
 	-- Bounding volumes
 	self.ParentSpaceAABB3d              = nil
 	self.ParentSpaceBoundingSphere      = nil
@@ -116,6 +123,34 @@ function self:GetWorldToLocalMatrixNative ()
 	return self.WorldToLocalMatrixNative
 end
 
+-- Invalidation
+function self:InvalidateTransformation ()
+	self.LocalToParentMatrixValid       = false
+	self.ParentToLocalMatrixValid       = false
+	self.LocalToParentMatrixValidNative = false
+	self.ParentToLocalMatrixValidNative = false
+	
+	-- Invalidate local to world and world to local matrices
+	self:InvalidateWorldMatrices ()
+	
+	-- Invalidate parent space bounding volumes
+	self:InvalidateParentSpaceBoundingVolumes ()
+	self:InvalidateWorldSpaceBoundingVolumes ()
+	
+	-- Propagate bounding volume invalidation upwards
+	if not self.Parent then return end
+	self.Parent:InvalidateLocalSpaceBoundingVolumes ()
+end
+
+function self:InvalidateParentSpaceBoundingVolumes ()
+	-- No propagation is performed here.
+	-- Propagation of invalidation should be performed by InvalidateLocalSpaceBoundingVolumes ().
+	self.ParentSpaceAABB3dValid         = false
+	self.ParentSpaceBoundingSphereValid = false
+	self.ParentSpaceOBB3dValid          = false
+end
+
+-- TransformationComponent
 function self:SetLocalToParentMatrix (matrix)
 	self:InvalidateTransformation ()
 	
@@ -158,52 +193,4 @@ function self:ComputeWorldToLocalMatrix ()
 	end
 end
 
-function self:InvalidateTransformation ()
-	self.LocalToParentMatrixValid       = false
-	self.ParentToLocalMatrixValid       = false
-	self.LocalToParentMatrixValidNative = false
-	self.ParentToLocalMatrixValidNative = false
-	
-	-- Invalidate local to world and world to local matrices
-	self:InvalidateWorldMatrices ()
-	
-	-- Invalidate parent space bounding volumes
-	self:InvalidateParentSpaceBoundingVolumes ()
-end
-
-function self:InvalidateLocalSpaceBoundingVolumes ()
-	-- If our local space bounding volumes are invalid,
-	-- it implies that our ancestors' local space bounding volumes are also invalid,
-	-- so we don't need to waste time propagating the invalidation upwards
-	if not self.LocalSpaceAABB3dValid and
-	   not self.LocalSpaceBoundingSphereValid and
-	   not self.LocalSpaceOBB3dValid then
-		return
-	end
-	
-	self.LocalSpaceAABB3dValid          = false
-	self.LocalSpaceBoundingSphereValid  = false
-	self.LocalSpaceOBB3dValid           = false
-	
-	-- Propagate bounding volume invalidation upwards
-	self:InvalidateParentSpaceBoundingVolumes ()
-end
-
-function self:InvalidateParentSpaceBoundingVolumes ()
-	-- If our parent space bounding volumes are invalid,
-	-- it implies that our ancestors' local space bounding volumes are also invalid,
-	-- so we don't need to waste time propagating the invalidation upwards
-	if not self.ParentSpaceAABB3dValid and
-	   not self.ParentSpaceBoundingSphereValid and
-	   not self.ParentSpaceOBB3dValid then
-		return
-	end
-	
-	self.ParentSpaceAABB3dValid          = false
-	self.ParentSpaceBoundingSphereValid  = false
-	self.ParentSpaceOBB3dValid           = false
-	
-	-- Propagate bounding volume invalidation upwards
-	if not self.Parent then return end
-	self.Parent:InvalidateLocalSpaceBoundingVolumes ()
-end
+GCAD.SceneGraph.Components.TransformationComponent.Instance = GCAD.SceneGraph.Components.TransformationComponent ()

@@ -51,3 +51,10 @@ end
 function self:GetRootSpatialPartitionNode ()
 	return self.RootNode
 end
+
+-- ISpace3d
+function self:UpdateItem (item)
+	if not self:Contains (item) then return end
+	
+	self.ItemNodes [item]:Update ()
+end

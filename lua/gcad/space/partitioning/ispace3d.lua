@@ -7,3 +7,7 @@ end
 function self:GetRootSpatialPartitionNode ()
 	GCAD.Error ("ISpace3d:GetRootSpatialPartitionNode : Not implemented.")
 end
+
+function self:UpdateItem (item)
+	GCAD.Error ("ISpace3d:UpdateItem : Not implemented.")
+end

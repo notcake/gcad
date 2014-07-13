@@ -202,16 +202,22 @@ include ("scenegraph/iscenegraph.lua")
 include ("scenegraph/iscenegraphnode.lua")
 include ("scenegraph/scenegraph.lua")
 include ("scenegraph/scenegraphnode.lua")
-include ("scenegraph/components/nontransformationnode.lua")
-include ("scenegraph/components/groupnode.lua")
-include ("scenegraph/components/transformationnode.lua")
-include ("scenegraph/components/orthogonalaffinetransformationnode.lua")
+include ("scenegraph/components/icontentscomponent.lua")
+include ("scenegraph/components/itransformationcomponent.lua")
+include ("scenegraph/components/nodecontainercomponent.lua")
+include ("scenegraph/components/noncontainercomponent.lua")
+include ("scenegraph/components/basetransformationcomponent.lua")
+include ("scenegraph/components/transformationcomponent.lua")
+include ("scenegraph/components/orthogonalaffinetransformationcomponent.lua")
+include ("scenegraph/components/nontransformationcomponent.lua")
 include ("scenegraph/matrixtransformationnode.lua")
 include ("scenegraph/orthogonalaffinetransformationnode.lua")
-include ("scenegraph/transformationnode.lua")
 include ("scenegraph/groupnode.lua")
 include ("scenegraph/modelnode.lua")
-include ("scenegraph/scenegraphrenderer.lua")
+
+if CLIENT then
+	include ("scenegraph/scenegraphrenderer.lua")
+end
 
 -- Engine Interop
 include ("nativeentities/nativeentitylist.lua")
@@ -268,9 +274,11 @@ GCAD:AddEventListener ("Unloaded",
 	end
 )
 
-GCAD.RootSceneGraph                 = GCAD.SceneGraph.SceneGraph ()
-GCAD.RootSceneGraphRenderer         = GCAD.SceneGraph.SceneGraphRenderer (GCAD.RootSceneGraph)
-GCAD.DestructorInvoker:AddDestructor (GCAD.RootSceneGraphRenderer)
+if CLIENT then
+	GCAD.RootSceneGraph                 = GCAD.SceneGraph.SceneGraph ()
+	GCAD.RootSceneGraphRenderer         = GCAD.SceneGraph.SceneGraphRenderer (GCAD.RootSceneGraph)
+	GCAD.DestructorInvoker:AddDestructor (GCAD.RootSceneGraphRenderer)
+end
 
 GCAD.NavigationGraph                = GCAD.Navigation.NavigationGraph ()
 GCAD.NavigationGraphEntityList      = GCAD.Navigation.NavigationGraphEntityList (GCAD.NavigationGraph)

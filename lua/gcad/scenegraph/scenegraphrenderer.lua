@@ -83,9 +83,18 @@ function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 		renderModifierComponent:PreRender ()
 	end
 	
-	for childNode in sceneGraphNode:GetChildEnumerator () do
-		if childNode:IsVisible () then
-			self:RenderNodeTranslucent (viewRenderInfo, childNode)
+	if sceneGraphNode.Space3d then
+		local spatialQueryResult = GCAD.Pools:Get (GCAD.SpatialQueryResult):Allocate ()
+		spatialQueryResult:Clear ()
+		
+		sceneGraphNode.Space3d:FindIntersectingFrustum (viewRenderInfo:GetFrustum ())
+		
+		GCAD.Pools:Get (GCAD.SpatialQueryResult):Deallocate (spatialQueryResult)
+	else
+		for childNode in sceneGraphNode:GetChildEnumerator () do
+			if childNode:IsVisible () then
+				self:RenderNodeTranslucent (viewRenderInfo, childNode)
+			end
 		end
 	end
 	
