@@ -105,11 +105,16 @@ function GCAD.Matrix2x2.SetRowUnpacked (self, row, x, y)
 	return self
 end
 
--- Matrix operations
+-- Matrix properties
 function GCAD.Matrix2x2.Determinant (self)
 	return self [1] * self [4] - self [3] * self [2]
 end
 
+function GCAD.Matrix2x2.Trace (self)
+	return self [1] + self [3]
+end
+
+-- Matrix operations
 local GCAD_Matrix2x2_Determinant = GCAD.Matrix2x2.Determinant
 function GCAD.Matrix2x2.Invert (self, out)
 	out = out or GCAD.Matrix2x2 ()
@@ -375,8 +380,11 @@ self.SetDiagonalUnpacked    = GCAD.Matrix2x2.SetDiagonalUnpacked
 self.SetRow                 = GCAD.Matrix2x2.SetRow
 self.SetRowUnpacked         = GCAD.Matrix2x2.SetRowUnpacked
 
--- Matrix operations
+-- Matrix properties
 self.Determinant            = GCAD.Matrix2x2.Determinant
+self.Trace                  = GCAD.Matrix2x2.Trace
+
+-- Matrix operations
 self.Invert                 = GCAD.Matrix2x2.Invert
 self.InvertOrthonormal      = GCAD.Matrix2x2.InvertOrthonormal
 self.Transpose              = GCAD.Matrix2x2.Transpose

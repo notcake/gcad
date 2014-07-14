@@ -1,18 +1,19 @@
 local self = {}
 GCAD.Matrix4x4 = GCAD.MakeConstructor (self)
 
-local math              = math
+local isnumber                      = isnumber
 
-local isnumber          = isnumber
+local Matrix                        = Matrix
 
-local Matrix            = Matrix
+local Vector                        = Vector
+local Vector___index                = debug.getregistry ().Vector.__index
+local Vector___newindex             = debug.getregistry ().Vector.__newindex
+local VMatrix_GetField              = debug.getregistry ().VMatrix.GetField
+local VMatrix_Identity              = debug.getregistry ().VMatrix.Identity
+local VMatrix_SetField              = debug.getregistry ().VMatrix.SetField
 
-local Vector            = Vector
-local Vector___index    = debug.getregistry ().Vector.__index
-local Vector___newindex = debug.getregistry ().Vector.__newindex
-local VMatrix_GetField  = debug.getregistry ().VMatrix.GetField
-local VMatrix_Identity  = debug.getregistry ().VMatrix.Identity
-local VMatrix_SetField  = debug.getregistry ().VMatrix.SetField
+local GCAD_Matrix3x3_Eigenvalues    = GCAD.Matrix3x3.Eigenvalues
+local GCAD_Matrix3x3_SingularValues = GCAD.Matrix3x3.SingularValues
 
 -- Copying
 function GCAD.Matrix4x4.Clone (self, out)
@@ -192,7 +193,7 @@ function GCAD.Matrix4x4.SetRowUnpacked (self, row, x, y, z, w)
 	return self
 end
 
--- Matrix operations
+-- Matrix properties
 function GCAD.Matrix4x4.Determinant (self)
 	return   self [1] * (  self [ 6] * (self [11] * self [16] - self [15] * self [12])
 	                     - self [ 7] * (self [10] * self [16] - self [14] * self [12])
@@ -214,6 +215,26 @@ function GCAD.Matrix4x4.Determinant3x3 (self)
 	       + self [3] * (self [ 5] * self [10] - self [ 9] * self [ 6])
 end
 
+function GCAD.Matrix4x4.Trace (self)
+	return self [1] + self [6] + self [11] + self [16]
+end
+
+function GCAD.Matrix4x4.Trace3x3 (self)
+	return self [1] + self [6] + self [11]
+end
+
+local matrix3x3 = nil
+function GCAD.Matrix4x4.Eigenvalues3x3 (self)
+	matrix3x3 = GCAD.Matrix4x4.ToMatrix3x3 (self, matrix3x3)
+	return GCAD_Matrix3x3_Eigenvalues (matrix3x3)
+end
+
+function GCAD.Matrix4x4.SingularValues3x3 (self)
+	matrix3x3 = GCAD.Matrix4x4.ToMatrix3x3 (self, matrix3x3)
+	return GCAD_Matrix3x3_SingularValues (matrix3x3)
+end
+
+-- Matrix operations
 local GCAD_Matrix4x4_Determinant = GCAD.Matrix4x4.Determinant
 function GCAD.Matrix4x4.Invert (self, out)
 	if out == self then out = nil end
@@ -790,8 +811,15 @@ self.SetRow                  = GCAD.Matrix4x4.SetRow
 self.SetRowNative            = GCAD.Matrix4x4.SetRowNative
 self.SetRowUnpacked          = GCAD.Matrix4x4.SetRowUnpacked
 
--- Matrix operations
+-- Matrix properties
 self.Determinant             = GCAD.Matrix4x4.Determinant
+self.Determinant3x3          = GCAD.Matrix4x4.Determinant3x3
+self.Trace                   = GCAD.Matrix4x4.Trace
+self.Trace3x3                = GCAD.Matrix4x4.Trace3x3
+self.Eigenvalues3x3          = GCAD.Matrix4x4.Eigenvalues3x3
+self.SingularValues3x3       = GCAD.Matrix4x4.SingularValues3x3
+
+-- Matrix operations
 self.Invert                  = GCAD.Matrix4x4.Invert
 self.InvertAffine            = GCAD.Matrix4x4.InvertAffine
 self.InvertAffineOrthonormal = GCAD.Matrix4x4.InvertAffineOrthonormal

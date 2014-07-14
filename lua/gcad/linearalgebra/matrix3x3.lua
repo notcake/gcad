@@ -3,7 +3,12 @@ GCAD.Matrix3x3 = GCAD.MakeConstructor (self)
 
 local isnumber          = isnumber
 
-local math              = math
+local math_acos         = math.acos
+local math_cos          = math.cos
+local math_max          = math.max
+local math_min          = math.min
+local math_pi           = math.pi
+local math_sqrt         = math.sqrt
 
 local Matrix            = Matrix
 
@@ -178,7 +183,7 @@ function GCAD.Matrix3x3.SetRowUnpacked (self, row, x, y, z)
 	return self
 end
 
--- Matrix operations
+-- Matrix properties
 function GCAD.Matrix3x3.Determinant (self)
 	return   self [1] * (self [5] * self [9] - self [8] * self [6])
 	       - self [2] * (self [4] * self [9] - self [7] * self [6])
@@ -186,9 +191,77 @@ function GCAD.Matrix3x3.Determinant (self)
 end
 
 function GCAD.Matrix3x3.Determinant2x2 (self)
-	return  self [1] * self [5] - self [4] * self [2]
+	return self [1] * self [5] - self [4] * self [2]
 end
 
+function GCAD.Matrix3x3.Trace (self)
+	return self [1] + self [5] + self [9]
+end
+
+function GCAD.Matrix3x3.Trace2x2 (self)
+	return self [1] + self [5]
+end
+
+local GCAD_Matrix3x3_Clone                = GCAD.Matrix3x3.Clone
+local GCAD_Matrix3x3_Determinant          = GCAD.Matrix3x3.Determinant
+local GCAD_Matrix3x3_Trace                = GCAD.Matrix3x3.Trace
+local pB = nil
+-- https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3.C3.973_matrices
+-- Given a real symmetric 3x3 matrix A, compute the eigenvalues
+function GCAD.Matrix3x3.Eigenvalues (self)
+	if self [2] ^ 2 + self [3] ^ 2 + self [6] ^ 2 == 0 then
+		-- Matrix is lower triangular or diagonal
+		return self [1], self [5], self [9]
+	else
+		local q = GCAD_Matrix3x3_Trace (self) * (1 / 3)
+		local p2 = (self [1] - q) ^ 2 + (self [5] - q) ^ 2 + (self [9] - q) ^ 2 + 2 * self [2] * self [4] + 2 * self [3] * self [7] + 2 * self [6] * self [8]
+		local p = math_sqrt (p2 * (1 / 6))
+		
+		-- B = (1 / p) (A - qI)
+		pB = GCAD_Matrix3x3_Clone (self, pB)
+		pB [1] = pB [1] - q
+		pB [5] = pB [5] - q
+		pB [9] = pB [9] - q
+		
+		-- β = 2 cos (1/3 acos (1/2 det B) + 2 k π / 3) for k = 0, 1, 2
+		-- In exact arithmetic for a symmetric matrix -1 <= r <= 1
+		-- but computation error can leave it slightly outside this range.
+		local halfDetB = GCAD_Matrix3x3_Determinant (pB) * 0.5 / (p * p * p)
+		halfDetB = math_min (math_max (halfDetB, -1), 1)
+		local phi = math_acos (halfDetB) * (1 / 3)
+		
+		-- The eigenvalues satisfy eig3 <= eig2 <= eig1
+		-- α = pβ + q
+		local eig1 = q + 2 * p * math_cos (phi                    )
+		local eig3 = q + 2 * p * math_cos (phi + (2 * math_pi / 3))
+		-- local eig2 = q + 2 * p * math_cos (phi + (4 * math_pi / 3))
+		
+		-- trace(A) = eig1 + eig2 + eig3
+		-- eig2 = trace(A) - eig1 - eig3
+		local eig2 = 3 * q - eig1 - eig3
+		
+		return eig1, eig2, eig3
+	end
+end
+
+local aat = nil
+function GCAD.Matrix3x3.SingularValues (self)
+	aat = aat or GCAD.Matrix3x3 ()
+	
+	-- Calculate AA^t
+	local m11, m12, m13 = self [1], self [2], self [3]
+	local m21, m22, m23 = self [4], self [5], self [6]
+	local m31, m32, m33 = self [7], self [8], self [9]
+	
+	aat [1], aat [2], aat [3] = m11 * m11 + m12 * m12 + m13 * m13, m11 * m21 + m12 * m22 + m13 * m23, m11 * m31 + m12 * m32 + m13 * m33
+	aat [4], aat [5], aat [6] = m11 * m21 + m12 * m22 + m13 * m23, m21 * m21 + m22 * m22 + m23 * m23, m21 * m31 + m22 * m32 + m23 * m33
+	aat [7], aat [8], aat [9] = m11 * m31 + m12 * m32 + m13 * m33, m21 * m31 + m22 * m32 + m23 * m33, m31 * m31 + m32 *m32 + m33 * m33
+	
+	local s1, s2, s3 = GCAD.Matrix3x3.Eigenvalues (aat)
+	return math_sqrt (s1), math_sqrt (s2), math_sqrt (s3)
+end
+
+-- Matrix operations
 local GCAD_Matrix3x3_Determinant = GCAD.Matrix3x3.Determinant
 function GCAD.Matrix3x3.Invert (self, out)
 	if out == self then out = nil end
@@ -661,8 +734,15 @@ self.SetRow                  = GCAD.Matrix3x3.SetRow
 self.SetRowNative            = GCAD.Matrix3x3.SetRowNative
 self.SetRowUnpacked          = GCAD.Matrix3x3.SetRowUnpacked
 
--- Matrix operations
+-- Matrix properties
 self.Determinant             = GCAD.Matrix3x3.Determinant
+self.Determinant2x2          = GCAD.Matrix3x3.Determinant2x2
+self.Trace                   = GCAD.Matrix3x3.Trace
+self.Trace2x2                = GCAD.Matrix3x3.Trace2x2
+self.Eigenvalues             = GCAD.Matrix3x3.Eigenvalues
+self.SingularValues          = GCAD.Matrix3x3.SingularValues
+
+-- Matrix operations
 self.Invert                  = GCAD.Matrix3x3.Invert
 self.InvertAffine            = GCAD.Matrix3x3.InvertAffine
 self.InvertAffineOrthonormal = GCAD.Matrix3x3.InvertAffineOrthonormal
