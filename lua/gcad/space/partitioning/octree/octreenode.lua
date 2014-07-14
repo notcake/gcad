@@ -64,16 +64,16 @@ function self:Insert (octreeItemNode, aabb3d)
 	
 	if self.InclusiveItemCount == 0 then
 		-- We can hold it.
-		self:InsertHere ()
+		self:InsertHere (octreeItemNode)
 	else
 		local failX, failY, failZ = GCAD_AABB3d_ContainsPoint3 (aabb3d, self.Centre)
 		if failX or failY or failZ then
 			-- None of our child nodes can hold it.
-			self:InsertHere ()
+			self:InsertHere (octreeItemNode)
 		elseif octreeItemNode:IsPoint () and
 		       GCAD_AABB3d_Equals (aabb3d, next (self.Items):GetAABB ()) then
 			-- Avoid infinite recursion for identical points
-			self:InsertHere ()
+			self:InsertHere (octreeItemNode)
 		else
 			self:CreateChildNodes ()
 			

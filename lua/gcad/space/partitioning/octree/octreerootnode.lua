@@ -2,13 +2,16 @@ local self = {}
 GCAD.OctreeRootNode = GCAD.MakeConstructor (self, GCAD.OctreeNode)
 
 function self:ctor ()
+	self:SetBoundsUnpacked (-1, -1, -1,
+	                         1,  1,  1)
 end
 
 -- OctreeNode
 function self:Insert (octreeItemNode, aabb3d)
 	aabb3d = aabb3d or octreeItemNode:GetAABB ()
 	
-	if not self:GetAABB ():ContainsAABB (aabb3d) then
+	if not self:GetAABB ():ContainsAABB (aabb3d) and
+	   not aabb3d:ContainsNaN () then
 		-- Object is too big for us.
 		self:ExpandToFit (aabb3d)
 	end

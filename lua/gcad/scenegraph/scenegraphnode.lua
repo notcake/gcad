@@ -1,6 +1,9 @@
 local self = {}
 GCAD.SceneGraph.SceneGraphNode = GCAD.MakeConstructor (self, GCAD.SceneGraph.ISceneGraphNode)
 
+local math_min = math.min
+local math_max = math.max
+
 function self:ctor ()
 	-- Scene graph
 	self.SceneGraph                    = nil
@@ -128,15 +131,27 @@ function self:GetParentSpaceOBB ()
 end
 
 function self:GetWorldSpaceAABB ()
-	GCAD.Error ("ISceneGraphNode:GetWorldSpaceAABB : Not implemented.")
+	if not self.WorldSpaceAABBValid then
+		self:ComputeWorldSpaceAABB ()
+	end
+	
+	return self.WorldSpaceAABB
 end
 
 function self:GetWorldSpaceBoundingSphere ()
-	GCAD.Error ("ISceneGraphNode:GetWorldSpaceBoundingSphere : Not implemented.")
+	if not self.WorldSpaceBoundingSphereValid then
+		self:ComputeWorldSpaceBoundingSphere ()
+	end
+	
+	return self.WorldSpaceBoundingSphere
 end
 
 function self:GetWorldSpaceOBB ()
-	GCAD.Error ("ISceneGraphNode:GetWorldSpaceOBB : Not implemented.")
+	if not self.WorldSpaceOBBValid then
+		self:ComputeWorldSpaceOBB ()
+	end
+	
+	return self.WorldSpaceOBB
 end
 
 -- Transformations
@@ -284,6 +299,18 @@ function self:ComputeWorldToLocalMatrix ()
 	self.TransformationComponent.ComputeWorldToLocalMatrix (self)
 end
 
+function self:ComputeParentSpaceAABB ()
+	self.TransformationComponent.ComputeParentSpaceAABB (self)
+end
+
+function self:ComputeParentSpaceBoundingSphere ()
+	self.TransformationComponent.ComputeParentSpaceBoundingSphere (self)
+end
+
+function self:ComputeParentSpaceOBB ()
+	self.TransformationComponent.ComputeParentSpaceOBB (self)
+end
+
 -- OrthogonalAffineTransformationComponent
 function self:GetAngle ()
 	return self.TransformationComponent.GetAngle (self)
@@ -315,6 +342,19 @@ end
 
 function self:SetTranslation (translation)
 	return self.TransformationComponent.SetTranslation (self, translation)
+end
+
+-- IContentsComponent
+function self:ComputeLocalSpaceAABB ()
+	return self.ContentsComponent.ComputeLocalSpaceAABB (self)
+end
+
+function self:ComputeLocalSpaceBoundingSphere ()
+	return self.ContentsComponent.ComputeLocalSpaceBoundingSphere (self)
+end
+
+function self:ComputeLocalSpaceOBB ()
+	return self.ContentsComponent.ComputeLocalSpaceOBB (self)
 end
 
 -- SceneGraphNode
@@ -358,4 +398,47 @@ function self:SetTransformationComponent (transformationComponent)
 	self:InvalidateTransformation ()
 	
 	return self
+end
+
+-- Internal, do not call
+function self:ComputeWorldSpaceAABB ()
+	self.WorldSpaceAABBValid = true
+	
+	self.WorldSpaceAABB = self.WorldSpaceAABB or GCAD.AABB3d ()
+	
+	local localToWorldMatrix = self:GetLocalToWorldMatrix ()
+	local localSpaceAABB = self:GetLocalSpaceAABB ()
+	
+	local x, y, z = localSpaceAABB:GetMinUnpacked ()
+	local dx, dy, dz = localSpaceAABB:GetMaxUnpacked ()
+	dx, dy, dz = GCAD.UnpackedVector3d.Subtract (dx, dy, dz, x, y, z)
+	
+	x, y, z = GCAD.Matrix4x4.MatrixUnpackedVectorMultiply (localToWorldMatrix, x, y, z, 1)
+	
+	self.WorldSpaceAABB:SetMinUnpacked (x + math_min (0, dx * localToWorldMatrix [ 1]) + math_min (0, dy * localToWorldMatrix [ 2]) + math_min (0, dz * localToWorldMatrix [ 3]),
+	                                    y + math_min (0, dx * localToWorldMatrix [ 5]) + math_min (0, dy * localToWorldMatrix [ 6]) + math_min (0, dz * localToWorldMatrix [ 7]),
+	                                    z + math_min (0, dx * localToWorldMatrix [ 9]) + math_min (0, dy * localToWorldMatrix [10]) + math_min (0, dz * localToWorldMatrix [11]))
+	self.WorldSpaceAABB:SetMaxUnpacked (x + math_max (0, dx * localToWorldMatrix [ 1]) + math_max (0, dy * localToWorldMatrix [ 2]) + math_max (0, dz * localToWorldMatrix [ 3]),
+	                                    y + math_max (0, dx * localToWorldMatrix [ 5]) + math_max (0, dy * localToWorldMatrix [ 6]) + math_max (0, dz * localToWorldMatrix [ 7]),
+	                                    z + math_max (0, dx * localToWorldMatrix [ 9]) + math_max (0, dy * localToWorldMatrix [10]) + math_max (0, dz * localToWorldMatrix [11]))
+end
+
+function self:ComputeWorldSpaceBoundingSphere ()
+	self.WorldSpaceBoundingSphereValid = true
+	
+	self.WorldSpaceBoundingSphere = self.WorldSpaceBoundingSphere or GCAD.Sphere3d ()
+	
+	local localToWorldMatrix = self:GetLocalToWorldMatrix ()
+	local localSpaceBoundingSphere = self:GetLocalSpaceBoundingSphere ()
+	local x, y, z = GCAD.Sphere3d.GetPositionUnpacked (localSpaceBoundingSphere)
+	x, y, z = GCAD.Matrix4x4.MatrixUnpackedVectorMultiply (localToWorldMatrix, x, y, z, 1)
+	
+	local largestSingularValue = math_max (GCAD.Matrix4x4.SingularValues3x3 (localToWorldMatrix))
+	
+	self.WorldSpaceBoundingSphere:SetPositionUnpacked (x, y, z)
+	self.WorldSpaceBoundingSphere:SetRadius (localSpaceBoundingSphere:GetRadius () * largestSingularValue)
+end
+
+function self:ComputeWorldSpaceOBB ()
+	GCAD.Error ("SceneGraphNode:ComputeWorldSpaceOBB : Not implemented.")
 end
