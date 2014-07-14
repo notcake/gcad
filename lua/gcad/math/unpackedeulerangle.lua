@@ -16,6 +16,20 @@ local GCAD_UnpackedVector2d_Length         = GCAD.UnpackedVector2d.Length
 local GCAD_UnpackedVector3d_ToNativeVector = GCAD.UnpackedVector3d.ToNativeVector
 local GCAD_UnpackedVector3d_ToVector3d     = GCAD.UnpackedVector3d.ToVector3d
 
+-- Equality
+function GCAD.UnpackedEulerAngle.Equals (p1, y1, r1, p2, y2, r2)
+	return p1 == p2 and
+	       y1 == y2 and
+		   r1 == r2
+end
+
+-- NaN
+function GCAD.UnpackedEulerAngle.ContainsNaN (p, y, r)
+	return p ~= p or
+	       y ~= y or
+		   r ~= r
+end
+
 -- Directions
 
 -- Pitch

@@ -19,6 +19,14 @@ function GCAD.UnpackedVector4d.Equals (x1, y1, z1, w1, x2, y2, z2, w2)
 	       w1 == w2
 end
 
+-- NaN
+function GCAD.UnpackedVector4d.ContainsNaN (x, y, z, w)
+	return x ~= x or
+	       y ~= y or
+	       z ~= z or
+		   w ~= w
+end
+
 -- Vector products
 function GCAD.UnpackedVector4d.Dot (x1, y1, z1, w1, x2, y2, z2, w2)
 	return x1 * x2 + y1 * y2 + z1 * z2 + w1 * w2

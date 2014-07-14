@@ -38,6 +38,13 @@ function GCAD.Vector3d.Equals (a, b)
 	       a [3] == b [3]
 end
 
+-- NaN
+function GCAD.Vector3d.ContainsNaN (self)
+	return self [1] ~= self [1] or
+	       self [2] ~= self [2] or
+	       self [3] ~= self [3]
+end
+
 -- Vector products
 function GCAD.Vector3d.Cross (a, b, out)
 	out = out or GCAD.Vector3d ()
@@ -266,6 +273,9 @@ self.Copy              = GCAD.Vector3d.Copy
 -- Equality
 self.Equals            = GCAD.Vector3d.Equals
 self.__eq              = GCAD.Vector3d.Equals
+
+-- NaN
+self.ContainsNaN       = GCAD.Vector3d.ContainsNaN
 
 -- Vector products
 self.Cross             = GCAD.Vector3d.Cross

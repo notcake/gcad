@@ -41,6 +41,14 @@ function GCAD.Vector4d.Equals (a, b)
 	       a [4] == b [4]
 end
 
+-- NaN
+function GCAD.Vector4d.ContainsNaN (self)
+	return self [1] ~= self [1] or
+	       self [2] ~= self [2] or
+	       self [3] ~= self [3] or
+	       self [4] ~= self [4]
+end
+
 -- Vector products
 function GCAD.Vector4d.Dot (a, b)
 	return a [1] * b [1] + a [2] * b [2] + a [3] * b [3] + a [4] * b [4]
@@ -275,6 +283,9 @@ self.Copy              = GCAD.Vector4d.Copy
 -- Equality
 self.Equals            = GCAD.Vector4d.Equals
 self.__eq              = GCAD.Vector4d.Equals
+
+-- NaN
+self.ContainsNaN       = GCAD.Vector4d.ContainsNaN
 
 -- Vector products
 self.Dot               = GCAD.Vector4d.Dot

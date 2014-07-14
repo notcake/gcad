@@ -11,6 +11,12 @@ function GCAD.UnpackedVector2d.Equals (x1, y1, x2, y2)
 	       y1 == y2
 end
 
+-- NaN
+function GCAD.UnpackedVector2d.ContainsNaN (x, y)
+	return x ~= x or
+	       y ~= y
+end
+
 -- Vector products
 function GCAD.UnpackedVector2d.Cross (x1, y1, x2, y2)
 	return x1 * y2 - y1 * x2

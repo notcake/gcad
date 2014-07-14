@@ -18,6 +18,13 @@ function GCAD.UnpackedVector3d.Equals (x1, y1, z1, x2, y2, z2)
 	       z1 == z2
 end
 
+-- NaN
+function GCAD.UnpackedVector3d.ContainsNaN (x, y, z)
+	return x ~= x or
+	       y ~= y or
+	       z ~= z
+end
+
 -- Vector products
 function GCAD.UnpackedVector3d.Cross (x1, y1, z1, x2, y2, z2)
 	return y1 * z2 - z1 * y2,

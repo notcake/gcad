@@ -36,6 +36,20 @@ function GCAD.EulerAngle.Copy (self, source)
 	return self
 end
 
+-- Equality
+function GCAD.EulerAngle.Equals (a, b)
+	return a [1] == b [1] and
+	       a [2] == b [2] and
+		   a [3] == b [3]
+end
+
+-- NaN
+function GCAD.EulerAngle.ContainsNaN (self)
+	return self [1] ~= self [1] or
+	       self [2] ~= self [2] or
+		   self [3] ~= self [3]
+end
+
 -- Directions
 
 -- Pitch
@@ -248,6 +262,13 @@ end
 -- Copying
 self.Clone                = GCAD.EulerAngle.Clone
 self.Copy                 = GCAD.EulerAngle.Copy
+
+-- Equality
+self.Equals               = GCAD.EulerAngle.Equals
+self.__eq                 = GCAD.EulerAngle.Equals
+
+-- NaN
+self.ContainsNaN          = GCAD.EulerAngle.ContainsNaN
 
 -- Directions
 self.GetPositiveX         = GCAD.EulerAngle.GetPositiveX

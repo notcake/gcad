@@ -30,6 +30,12 @@ function GCAD.Vector2d.Equals (a, b)
 	       a [2] == b [2]
 end
 
+-- NaN
+function GCAD.Vector2d.ContainsNaN (self)
+	return self [1] ~= self [1] or
+	       self [2] ~= self [2]
+end
+
 -- Vector products
 function GCAD.Vector2d.Cross (a, b)
 	return a [1] * b [2] - a [2] * b [1]
@@ -219,6 +225,9 @@ self.Copy              = GCAD.Vector2d.Copy
 -- Equality
 self.Equals            = GCAD.Vector2d.Equals
 self.__eq              = GCAD.Vector2d.Equals
+
+-- NaN
+self.ContainsNaN       = GCAD.Vector2d.ContainsNaN
 
 -- Vector products
 self.Cross             = GCAD.Vector2d.Cross

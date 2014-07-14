@@ -9,6 +9,7 @@ local Entity_OBBMins                              = debug.getregistry ().Entity.
 
 local GCAD_AABB3d_GetExtremeCornerIdsUnpacked     = GCAD.AABB3d.GetExtremeCornerIdsUnpacked
 local GCAD_EulerAngle_Clone                       = GCAD.EulerAngle.Clone
+local GCAD_EulerAngle_ContainsNaN                 = GCAD.EulerAngle.ContainsNaN
 local GCAD_EulerAngle_Copy                        = GCAD.EulerAngle.Copy
 local GCAD_EulerAngle_FromNativeAngle             = GCAD.EulerAngle.FromNativeAngle
 local GCAD_EulerAngle_ToNativeAngle               = GCAD.EulerAngle.ToNativeAngle
@@ -16,6 +17,7 @@ local GCAD_EulerAngle_Unpack                      = GCAD.EulerAngle.Unpack
 local GCAD_Matrix3x3_UnpackedVectorMatrixMultiply = GCAD.Matrix3x3.UnpackedVectorMatrixMultiply
 local GCAD_Vector3d_Add                           = GCAD.Vector3d.Add
 local GCAD_Vector3d_Clone                         = GCAD.Vector3d.Clone
+local GCAD_Vector3d_ContainsNaN                   = GCAD.Vector3d.ContainsNaN
 local GCAD_Vector3d_Copy                          = GCAD.Vector3d.Copy
 local GCAD_Vector3d_FromNativeVector              = GCAD.Vector3d.FromNativeVector
 local GCAD_Vector3d_ToNativeVector                = GCAD.Vector3d.ToNativeVector
@@ -68,6 +70,14 @@ function GCAD.OBB3d.Copy (self, source)
 	self.RotationMatrixValid = false
 	
 	return self
+end
+
+-- NaN
+function GCAD.OBB3d.ContainsNaN (self)
+	return GCAD_Vector3d_ContainsNaN   (self.Position) or
+	       GCAD_Vector3d_ContainsNaN   (self.Min     ) or
+		   GCAD_Vector3d_ContainsNaN   (self.Max     ) or
+		   GCAD_EulerAngle_ContainsNaN (self.Angle   )
 end
 
 -- OBB properties
@@ -309,6 +319,9 @@ end
 -- Copying
 self.Clone                       = GCAD.OBB3d.Clone
 self.Copy                        = GCAD.OBB3d.Copy
+
+-- NaN
+self.ContainsNaN                 = GCAD.OBB3d.ContainsNaN
 
 -- OBB properties
 self.GetPosition                 = GCAD.OBB3d.GetPosition

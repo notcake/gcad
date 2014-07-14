@@ -9,6 +9,7 @@ local Entity_IsValid                              = debug.getregistry ().Entity.
 local Entity_WorldSpaceAABB                       = debug.getregistry ().Entity.WorldSpaceAABB
 
 local GCAD_Vector3d_Clone                         = GCAD.Vector3d.Clone
+local GCAD_Vector3d_ContainsNaN                   = GCAD.Vector3d.ContainsNaN
 local GCAD_Vector3d_Copy                          = GCAD.Vector3d.Copy
 local GCAD_Vector3d_Equals                        = GCAD.Vector3d.Equals
 local GCAD_Vector3d_FromNativeVector              = GCAD.Vector3d.FromNativeVector
@@ -17,7 +18,9 @@ local GCAD_Vector3d_ToString                      = GCAD.Vector3d.ToString
 local GCAD_Vector3d_Unpack                        = GCAD.Vector3d.Unpack
 local GCAD_UnpackedRange1d_IntersectTriple        = GCAD.UnpackedRange1d.IntersectTriple
 local GCAD_UnpackedRange1d_IsEmpty                = GCAD.UnpackedRange1d.IsEmpty
+local GCAD_UnpackedRange3d_ContainsPoint3         = GCAD.UnpackedRange3d.ContainsPoint3
 local GCAD_UnpackedRange3d_ContainsUnpackedPoint  = GCAD.UnpackedRange3d.ContainsUnpackedPoint
+local GCAD_UnpackedRange3d_ContainsUnpackedPoint3 = GCAD.UnpackedRange3d.ContainsUnpackedPoint3
 local GCAD_UnpackedVector3d_FromNativeVector      = GCAD.UnpackedVector3d.FromNativeVector
 
 function GCAD.AABB3d.FromEntity (ent, out)
@@ -54,6 +57,12 @@ end
 function GCAD.AABB3d.Equals (self, aabb3d)
 	return GCAD_Vector3d_Equals (self.Min, aabb3d.Min) and
 	       GCAD_Vector3d_Equals (self.Max, aabb3d.Max)
+end
+
+-- NaN
+function GCAD.AABB3d.ContainsNaN (self)
+	return GCAD_Vector3d_ContainsNaN (self.Min) or
+	       GCAD_Vector3d_ContainsNaN (self.Max)
 end
 
 -- AABB properties
@@ -261,6 +270,18 @@ function GCAD.AABB3d.ContainsNativePoint (self, v)
 	return GCAD_AABB3d_ContainsUnpackedPoint (self, GCAD_UnpackedVector3d_FromNativeVector (v))
 end
 
+function GCAD.AABB3d.ContainsPoint3 (self, v3d)
+	return GCAD_UnpackedRange3d_ContainsPoint3 (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], v3d)
+end
+
+function GCAD.AABB3d.ContainsNativePoint3 (self, v)
+	return GCAD_UnpackedRange3d_ContainsUnpackedPoint3 (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], GCAD_UnpackedVector3d_FromNativeVector (v))
+end
+
+function GCAD.AABB3d.ContainsUnpackedPoint3 (self, x, y, z)
+	return GCAD_UnpackedRange3d_ContainsUnpackedPoint3 (self.Min [1], self.Min [2], self.Min [3], self.Max [1], self.Max [2], self.Max [3], x, y, z)
+end
+
 -- Line
 function GCAD.AABB3d.IntersectLine (self, line3d)
 	local dx, dy, dz = line3d:GetDirectionUnpacked ()
@@ -398,6 +419,9 @@ self.Copy                        = GCAD.AABB3d.Copy
 self.Equals                      = GCAD.AABB3d.Equals
 self.__eq                        = GCAD.AABB3d.Equals
 
+-- NaN
+self.ContainsNaN                 = GCAD.AABB3d.ContainsNaN
+
 -- AABB properties
 self.GetMin                      = GCAD.AABB3d.GetMin
 self.GetMax                      = GCAD.AABB3d.GetMax
@@ -448,6 +472,9 @@ self.Union                       = GCAD.AABB3d.Union
 self.ContainsPoint               = GCAD.AABB3d.ContainsPoint
 self.ContainsNativePoint         = GCAD.AABB3d.ContainsNativePoint
 self.ContainsUnpackedPoint       = GCAD.AABB3d.ContainsUnpackedPoint
+self.ContainsPoint3              = GCAD.AABB3d.ContainsPoint3
+self.ContainsNativePoint3        = GCAD.AABB3d.ContainsNativePoint3
+self.ContainsUnpackedPoint3      = GCAD.AABB3d.ContainsUnpackedPoint3
 
 -- Line
 self.IntersectsLine              = GCAD.AABB3d.IntersectsLine
