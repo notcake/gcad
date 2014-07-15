@@ -10,13 +10,13 @@ function self:Initialize ()
 	base.Initialize (self)
 	
 	-- Bounding volumes
-	self.ParentSpaceAABB3d              = nil
+	self.ParentSpaceAABB                = nil
 	self.ParentSpaceBoundingSphere      = nil
-	self.ParentSpaceOBB3d               = nil
+	self.ParentSpaceOBB                 = nil
 	
-	self.ParentSpaceAABB3dValid         = false
+	self.ParentSpaceAABBValid           = false
 	self.ParentSpaceBoundingSphereValid = false
-	self.ParentSpaceOBB3dValid          = false
+	self.ParentSpaceOBBValid            = false
 	
 	-- Transformations
 	self.LocalToParentMatrix            = GCAD.Matrix4x4.Identity ()
@@ -34,10 +34,10 @@ end
 
 -- Bounding volumes
 function self:GetParentSpaceAABB ()
-	if not self.ParentSpaceAABB3dValid then
-		self:ComputeParentSpaceAABB3d ()
+	if not self.ParentSpaceAABBValid then
+		self:ComputeParentSpaceAABB ()
 	end
-	return self.ParentSpaceAABB3d
+	return self.ParentSpaceAABB
 end
 
 function self:GetParentSpaceBoundingSphere ()
@@ -48,10 +48,10 @@ function self:GetParentSpaceBoundingSphere ()
 end
 
 function self:GetParentSpaceOBB ()
-	if not self.ParentSpaceOBB3dValid then
-		self:ComputeParentSpaceOBB3d ()
+	if not self.ParentSpaceOBBValid then
+		self:ComputeParentSpaceOBB ()
 	end
-	return self.ParentSpaceOBB3d
+	return self.ParentSpaceOBB
 end
 
 -- Transformations
@@ -145,9 +145,9 @@ end
 function self:InvalidateParentSpaceBoundingVolumes ()
 	-- No propagation is performed here.
 	-- Propagation of invalidation should be performed by InvalidateLocalSpaceBoundingVolumes ().
-	self.ParentSpaceAABB3dValid         = false
+	self.ParentSpaceAABBValid           = false
 	self.ParentSpaceBoundingSphereValid = false
-	self.ParentSpaceOBB3dValid          = false
+	self.ParentSpaceOBBValid            = false
 end
 
 -- TransformationComponent

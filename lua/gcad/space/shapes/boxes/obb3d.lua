@@ -261,6 +261,17 @@ function GCAD.OBB3d.IntersectsLine (self, line3d)
 end
 
 -- Conversion
+function GCAD.OBB3d.FromAABB3d (aabb3d, out)
+	out = out or GCAD.OBB3d ()
+	
+	out:SetPositionUnpacked (0, 0, 0)
+	out:SetAngleUnpacked (0, 0, 0)
+	out:SetMinUnpacked (GCAD.AABB3d.GetMinUnpacked (aabb3d))
+	out:SetMaxUnpacked (GCAD.AABB3d.GetMaxUnpacked (aabb3d))
+	
+	return out
+end
+
 function GCAD.OBB3d.FromNativeOBB3d (nativeOBB3d, out)
 	out = out or GCAD.OBB3d ()
 	

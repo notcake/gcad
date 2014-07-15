@@ -10,13 +10,19 @@ end
 function self:Insert (octreeItemNode, aabb3d)
 	aabb3d = aabb3d or octreeItemNode:GetAABB ()
 	
+	local containsNaN = GCAD.AABB3d.ContainsNaN (aabb3d)
+	
 	if not self:GetAABB ():ContainsAABB (aabb3d) and
-	   not aabb3d:ContainsNaN () then
+	   not containsNaN then
 		-- Object is too big for us.
 		self:ExpandToFit (aabb3d)
 	end
 	
-	self.__base.Insert (self, octreeItemNode, aabb3d)
+	if containsNaN then
+		self:InsertHere (octreeItemNode)
+	else
+		self.__base.Insert (self, octreeItemNode, aabb3d)
+	end
 end
 
 -- OctreeRootNode

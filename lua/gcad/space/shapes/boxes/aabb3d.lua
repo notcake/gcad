@@ -346,6 +346,17 @@ function GCAD.AABB3d.ToNativeAABB3d (self, out)
 	return out
 end
 
+function GCAD.AABB3d.ToOBB3d (self, out)
+	out = out or GCAD.OBB3d ()
+	
+	out:SetPositionUnpacked (0, 0, 0)
+	out:SetAngleUnpacked (0, 0, 0)
+	out:SetMin (self.Min)
+	out:SetMax (self.Max)
+	
+	return out
+end
+
 function GCAD.AABB3d.FromRange3d (range3d, out)
 	out = out or GCAD.AABB3d ()
 	
@@ -382,6 +393,7 @@ function GCAD.AABB3d.Minimum (out)
 	
 	return out
 end
+
 function GCAD.AABB3d.Maximum (out)
 	out = out or GCAD.AABB3d ()
 	
@@ -487,6 +499,7 @@ self.IntersectsAABB              = GCAD.AABB3d.IntersectsAABB
 
 -- Conversion
 self.ToNativeAABB3d              = GCAD.AABB3d.ToNativeAABB3d
+self.ToOBB3d                     = GCAD.AABB3d.ToOBB3d
 self.ToRange3d                   = GCAD.AABB3d.ToRange3d
 
 -- Utility

@@ -46,19 +46,42 @@ function self:CreateNavigationGraphNodeSceneGraphNode (navigationGraphNode)
 	self.NavigationGraphNodeSceneGraphNodes [navigationGraphNode] = sceneGraphNode
 	
 	local navigationGraphNodeEntity = self.NavigationGraphNodeEntityList:GetNavigationGraphNodeEntity (navigationGraphNode)
-	sceneGraphNode:SetRenderComponent (navigationGraphNodeEntity)
 	navigationGraphNodeEntity:SetSceneGraphNode (sceneGraphNode)
 	
+	sceneGraphNode:SetRenderComponent (navigationGraphNodeEntity)
+	sceneGraphNode:SetLocalSpaceAABB (navigationGraphNodeEntity:GetLocalSpaceAABB ())
+	sceneGraphNode:SetLocalSpaceBoundingSphere (navigationGraphNodeEntity:GetLocalSpaceBoundingSphere ())
+	sceneGraphNode:SetLocalSpaceOBB (navigationGraphNodeEntity:GetLocalSpaceOBB ())
 	sceneGraphNode:SetPosition (navigationGraphNode:GetPosition ())
 end
 
+local aabb3d   = GCAD.AABB3d ()
+local sphere3d = GCAD.Sphere3d ()
+local obb3d    = GCAD.OBB3d ()
 function self:CreateNavigationGraphEdgeSceneGraphNode (navigationGraphEdge)
 	if self.NavigationGraphEdgeSceneGraphNodes [navigationGraphEdge] then return end
 	
 	local sceneGraphNode = self.SceneGraph:CreateModelNode ()
 	self.RootSceneGraphNode:AddChild (sceneGraphNode)
 	self.NavigationGraphEdgeSceneGraphNodes [navigationGraphEdge] = sceneGraphNode
+	
 	sceneGraphNode:SetRenderComponent (GCAD.Navigation.NavigationGraphEdgeRenderComponent (navigationGraphEdge))
+	
+	local x1, y1, z1 = navigationGraphEdge:GetFirstNode ():GetPositionUnpacked ()
+	local x2, y2, z2 = navigationGraphEdge:GetSecondNode ():GetPositionUnpacked ()
+	aabb3d:SetMinUnpacked (math.min (x1, x2), math.min (y1, y2), math.min (z1, z2))
+	aabb3d:SetMaxUnpacked (math.max (x1, x2), math.max (y1, y2), math.max (z1, z2))
+	local r = GCAD.UnpackedVector3d.DistanceTo (x1, y1, z1, x2, y2, z2) * 0.5
+	sphere3d:SetPositionUnpacked (GCAD.UnpackedVector3d.ScalarVectorMultiply (0.5, GCAD.UnpackedVector3d.Add (x1, y1, z1, x2, y2, z2)))
+	sphere3d:SetRadius (r)
+	obb3d:SetPositionUnpacked (x1, y1, z1)
+	obb3d:SetMinUnpacked (0, 0, 0)
+	obb3d:SetMaxUnpacked (2 * r, 0, 0)
+	obb3d:SetAngleUnpacked (GCAD.UnpackedEulerAngle.FromUnpackedDirection (GCAD.UnpackedVector3d.Subtract (x2, y2, z2, x1, y1, z1)))
+	
+	sceneGraphNode:SetLocalSpaceAABB (aabb3d)
+	sceneGraphNode:SetLocalSpaceBoundingSphere (sphere3d)
+	sceneGraphNode:SetLocalSpaceOBB (obb3d)
 end
 
 function self:DestroyNavigationGraphNodeSceneGraphNode (navigationGraphNode)

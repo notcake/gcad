@@ -32,6 +32,19 @@ if CLIENT then
 	self.WireframeBoxMesh = GCAD.Meshes.CreateAxisAlignedWireframeCube (-self.HalfBoxSize, self.HalfBoxSize)
 end
 
+-- Local space bounding volumes
+self.LocalSpaceAABB = GCAD.AABB3d ()
+self.LocalSpaceAABB:SetMinUnpacked (-self.HalfBoxSize, -self.HalfBoxSize, -self.HalfBoxSize)
+self.LocalSpaceAABB:SetMaxUnpacked ( self.HalfBoxSize,  self.HalfBoxSize,  self.HalfBoxSize)
+self.LocalSpaceBoundingSphere = GCAD.Sphere3d ()
+self.LocalSpaceBoundingSphere:SetPositionUnpacked (0, 0, 0)
+self.LocalSpaceBoundingSphere:SetRadius (math.sqrt (3 * self.HalfBoxSize * self.HalfBoxSize))
+self.LocalSpaceOBB = GCAD.OBB3d ()
+self.LocalSpaceOBB:SetPositionUnpacked (0, 0, 0)
+self.LocalSpaceOBB:SetAngleUnpacked (0, 0, 0)
+self.LocalSpaceOBB:SetMinUnpacked (-self.HalfBoxSize, -self.HalfBoxSize, -self.HalfBoxSize)
+self.LocalSpaceOBB:SetMaxUnpacked ( self.HalfBoxSize,  self.HalfBoxSize,  self.HalfBoxSize)
+
 function self:ctor (navigationGraphNode)
 	self.NavigationGraphNode = navigationGraphNode
 	
@@ -102,6 +115,18 @@ function self:ComputeNativeOBB ()
 	self.NativeOBBValid = true
 	
 	self.NativeOBB:SetPosition (self.NavigationGraphNode:GetPositionNative ())
+end
+
+function self:GetLocalSpaceAABB ()
+	return self.LocalSpaceAABB
+end
+
+function self:GetLocalSpaceBoundingSphere ()
+	return self.LocalSpaceBoundingSphere
+end
+
+function self:GetLocalSpaceOBB ()
+	return self.LocalSpaceOBB
 end
 
 -- VEntity

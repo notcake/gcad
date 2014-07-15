@@ -14,13 +14,13 @@ end
 -- IContentsComponent
 function self:Initialize ()
 	-- Bounding volumes
-	self.LocalSpaceAABB3d               = nil
-	self.LocalSpaceBoundingSphere       = nil
-	self.LocalSpaceOBB3d                = nil
+	self.LocalSpaceAABB                = nil
+	self.LocalSpaceBoundingSphere      = nil
+	self.LocalSpaceOBB                 = nil
 	
-	self.LocalSpaceAABB3dValid          = false
-	self.LocalSpaceBoundingSphereValid  = false
-	self.LocalSpaceOBB3dValid           = false
+	self.LocalSpaceAABBValid           = false
+	self.LocalSpaceBoundingSphereValid = false
+	self.LocalSpaceOBBValid            = false
 end
 
 function self:Uninitialize ()

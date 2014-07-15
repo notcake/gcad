@@ -12,13 +12,13 @@ function self:ctor ()
 	self.Parent                        = nil
 	
 	-- Bounding volumes
-	self.WorldSpaceAABB3d              = nil
+	self.WorldSpaceAABB                = nil
 	self.WorldSpaceBoundingSphere      = nil
-	self.WorldSpaceOBB3d               = nil
+	self.WorldSpaceOBB                 = nil
 	
-	self.WorldSpaceAABB3dValid         = false
+	self.WorldSpaceAABBValid           = false
 	self.WorldSpaceBoundingSphereValid = false
-	self.WorldSpaceOBB3dValid          = false
+	self.WorldSpaceOBBValid            = false
 	
 	-- Rendering
 	self.Visible                       = true
@@ -101,8 +101,8 @@ function self:RemoveChild (sceneGraphNode)
 	self.ContentsComponent.RemoveChild (self, sceneGraphNode)
 end
 
-function self:OnChildLocalSpaceBoundingVolumesInvalidated (sceneGraphNode)
-	self.ContentsComponent.OnChildLocalSpaceBoundingVolumesInvalidated (self, sceneGraphNode)
+function self:OnChildWorldSpaceBoundingVolumesInvalidated (sceneGraphNode)
+	self.ContentsComponent.OnChildWorldSpaceBoundingVolumesInvalidated (self, sceneGraphNode)
 end
 
 -- Bounding volumes
@@ -253,15 +253,15 @@ function self:InvalidateLocalSpaceBoundingVolumes ()
 	-- If our local space bounding volumes are invalid,
 	-- it implies that our ancestors' local space bounding volumes are also invalid,
 	-- so we don't need to waste time propagating the invalidation upwards
-	if not self.LocalSpaceAABB3dValid and
+	if not self.LocalSpaceAABBValid and
 	   not self.LocalSpaceBoundingSphereValid and
-	   not self.LocalSpaceOBB3dValid then
+	   not self.LocalSpaceOBBValid then
 		return
 	end
 	
-	self.LocalSpaceAABB3dValid         = false
+	self.LocalSpaceAABBValid           = false
 	self.LocalSpaceBoundingSphereValid = false
-	self.LocalSpaceOBB3dValid          = false
+	self.LocalSpaceOBBValid            = false
 	
 	-- Invalidate parent and world space bounding volumes too
 	self:InvalidateParentSpaceBoundingVolumes ()
@@ -277,9 +277,12 @@ function self:InvalidateParentSpaceBoundingVolumes ()
 end
 
 function self:InvalidateWorldSpaceBoundingVolumes ()
-	self.WorldSpaceAABB3dValid         = false
+	self.WorldSpaceAABBValid           = false
 	self.WorldSpaceBoundingSphereValid = false
-	self.WorldSpaceOBB3dValid          = false
+	self.WorldSpaceOBBValid            = false
+	
+	if not self.Parent then return end
+	self.Parent:OnChildWorldSpaceBoundingVolumesInvalidated (self)
 end
 
 -- TransformationComponent
@@ -355,6 +358,19 @@ end
 
 function self:ComputeLocalSpaceOBB ()
 	return self.ContentsComponent.ComputeLocalSpaceOBB (self)
+end
+
+-- NonContainerComponent
+function self:SetLocalSpaceAABB (aabb3d)
+	self.ContentsComponent.SetLocalSpaceAABB (self, aabb3d)
+end
+
+function self:SetLocalSpaceBoundingSphere (sphere3d)
+	self.ContentsComponent.SetLocalSpaceBoundingSphere (self, sphere3d)
+end
+
+function self:SetLocalSpaceOBB (obb3d)
+	self.ContentsComponent.SetLocalSpaceOBB (self, obb3d)
 end
 
 -- SceneGraphNode
@@ -440,5 +456,8 @@ function self:ComputeWorldSpaceBoundingSphere ()
 end
 
 function self:ComputeWorldSpaceOBB ()
-	GCAD.Error ("SceneGraphNode:ComputeWorldSpaceOBB : Not implemented.")
+	self.WorldSpaceOBBValid = true
+	
+	self.WorldSpaceOBB = self.WorldSpaceOBB or GCAD.OBB3d ()
+	self.WorldSpaceOBB = GCAD.AABB3d.ToOBB3d (self:GetWorldSpaceAABB (), self.WorldSpaceOBB)
 end

@@ -86,7 +86,7 @@ function self:Insert (octreeItemNode, aabb3d)
 end
 
 function self:Remove (octreeItemNode)
-	if not self.Items                   then return end
+	if not self.Items                  then return end
 	if not self.Items [octreeItemNode] then return end
 	
 	octreeItemNode.Parent = nil
@@ -97,10 +97,10 @@ function self:Remove (octreeItemNode)
 	self:DecrementInclusiveItemCount ()
 	
 	-- Cull
-	if self.InclusiveItemCount == 0 and
-	   self.Parent then
-		self.Parent:Cull ()
-	end
+	-- if self.InclusiveItemCount == 0 and
+	--    self.Parent then
+	-- 	self.Parent:Cull ()
+	-- end
 end
 
 function self:Update (octreeItemNode, aabb3d)
@@ -109,7 +109,11 @@ function self:Update (octreeItemNode, aabb3d)
 	
 	aabb3d = aabb3d or octreeItemNode:GetAABB ()
 	
-	if self:GetAABB ():ContainsAABB (aabb3d) then return end -- Panic over
+	if self.InclusiveItemCount == 0 and
+	   self:GetAABB ():ContainsAABB (aabb3d) then
+		-- Panic over
+		return
+	end
 	
 	-- This object is too big for us
 	local newParent = self

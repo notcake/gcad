@@ -13,6 +13,10 @@ function self:Add (item)
 	if self:Contains (item) then return end
 	
 	local node = GCAD.OctreeItemNode (item)
+	
+	self.ItemNodes [item] = node
+	self.Count = self.Count + 1
+	
 	self.RootNode:Insert (node, node:GetAABB ())
 end
 
@@ -43,7 +47,10 @@ function self:Remove (item)
 	if not self:Contains (item) then return end
 	
 	local node = self.ItemNodes [item]
+	
 	self.ItemNodes [item] = nil
+	self.Count = self.Count - 1
+	
 	node:Remove ()
 end
 

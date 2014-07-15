@@ -40,7 +40,7 @@ function self:SetRenderComponent (renderComponent)
 end
 
 function self:SetSceneGraphNode (sceneGraphNode)
-	self.ScemeGraphNode = sceneGraphNode
+	self.SceneGraphNode = sceneGraphNode
 end
 
 function self:SetSpatialNode2d (spatialNode2d)

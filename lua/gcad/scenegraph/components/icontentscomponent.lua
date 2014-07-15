@@ -50,8 +50,8 @@ function self:RemoveChild (sceneGraphNode)
 	GCAD.Error ("IContentsComponent:RemoveChild : Not implemented.")
 end
 
-function self:OnChildLocalSpaceBoundingVolumesInvalidated (sceneGraphNode)
-	GCAD.Error ("IContentsComponent:OnChildLocalSpaceBoundingVolumesInvalidated : Not implemented.")
+function self:OnChildWorldSpaceBoundingVolumesInvalidated (sceneGraphNode)
+	GCAD.Error ("IContentsComponent:OnChildWorldSpaceBoundingVolumesInvalidated : Not implemented.")
 end
 
 -- Bounding volumes

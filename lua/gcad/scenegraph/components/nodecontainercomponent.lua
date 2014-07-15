@@ -1,6 +1,9 @@
 local self = {}
 GCAD.SceneGraph.Components.NodeContainerComponent = GCAD.MakeConstructor (self, GCAD.SceneGraph.Components.IContentsComponent)
 
+local math_max = math.max
+local math_min = math.min
+
 function self:ctor (sceneGraphNode)
 	self.SceneGraphNode = sceneGraphNode
 	
@@ -20,13 +23,13 @@ function self:Initialize ()
 	self.Space3d    = nil
 	
 	-- Bounding volumes
-	self.LocalSpaceAABB3d               = nil
-	self.LocalSpaceBoundingSphere       = nil
-	self.LocalSpaceOBB3d                = nil
+	self.LocalSpaceAABB                = nil
+	self.LocalSpaceBoundingSphere      = nil
+	self.LocalSpaceOBB                 = nil
 	
-	self.LocalSpaceAABB3dValid          = false
-	self.LocalSpaceBoundingSphereValid  = false
-	self.LocalSpaceOBB3dValid           = false
+	self.LocalSpaceAABBValid           = false
+	self.LocalSpaceBoundingSphereValid = false
+	self.LocalSpaceOBBValid            = false
 end
 
 function self:Uninitialize ()
@@ -55,15 +58,15 @@ function self:AddChild (sceneGraphNode)
 	sceneGraphNode.Parent = self
 	
 	-- Convert to octree if it's too much
-	-- if not self.Space3d and self.ChildCount > 5 then
-	-- 	self.Space3d = GCAD.Octree ()
-	-- 	
-	-- 	for childSceneGraphNode in self:GetChildEnumerator () do
-	-- 		self.Space3d:Add (childSceneGraphNode)
-	-- 	end
-	-- elseif self.Space3d then
-	-- 	self.Space3d:Add (sceneGraphNode)
-	-- end
+	if not self.Space3d and self.ChildCount > 5 then
+		self.Space3d = GCAD.Octree ()
+		
+		for childSceneGraphNode in self:GetChildEnumerator () do
+			self.Space3d:Add (childSceneGraphNode)
+		end
+	elseif self.Space3d then
+		self.Space3d:Add (sceneGraphNode)
+	end
 	
 	-- Invalidate the child's world matrices (and world space bounding volumes)
 	sceneGraphNode:InvalidateWorldMatrices ()
@@ -146,7 +149,7 @@ function self:RemoveChild (sceneGraphNode)
 	self:InvalidateLocalSpaceBoundingVolumes ()
 end
 
-function self:OnChildLocalSpaceBoundingVolumesInvalidated (sceneGraphNode)
+function self:OnChildWorldSpaceBoundingVolumesInvalidated (sceneGraphNode)
 	if not self.Space3d then return end
 	
 	self.Space3d:UpdateItem (sceneGraphNode)
@@ -171,7 +174,7 @@ end
 
 function self:GetLocalSpaceOBB ()
 	if not self.LocalSpaceOBBValid then
-		self:ComputeLocalOBBSphere ()
+		self:ComputeLocalSpaceOBB ()
 	end
 	
 	return self.LocalSpaceOBB
@@ -181,18 +184,37 @@ function self:ComputeLocalSpaceAABB ()
 	self.LocalSpaceAABBValid = true
 	
 	self.LocalSpaceAABB = self.LocalSpaceAABB or GCAD.AABB3d ()
+	
+	local x1, y1, z1 =  math.huge,  math.huge,  math.huge
+	local x2, y2, z2 = -math.huge, -math.huge, -math.huge
+	for childSceneGraphNode in self:GetChildEnumerator () do
+		local childAABB = childSceneGraphNode:GetParentSpaceAABB ()
+		x1 = math_min (x1, childAABB.Min [1])
+		y1 = math_min (y1, childAABB.Min [2])
+		z1 = math_min (z1, childAABB.Min [3])
+		x2 = math_max (x2, childAABB.Max [1])
+		y2 = math_max (y2, childAABB.Max [2])
+		z2 = math_max (z2, childAABB.Max [3])
+	end
+	
+	self.LocalSpaceAABB:SetMinUnpacked (x1, y1, z1)
+	self.LocalSpaceAABB:SetMaxUnpacked (x2, y2, z2)
 end
 
 function self:ComputeLocalSpaceBoundingSphere ()
 	self.LocalSpaceBoundingSphereValid = true
 	
 	self.LocalSpaceBoundingSphere = self.LocalSpaceBoundingSphere or GCAD.Sphere3d ()
+	
+	GCAD.Error ("NodeContainerComponent:ComputeLocalSpaceBoundingSphere : Not implemented.")
 end
 
-function self:ComputeLocalOBBSphere ()
+function self:ComputeLocalSpaceOBB ()
 	self.LocalSpaceOBBValid = true
 	
 	self.LocalSpaceOBB = self.LocalSpaceOBB or GCAD.OBB3d ()
+	
+	GCAD.Error ("NodeContainerComponent:ComputeLocalSpaceOBB : Not implemented.")
 end
 
 GCAD.SceneGraph.Components.NodeContainerComponent.Instance = GCAD.SceneGraph.Components.NodeContainerComponent ()
