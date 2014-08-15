@@ -90,7 +90,22 @@ function self:GetRecursiveEnumerator ()
 end
 
 function self:SetParent (parent)
-	return self.ContentsComponent.SetParent (self, parent)
+	if self.Parent == parent then return self end
+	
+	if self.Parent then
+		local oldParent = self.Parent
+		self.Parent = nil
+		oldParent:RemoveChild (self)
+	end
+	self.Parent = parent
+	if self.Parent then
+		self.Parnet:AddChild (self)
+	end
+	
+	-- Invalidate our world matrices (and world space bounding volumes)
+	self:InvalidateWorldMatrices ()
+	
+	return self
 end
 
 function self:Remove ()

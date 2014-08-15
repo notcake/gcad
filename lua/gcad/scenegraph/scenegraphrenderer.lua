@@ -55,22 +55,44 @@ function self:RenderNodeOpaque (viewRenderInfo, sceneGraphNode)
 	local renderComponent = sceneGraphNode:GetRenderComponent ()
 	local renderModifierComponent = sceneGraphNode:GetRenderModifierComponent ()
 	
+	-- Pre render
 	if renderModifierComponent:HasPreRenderModifier () then
 		renderModifierComponent:PreRender ()
 	end
 	
-	for childNode in sceneGraphNode:GetChildEnumerator () do
-		if childNode:IsVisible () then
-			self:RenderNodeOpaque (viewRenderInfo, childNode)
+	-- Render children
+	if sceneGraphNode.Space3d then
+		local spatialQueryResult = GCAD.Pools:Get (GCAD.SpatialQueryResult):Allocate ()
+		spatialQueryResult:Clear ()
+		Profiler:Begin ("Space3d:FindIntersectingFrustum")
+		spatialQueryResult = sceneGraphNode.Space3d:FindIntersectingFrustum (viewRenderInfo:GetFrustum (), spatialQueryResult)
+		Profiler:End ()
+		
+		Profiler:Begin ("Dispatch RenderNodeOpaque", spatialQueryResult:GetResultCount ())
+		for childNode in spatialQueryResult:GetEnumerator () do
+			if childNode:IsVisible () then
+				self:RenderNodeOpaque (viewRenderInfo, childNode)
+			end
+		end
+		Profiler:End ()
+		
+		GCAD.Pools:Get (GCAD.SpatialQueryResult):Deallocate (spatialQueryResult)
+	else
+		for childNode in sceneGraphNode:GetChildEnumerator () do
+			if childNode:IsVisible () then
+				self:RenderNodeOpaque (viewRenderInfo, childNode)
+			end
 		end
 	end
 	
+	-- Render this
 	if renderComponent:HasOpaqueRendering () then
 		cam_PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
 		renderComponent:RenderOpaque ()
 		cam_PopModelMatrix ()
 	end
 	
+	-- Post render
 	if renderModifierComponent:HasPostRenderModifier () then
 		renderModifierComponent:PostRender ()
 	end
@@ -79,15 +101,26 @@ end
 function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 	local renderModifierComponent = sceneGraphNode:GetRenderModifierComponent ()
 	
+	-- Pre render
 	if renderModifierComponent:HasPreRenderModifier () then
 		renderModifierComponent:PreRender ()
 	end
 	
+	-- Render children
 	if sceneGraphNode.Space3d then
 		local spatialQueryResult = GCAD.Pools:Get (GCAD.SpatialQueryResult):Allocate ()
 		spatialQueryResult:Clear ()
+		Profiler:Begin ("Space3d:FindIntersectingFrustum")
+		spatialQueryResult = sceneGraphNode.Space3d:FindIntersectingFrustum (viewRenderInfo:GetFrustum (), spatialQueryResult)
+		Profiler:End ()
 		
-		sceneGraphNode.Space3d:FindIntersectingFrustum (viewRenderInfo:GetFrustum ())
+		Profiler:Begin ("Dispatch RenderNodeTranslucent", spatialQueryResult:GetResultCount ())
+		for childNode in spatialQueryResult:GetEnumerator () do
+			if childNode:IsVisible () then
+				self:RenderNodeTranslucent (viewRenderInfo, childNode)
+			end
+		end
+		Profiler:End ()
 		
 		GCAD.Pools:Get (GCAD.SpatialQueryResult):Deallocate (spatialQueryResult)
 	else
@@ -98,6 +131,7 @@ function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 		end
 	end
 	
+	-- Render this
 	local renderComponent = sceneGraphNode:GetRenderComponent ()
 	if renderComponent:HasTranslucentRendering () then
 		cam_PushModelMatrix (sceneGraphNode:GetLocalToWorldMatrixNative ())
@@ -105,6 +139,7 @@ function self:RenderNodeTranslucent (viewRenderInfo, sceneGraphNode)
 		cam_PopModelMatrix ()
 	end
 	
+	-- Post render
 	if renderModifierComponent:HasPostRenderModifier () then
 		renderModifierComponent:PostRender ()
 	end

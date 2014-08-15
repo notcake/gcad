@@ -22,7 +22,7 @@ function self:RenderOpaque (renderContext)
 	if not node1 then return end
 	if not node2 then return end
 	
-	render.DrawLine (node1:GetPositionNative (), node2:GetPositionNative (), GLib.Colors.Red, true)
+	render.DrawLine (node1:GetPositionNative (), node2:GetPositionNative (), GLib.Colors.CornflowerBlue, true)
 end
 
 -- NavigationGraphEdgeRenderComponent

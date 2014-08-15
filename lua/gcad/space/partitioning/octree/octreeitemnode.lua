@@ -40,6 +40,10 @@ function self:GetParent ()
 	return self.Parent
 end
 
+function self:Remove ()
+	self.Parent:Remove (self)
+end
+
 function self:Update ()
 	self.AABB3d = self.Item:GetAABB (self.AABB3d)
 	self.Point = self.AABB3d.Min [1] == self.AABB3d.Max [1] and

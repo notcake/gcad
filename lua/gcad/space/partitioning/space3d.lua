@@ -58,7 +58,9 @@ function self:FindInSpatialPartitionNode (spatialPartitionNode, spatialQueryResu
 	end
 	
 	for childSpatialPartitionNode in spatialPartitionNode:GetChildNodeEnumerator () do
-		self:FindInSpatialPartitionNode (childSpatialPartitionNode, spatialQueryResult)
+		if childSpatialPartitionNode:GetInclusiveItemCount () > 0 then
+			self:FindInSpatialPartitionNode (childSpatialPartitionNode, spatialQueryResult)
+		end
 	end
 	
 	return spatialPartitionNode
