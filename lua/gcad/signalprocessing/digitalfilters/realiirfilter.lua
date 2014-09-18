@@ -3,9 +3,11 @@ GCAD.RealIIRFilter = GCAD.MakeConstructor (self)
 
 --  Y     b0 + b1 z^-1 + b2 z^-2 + b3 z^-3 + b4 z^-4 + ...
 -- --- = --------------------------------------------------
---  X      1 + a1 z^-1 + a2 z^-2 + a3 z^-3 + a4 z^-4 + ...
+--  X     a0 + a1 z^-1 + a2 z^-2 + a3 z^-3 + a4 z^-4 + ...
 
 function GCAD.RealIIRFilter.FromNumeratorAndDenominator (numerator, denominator)
+	denominator = denominator or 1
+	
 	local iirFilter = GCAD.RealIIRFilter ()
 	iirFilter:SetNumerator (numerator)
 	iirFilter:SetDenominator (denominator)
@@ -31,17 +33,20 @@ function self:CreateCompiledFilter ()
 		end
 		code:Append ("return function (x)\n")
 		
+		-- Constant
+		local invA0 = 1 / self.Denominator [1]
+		
 		-- Compute the intermediate value
 		code:Append ("\tx = x")
-		for i = 1, #self.Denominator do
-			code:Append (" - " .. tostring (self.Denominator [i]) .. " * x" .. tostring (i))
+		for i = 2, #self.Denominator do
+			code:Append (" - " .. tostring (self.Denominator [i] * invA0) .. " * x" .. tostring (i - 1))
 		end
 		code:Append ("\n")
 		
 		-- Compute the output
-		code:Append ("\tlocal y = " .. tostring (self.Numerator [1]) .. " * x")
+		code:Append ("\tlocal y = " .. tostring (self.Numerator [1] * invA0) .. " * x")
 		for i = 2, #self.Numerator do
-			code:Append (" + " .. tostring (self.Numerator [i]) .. " * x" .. tostring (i - 1))
+			code:Append (" + " .. tostring (self.Numerator [i] * invA0) .. " * x" .. tostring (i - 1))
 		end
 		code:Append ("\n")
 		
@@ -87,7 +92,7 @@ function self:GetNumerator ()
 end
 
 function self:GetOrder()
-	return math.max (#self.Numerator - 1, #self.Denominator)
+	return math.max (#self.Numerator - 1, #self.Denominator - 1)
 end
 
 function self:SetDenominator (denominator, ...)
