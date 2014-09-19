@@ -253,6 +253,10 @@ end
 
 include ("autopilot.lua")
 
+GCAD.CodeExporter = GLib.Lua.CodeExporter ("GCAD", "gcad")
+GCAD.CodeExporter:AddAuxiliarySystemName ("GLib")
+GCAD.CodeExporter:AddAuxiliarySystemName ("Gooey")
+
 function GCAD.CanRunConCommand (ply)
 	if CLIENT then return true end
 	if SERVER then
