@@ -65,7 +65,7 @@ function self:CreateCompiledFilter ()
 		
 		self.FactoryCode = code:ToString ()
 		
-		print (self.FactoryCode)
+		-- MsgN (self.FactoryCode)
 		
 		local compiled = CompileString (self.FactoryCode, "GCAD.RealIIRFilter", false)
 		if isstring (compiled) then

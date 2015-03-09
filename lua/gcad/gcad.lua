@@ -14,6 +14,7 @@ GLib.AddCSLuaPackFolderRecursive ("gcad")
 -- Profiling
 include ("profiling/profilersectionentry.lua")
 include ("profiling/profiler.lua")
+include ("profiling/hookprofiling.lua")
 include ("profiling/entityprofiling.lua")
 if CLIENT then
 	include ("profiling/panelprofiling.lua")

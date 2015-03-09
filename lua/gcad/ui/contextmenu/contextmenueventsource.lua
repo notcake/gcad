@@ -20,7 +20,9 @@ function self:ctor ()
 	
 	hook.Add ("OnContextMenuClose", "GCAD.ContextMenuEventSource",
 		function ()
-			self.Control:MouseCapture (false)
+			if self.Control and self.Control:IsValid () then
+				self.Control:MouseCapture (false)
+			end
 			
 			self:DispatchMouseLeave ()
 		end

@@ -60,6 +60,8 @@ end
 function self:EnumeratePanels (callback)
 	callback (vgui.GetWorldPanel ())
 	self:EnumeratePanelChildren (vgui.GetWorldPanel (), callback)
+	callback (GetHUDPanel ())
+	self:EnumeratePanelChildren (GetHUDPanel (), callback)
 end
 
 function self:EnumeratePanelChildren (panel, callback)

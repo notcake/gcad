@@ -45,10 +45,14 @@ end
 
 function self:RenderOpaque (viewRenderInfo)
 	self:RenderNodeOpaque (viewRenderInfo, self.SceneGraph:GetRootNode ())
+	
+	render.SetColorMaterial ()
 end
 
 function self:RenderTranslucent (viewRenderInfo)
 	self:RenderNodeTranslucent (viewRenderInfo, self.SceneGraph:GetRootNode ())
+	
+	render.SetColorMaterial ()
 end
 
 function self:RenderNodeOpaque (viewRenderInfo, sceneGraphNode)

@@ -28,7 +28,7 @@ function self:ctor ()
 	
 	GLib.WaitForLocalPlayer (
 		function ()
-			self:SetEnabled (LocalPlayer ():SteamID () == "STEAM_0:1:19269760")
+			-- self:SetEnabled (LocalPlayer ():SteamID () == "STEAM_0:1:19269760")
 		end
 	)
 	
@@ -149,25 +149,33 @@ function self:SetEnabled (enabled)
 				GCAD.Profiler:End ()
 				
 				-- Draw lines
-				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render : Draw lines")
-				local lineCount = 0
+				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render : Determine line rendering type")
 				local lastCumulativeFrameDuration = 0
 				local cumulativeFrameDuration     = 0
 				
+				local sectionEntriesDrawCumulative = {}
 				for _, sectionEntry in ipairs (sectionEntries) do
 					local depth = sectionEntry:GetDepth ()
 					
-					local sectionFrameDuration = sectionEntry:GetLastFrameDuration ()
-					local drawCumulative = false
 					if depth == 0 then
 						lastCumulativeFrameDuration = cumulativeFrameDuration
-						cumulativeFrameDuration = cumulativeFrameDuration + sectionFrameDuration
+						cumulativeFrameDuration = cumulativeFrameDuration + sectionEntry:GetLastFrameDuration ()
 						if math.floor (lastCumulativeFrameDuration / 0.0025) ~= math.floor (cumulativeFrameDuration / 0.0025) then
-							drawCumulative = true
+							sectionEntriesDrawCumulative [sectionEntry] = true
 						end
 					end
-					
+				end
+				GCAD.Profiler:End ()
+				
+				local screenHeight = ScrH ()
+				local contentY     = y
+				
+				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render : Draw line backgrounds")
+				y = contentY
+				local lineCount = 0
+				for _, sectionEntry in ipairs (sectionEntries) do
 					-- Background
+					local sectionFrameDuration = sectionEntry:GetLastFrameDuration ()
 					if sectionFrameDuration >= 0.000750 then
 						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority2BackgroundColor1 or self.Priority2BackgroundColor2)
 					elseif sectionFrameDuration >= 0.000100 then
@@ -175,11 +183,20 @@ function self:SetEnabled (enabled)
 					else
 						surface_SetDrawColor (lineCount % 2 == 0 and self.Priority0BackgroundColor1 or self.Priority0BackgroundColor2)
 					end
-					surface_DrawRect (x0, y, w + (drawCumulative and 160 or 0), lineHeight)
+					surface_DrawRect (x0, y, w + (sectionEntriesDrawCumulative [sectionEntry] and 160 or 0), lineHeight)
 					lineCount = lineCount + 1
 					
+					y = y + lineHeight
+					
+					if y > screenHeight then break end
+				end
+				GCAD.Profiler:End ()
+				
+				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render : Draw line text")
+				y = contentY
+				for _, sectionEntry in ipairs (sectionEntries) do
 					-- Columns
-					local indent = stackLevelIndent * depth
+					local indent = stackLevelIndent * sectionEntry:GetDepth ()
 					
 					-- Section name
 					text = sectionEntry:GetDisplayName ()
@@ -197,11 +214,11 @@ function self:SetEnabled (enabled)
 					surface_DrawText (text)
 					
 					-- Frame duration
-					text = GLib.FormatDuration (sectionFrameDuration)
+					text = GLib.FormatDuration (sectionEntry:GetLastFrameDuration ())
 					surface_SetTextPos (x4 + indent - 8 - surface_GetTextSize (text), y + 2)
 					surface_DrawText (text)
 					
-					if drawCumulative then
+					if sectionEntriesDrawCumulative [sectionEntry] then
 						-- Cumulative frame duration
 						text = GLib.FormatDuration (cumulativeFrameDuration)
 						surface_SetTextPos (x5 + maximumIndent - 8 - surface_GetTextSize (text), y + 2)
@@ -215,7 +232,7 @@ function self:SetEnabled (enabled)
 					
 					y = y + lineHeight
 					
-					if y > ScrH () then break end
+					if y > screenHeight then break end
 				end
 				GCAD.Profiler:End ()
 				

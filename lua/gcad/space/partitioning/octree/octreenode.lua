@@ -104,7 +104,7 @@ function self:Remove (octreeItemNode)
 end
 
 function self:Update (octreeItemNode, aabb3d)
-	if not self.Items                   then return end
+	if not self.Items                  then return end
 	if not self.Items [octreeItemNode] then return end
 	
 	aabb3d = aabb3d or octreeItemNode:GetAABB ()
