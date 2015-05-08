@@ -189,8 +189,8 @@ end
 function GCAD.EulerAngle.FromDirection (forwards, out)
 	out = out or GCAD.EulerAngle ()
 	
-	out [1] = math_deg (math_atan2 (forwards [3], GCAD_Vector2d_Length (forwards)))
-	out [2] = math_deg (math_atan2 (forwards [2], forwards [1]))
+	out [1] = math_deg (math_atan2 (-forwards [3], GCAD_Vector2d_Length (forwards)))
+	out [2] = math_deg (math_atan2 ( forwards [2], forwards [1]))
 	out [3] = 0
 	
 	return out
@@ -199,8 +199,8 @@ end
 function GCAD.EulerAngle.FromUnpackedDirection (x, y, z, out)
 	out = out or GCAD.EulerAngle ()
 	
-	out [1] = math_deg (math_atan2 (z, GCAD_UnpackedVector2d_Length (x, y)))
-	out [2] = math_deg (math_atan2 (y, x))
+	out [1] = math_deg (math_atan2 (-z, GCAD_UnpackedVector2d_Length (x, y)))
+	out [2] = math_deg (math_atan2 ( y, x))
 	out [3] = 0
 	
 	return out
