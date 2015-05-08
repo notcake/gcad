@@ -293,6 +293,7 @@ self.GetUpUnpacked        = GCAD.EulerAngle.GetUpUnpacked
 
 -- Conversion
 self.ToMatrix3x3          = GCAD.EulerAngle.ToMatrix3x3
+self.ToMatrix4x4          = GCAD.EulerAngle.ToMatrix4x4
 self.ToNativeAngle        = GCAD.EulerAngle.ToNativeAngle
 
 -- Utility
