@@ -4,10 +4,21 @@ local mesh_Begin              = mesh._Begin          or mesh.Begin
 local mesh_End                = mesh._End            or mesh.End
 local mesh_AdvanceVertex      = mesh.AdvanceVertex
 local mesh_Color              = mesh.Color
+local mesh_Normal             = mesh.Normal
 local mesh_Position           = mesh.Position
 
 local MATERIAL_LINES          = MATERIAL_LINES
 local MATERIAL_TRIANGLES      = MATERIAL_TRIANGLES
+
+local normals =
+{
+	Vector ( 0,  0, -1),
+	Vector ( 0, -1,  0),
+	Vector (-1,  0,  0),
+	Vector ( 0,  1,  0),
+	Vector ( 1,  0,  0),
+	Vector ( 0,  0,  1)
+}
 
 function GCAD.Meshes.CreateAxisAlignedCube (min, max, color)
 	color = color or GLib.Colors.White
@@ -27,47 +38,47 @@ function GCAD.Meshes.CreateAxisAlignedCube (min, max, color)
 	
 	local cubeMesh = Mesh ()
 	mesh_Begin (cubeMesh, MATERIAL_TRIANGLES, 12)
-		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_Normal (normals [1]) mesh_AdvanceVertex ()
 		
-		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_Normal (normals [2]) mesh_AdvanceVertex ()
 		
-		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [1]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_Normal (normals [3]) mesh_AdvanceVertex ()
 		
-		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [2]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_Normal (normals [4]) mesh_AdvanceVertex ()
 		
-		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [3]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [4]) mesh_Color (r, g, b, a) mesh_Normal (normals [5]) mesh_AdvanceVertex ()
 		
-		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
-		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [6]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [7]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [8]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
+		mesh_Position (vertices [5]) mesh_Color (r, g, b, a) mesh_Normal (normals [6]) mesh_AdvanceVertex ()
 	mesh_End ()
 	
 	return cubeMesh
