@@ -75,6 +75,19 @@ function self:Load (path)
 	end
 end
 
+function self:SerializeNode (navigationGraphNode, outBuffer)
+	if not navigationGraphNode then
+		outBuffer:UInt32 (0x00000000)
+		return
+	end
+	
+	outBuffer:UInt32 (navigationGraphNode:GetId ())
+	outBuffer:Double (navigationGraphNode:GetPosition () [1])
+	outBuffer:Double (navigationGraphNode:GetPosition () [2])
+	outBuffer:Double (navigationGraphNode:GetPosition () [3])
+	outBuffer:StringN8 (navigationGraphNode:GetName () or "")
+end
+
 function self:DeserializeNode (inBuffer)
 	local nodeId = inBuffer:UInt32 ()
 	if nodeId == 0x00000000 then return nil, nil end
@@ -92,17 +105,16 @@ function self:DeserializeNode (inBuffer)
 	return nodeId, navigationGraphNode
 end
 
-function self:SerializeNode (navigationGraphNode, outBuffer)
-	if not navigationGraphNode then
+function self:SerializeEdge (navigationGraphEdge, outBuffer)
+	if not navigationGraphEdge then
+		outBuffer:UInt32 (0x00000000)
 		outBuffer:UInt32 (0x00000000)
 		return
 	end
 	
-	outBuffer:UInt32 (navigationGraphNode:GetId ())
-	outBuffer:Double (navigationGraphNode:GetPosition () [1])
-	outBuffer:Double (navigationGraphNode:GetPosition () [2])
-	outBuffer:Double (navigationGraphNode:GetPosition () [3])
-	outBuffer:StringN8 (navigationGraphNode:GetName () or "")
+	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetFirstNode ()))
+	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetSecondNode ()))
+	outBuffer:Boolean (navigationGraphEdge:IsBidirectional ())
 end
 
 function self:DeserializeEdge (inBuffer)
@@ -120,18 +132,6 @@ function self:DeserializeEdge (inBuffer)
 	edge:SetBidirectional (bidirectional)
 	
 	return edge
-end
-
-function self:SerializeEdge (navigationGraphEdge, outBuffer)
-	if not navigationGraphEdge then
-		outBuffer:UInt32 (0x00000000)
-		outBuffer:UInt32 (0x00000000)
-		return
-	end
-	
-	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetFirstNode ()))
-	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetSecondNode ()))
-	outBuffer:Boolean (navigationGraphEdge:IsBidirectional ())
 end
 
 function self:QueueSave ()
