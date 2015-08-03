@@ -86,6 +86,8 @@ function self:SerializeNode (navigationGraphNode, outBuffer)
 	outBuffer:Double (navigationGraphNode:GetPosition () [2])
 	outBuffer:Double (navigationGraphNode:GetPosition () [3])
 	outBuffer:StringN8 (navigationGraphNode:GetName () or "")
+	
+	return outBuffer
 end
 
 function self:DeserializeNode (inBuffer)
@@ -115,6 +117,8 @@ function self:SerializeEdge (navigationGraphEdge, outBuffer)
 	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetFirstNode ()))
 	outBuffer:UInt32 (self.NavigationGraph:GetNodeId (navigationGraphEdge:GetSecondNode ()))
 	outBuffer:Boolean (navigationGraphEdge:IsBidirectional ())
+	
+	return outBuffer
 end
 
 function self:DeserializeEdge (inBuffer)
