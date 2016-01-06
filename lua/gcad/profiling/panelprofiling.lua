@@ -86,16 +86,18 @@ function self:HookPanel (panel)
 	if not panel            then return end
 	if not panel:IsValid () then return end
 	
+	local className = panel.ClassName or "PANEL"
+	if panel == vgui.GetWorldPanel () then className = "vgui.GetWorldPanel ()" end
+	if panel == GetHUDPanel ()        then className = "GetHUDPanel ()"        end
+	
 	for _, methodName in ipairs (profiledMethods) do
 		local oldMethodName = "____" .. methodName
-		local groupName   = "PANEL:" .. methodName
-		local sectionName = (panel.ClassName or "Unknown") .. ":" .. methodName
+		local sectionName = className .. ":" .. methodName
 		
 		if panel [methodName] then
 			panel [oldMethodName] = panel [oldMethodName] or panel [methodName]
 			panel [methodName] = function (self, ...)
 				if GCAD and GCAD.Profiler then
-					GCAD.Profiler:Begin (groupName)
 					GCAD.Profiler:Begin (sectionName)
 				end
 				
@@ -103,12 +105,60 @@ function self:HookPanel (panel)
 				
 				if GCAD and GCAD.Profiler then
 					GCAD.Profiler:End ()
-					GCAD.Profiler:End (groupName)
 				end
 				
 				return a, b, c, d
 			end
 		end
+	end
+	
+	local sectionName = className .. ":Paint"
+	local paintChildrenSectionName = className .. ":PaintChildren"
+	local oldMethodName = "____Paint"
+	panel [oldMethodName] = panel [oldMethodName] or function () end
+	panel.Paint = function (self, ...)
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:Begin (sectionName)
+		end
+		
+		local a, b, c, d = nil, nil, nil, nil
+		if self [oldMethodName] then
+			a, b, c, d = self [oldMethodName] (self, ...)
+		end
+		
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:End ()
+		end
+		
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:Begin (paintChildrenSectionName)
+		end
+		
+		return a, b, c, d
+	end
+	
+	local sectionName = (panel.ClassName or "PANEL") .. ":PaintOver"
+	local oldMethodName = "____PaintOver"
+	panel [oldMethodName] = panel [oldMethodName] or function () end
+	panel.PaintOver = function (self, ...)
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:End ()
+		end
+		
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:Begin (sectionName)
+		end
+		
+		local a, b, c, d = nil, nil, nil, nil
+		if self [oldMethodName] then
+			a, b, c, d = self [oldMethodName] (self, ...)
+		end
+		
+		if GCAD and GCAD.Profiler then
+			GCAD.Profiler:End ()
+		end
+		
+		return a, b, c, d
 	end
 end
 
