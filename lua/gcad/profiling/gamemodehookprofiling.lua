@@ -2,7 +2,7 @@ local self = {}
 GCAD.GamemodeHookProfiling = GCAD.MakeConstructor (self)
 
 function self:ctor ()
-	self.Gamemode = GAMEMODE or GM
+	self.Gamemode = nil
 
 	self.Enabled = false
 	
@@ -44,6 +44,8 @@ function self:Enable ()
 	if self.Enabled then return end
 	
 	self.Enabled = true
+	
+	self.Gamemode = GAMEMODE or GM
 	
 	for methodName, f in pairs (self.Gamemode) do
 		if type (f) == "function" then
