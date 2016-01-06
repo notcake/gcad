@@ -64,7 +64,7 @@ function self:Disable ()
 	
 	for methodName, f in pairs (self.Gamemode) do
 		if type (f) == "function" and
-		   self.GamemodeHooks [commandName] then
+		   f == self.GamemodeHooks [methodName] then
 			self.Gamemode [methodName] = self.OriginalGamemodeHooks [commandName]
 		end
 	end
