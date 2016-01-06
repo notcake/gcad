@@ -47,7 +47,7 @@ function self:Enable ()
 	
 	for methodName, f in pairs (self.Gamemode) do
 		if type (f) == "function" then
-			self.OriginalGamemodeHooks [methodName] = handler
+			self.OriginalGamemodeHooks [methodName] = f
 			self.GamemodeHooks         [methodName] = GCAD.Profiler:Wrap (self.OriginalGamemodeHooks [methodName], "GAMEMODE:" .. methodName)
 			
 			self.Gamemode [methodName] = self.GamemodeHooks [methodName]
