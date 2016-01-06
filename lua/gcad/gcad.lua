@@ -12,10 +12,15 @@ GLib.AddCSLuaPackFile ("autorun/gcad.lua")
 GLib.AddCSLuaPackFolderRecursive ("gcad")
 
 -- Profiling
+include ("profiling/profiling.lua")
 include ("profiling/profilersectionentry.lua")
 include ("profiling/profiler.lua")
 include ("profiling/hookprofiling.lua")
+include ("profiling/gamemodehookprofiling.lua")
 include ("profiling/entityprofiling.lua")
+include ("profiling/concommandprofiling.lua")
+include ("profiling/netprofiling.lua")
+
 if CLIENT then
 	include ("profiling/panelprofiling.lua")
 	include ("profiling/profilingstatisticsrenderer.lua")

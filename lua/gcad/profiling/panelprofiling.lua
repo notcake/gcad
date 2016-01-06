@@ -25,9 +25,7 @@ end
 function self:SetEnabled (enabled)
 	if self.Enabled == enabled then return self end
 	
-	self.Enabled = enabled
-	
-	if self.Enabled then
+	if enabled then
 		self:Enable ()
 	else
 		self:Disable ()
@@ -38,6 +36,8 @@ end
 
 -- Internal, do not call
 function self:Enable ()
+	if self.Enabled then return end
+	
 	self.Enabled = true
 	
 	self:EnumeratePanels (
@@ -48,6 +48,8 @@ function self:Enable ()
 end
 
 function self:Disable ()
+	if not self.Enabled then return end
+	
 	self.Enabled = false
 	
 	self:EnumeratePanels (

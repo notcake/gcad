@@ -28,9 +28,7 @@ end
 function self:SetEnabled (enabled)
 	if self.Enabled == enabled then return self end
 	
-	self.Enabled = enabled
-	
-	if self.Enabled then
+	if enabled then
 		self:Enable ()
 	else
 		self:Disable ()
@@ -41,6 +39,8 @@ end
 
 -- Internal, do not call
 function self:Enable ()
+	if self.Enabled then return end
+	
 	self.Enabled = true
 	
 	for eventName, eventTable in pairs (hook.GetTable ()) do
@@ -48,15 +48,29 @@ function self:Enable ()
 		self.Hooks         [eventName] = self.Hooks         [eventName] or {}
 		
 		for hookName, hookFunction in pairs (eventTable) do
-			self.OriginalHooks [eventName] [hookName] = hookFunction
-			self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
+			local valid = true
+			if type (hookName) == "string" or
+			   type (hookName) == "number" or
+			   type (hookName) == "function" or
+			   type (hookName) == "boolean" then
+				valid = true
+			else
+				valid = IsValid(hookName)
+			end
 			
-			hook.Add (eventName, hookName, self.Hooks [eventName] [hookName])
+			if valid then
+				self.OriginalHooks [eventName] [hookName] = hookFunction
+				self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
+				
+				hook.Add (eventName, hookName, self.Hooks [eventName] [hookName])
+			end
 		end
 	end
 end
 
 function self:Disable ()
+	if not self.Enabled then return end
+	
 	self.Enabled = false
 	
 	for eventName, eventTable in pairs (hook.GetTable ()) do
