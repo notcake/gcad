@@ -4,8 +4,10 @@ GCAD.HookProfiling = GCAD.MakeConstructor (self)
 function self:ctor ()
 	self.Enabled = false
 	
-	self.OriginalHooks = {}
-	self.Hooks         = {}
+	self.OriginalHooks   = {}
+	self.Hooks           = {}
+	self.OriginalHookAdd = nil
+	self.HookAdd         = nil
 	
 	concommand.Add ("gcad_hook_profiling_enable",  function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (true ) end)
 	concommand.Add ("gcad_hook_profiling_disable", function (ply, _, _) if not GCAD.CanRunConCommand (ply) then return end self:SetEnabled (false) end)
@@ -98,12 +100,30 @@ function self:Enable ()
 	hook.Add ("PostDrawHUD",                    "GCAD.HookProfiling", function () GCAD.Profiler:End () end)
 	hook.Add ("PostDrawOpaqueRenderables",      "GCAD.HookProfiling", function () GCAD.Profiler:End () end)
 	hook.Add ("PostDrawTranslucentRenderables", "GCAD.HookProfiling", function () GCAD.Profiler:End () end)
+	
+	self.OriginalHookAdd = hook.Add
+	self.HookAdd = function (eventName, hookName, f)
+		self.OriginalHooks [eventName] = self.OriginalHooks [eventName] or {}
+		self.Hooks         [eventName] = self.Hooks         [eventName] or {}
+		
+		self.OriginalHooks [eventName] [hookName] = f
+		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
+		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.Hooks [eventName] [hookName], eventName)
+		
+		return self.OriginalHookAdd (eventName, hookName, self.Hooks [eventName] [hookName])
+	end
+	
+	hook.Add = self.HookAdd
 end
 
 function self:Disable ()
 	if not self.Enabled then return end
 	
 	self.Enabled = false
+	
+	if hook.Add == self.HookAdd then
+		hook.Add = self.OriginalHookAdd
+	end
 	
 	hook.Remove ("PreRender",                      "GCAD.HookProfiling")
 	hook.Remove ("PostRender",                     "GCAD.HookProfiling")
