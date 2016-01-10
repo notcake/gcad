@@ -65,7 +65,7 @@ function self:Enable ()
 				self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
 				self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.Hooks [eventName] [hookName], eventName)
 				
-				hook.Add (eventName, hookName, self.Hooks [eventName] [hookName])
+				eventTable [hookName] = self.Hooks [eventName] [hookName]
 			end
 		end
 	end
@@ -103,6 +103,11 @@ function self:Enable ()
 	
 	self.OriginalHookAdd = hook.Add
 	self.HookAdd = function (eventName, hookName, f)
+		self.OriginalHookAdd (eventName, hookName, f)
+		
+		local f = hook.GetTable () [eventName] [hookName]
+		if not f then return end
+		
 		self.OriginalHooks [eventName] = self.OriginalHooks [eventName] or {}
 		self.Hooks         [eventName] = self.Hooks         [eventName] or {}
 		
@@ -110,7 +115,7 @@ function self:Enable ()
 		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
 		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.Hooks [eventName] [hookName], eventName)
 		
-		return self.OriginalHookAdd (eventName, hookName, self.Hooks [eventName] [hookName])
+		hook.GetTable () [eventName] [hookName] = self.Hooks [eventName] [hookName]
 	end
 	
 	hook.Add = self.HookAdd
@@ -142,7 +147,7 @@ function self:Disable ()
 		
 		for hookName, hookFunction in pairs (eventTable) do
 			if hookFunction == self.Hooks [eventName] [hookName] then
-				hook.Add (eventName, hookName, self.OriginalHooks [eventName] [hookName])
+				eventTable [hookName] = self.OriginalHooks [eventName] [hookName]
 			end
 		end
 	end
