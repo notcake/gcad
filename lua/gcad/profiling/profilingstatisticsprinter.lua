@@ -6,32 +6,35 @@ function self:ctor ()
 	self.Priority1Color = GLib.Colors.Orange
 	self.Priority2Color = GLib.Colors.OrangeRed
 	
-	concommand.Add ("gcad_profiler_print",
-		function (ply, _, args)
-			if not GCAD.CanRunConCommand (ply) then return end
-			
-			if #args == 1 and args [1] == "help" then
-				print ("gcad_profiler_print [showold] [showsmall]")
-				return
-			end
-			
-			local showOldEntries   = false
-			local showSmallEntries = false
-			
-			for _, v in ipairs (args) do
-				v = string.lower (v)
-				v = string.gsub (v, "[^a-z0-9]", "")
+	local commands = { "gcad_profiler_print", SERVER and "gcad_profiler_print_sv" or "gcad_profiler_print_cl" }
+	for _, command in ipairs (commands) do
+		concommand.Add (command,
+			function (ply, _, args)
+				if not GCAD.CanRunConCommand (ply) then return end
 				
-				if v == "showold" then
-					showOldEntries = true
-				elseif v == "showsmall" then
-					showSmallEntries = true
+				if #args == 1 and args [1] == "help" then
+					print ("gcad_profiler_print [showold] [showsmall]")
+					return
 				end
+				
+				local showOldEntries   = false
+				local showSmallEntries = false
+				
+				for _, v in ipairs (args) do
+					v = string.lower (v)
+					v = string.gsub (v, "[^a-z0-9]", "")
+					
+					if v == "showold" then
+						showOldEntries = true
+					elseif v == "showsmall" then
+						showSmallEntries = true
+					end
+				end
+				
+				self:Print (showOldEntries, showSmallEntries)
 			end
-			
-			self:Print (showOldEntries, showSmallEntries)
-		end
-	)
+		)
+	end
 end
 
 function self:dtor ()
