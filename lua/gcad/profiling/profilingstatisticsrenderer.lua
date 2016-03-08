@@ -95,7 +95,6 @@ function self:SetEnabled (enabled)
 				-- Get list of section entries
 				GCAD.Profiler:Begin ("ProfilingStatisticsRenderer:Render : Enumerate section entries")
 				local sectionEntries = {}
-				local y = y0
 				for sectionEntry in GCAD.Profiler:GetEnumerator (sectionFilter) do
 					local shouldDraw = sectionEntry:GetLastFrameDuration () > 0.00002 or showAll
 					sectionEntry.LastShouldDrawTime = sectionEntry.LastShouldDrawTime or 0
@@ -106,9 +105,6 @@ function self:SetEnabled (enabled)
 					if showAll or
 					   SysTime () - sectionEntry.LastShouldDrawTime < 1 then
 						sectionEntries [#sectionEntries + 1] = sectionEntry
-						
-						y = y + lineHeight
-						if y >= ScrH () then break end
 					end
 				end
 				GCAD.Profiler:End ()
