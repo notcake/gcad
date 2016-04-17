@@ -111,6 +111,10 @@ function self:Enable ()
 		self.OriginalHooks [eventName] = self.OriginalHooks [eventName] or {}
 		self.Hooks         [eventName] = self.Hooks         [eventName] or {}
 		
+		-- Avoid reinstrumenting our own hooks if another script suspends
+		-- and restores hooks.
+		if f == self.Hooks [eventName] [hookName] then return end
+		
 		self.OriginalHooks [eventName] [hookName] = f
 		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.OriginalHooks [eventName] [hookName], eventName .. ":" .. tostring (hookName))
 		self.Hooks         [eventName] [hookName] = GCAD.Profiler:Wrap (self.Hooks [eventName] [hookName], eventName)
