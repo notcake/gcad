@@ -15,11 +15,11 @@ function GCAD.UI.ContextMenuContextMenu (self)
 				GCAD.NavigationGraphEdgeGenerator:AutolinkNode (navigationGraphNode)
 			end
 		)
-	creationMenu:AddItem ("Navigation Node (x100)")
+	creationMenu:AddItem ("Navigation Node (x10)")
 		:SetIcon ("icon16/vector.png")
 		:AddEventListener ("Click",
 			function (_)
-				for i = 1, 100 do
+				for i = 1, 10 do
 					GCAD.NavigationGraph:CreateNode (contextMenu.WorldIntersectionPosition)
 				end
 			end
@@ -245,8 +245,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 						GCAD.Profiler:Begin (GLib.Lua.GetFunctionName (actionInfo.Filter) or tostring (actionInfo.Filter))
 						local filterResult = actionInfo:Filter (object, localPlayer)
 						GCAD.Profiler:End ()
-						if filterResult and
-						   not actionInfo.MenuOpen then
+						if filterResult then
 							applicableActions [#applicableActions + 1] = actionInfo
 							break
 						end
@@ -271,6 +270,10 @@ function GCAD.UI.ContextMenuContextMenu (self)
 			if #applicableActions > 0 then
 				BeginItemGroup ("Actions")
 			end
+			
+			-- Compatibility for submenus
+			local submenuTarget = nil
+			local submenuTargetResolved = false
 			
 			-- Create action menu items
 			local toggleSpacerCreated = false
@@ -304,6 +307,7 @@ function GCAD.UI.ContextMenuContextMenu (self)
 					menuItem:SetIcon (actionInfo.MenuIcon)
 				end
 				
+				-- Determine checked state of toggle actions
 				if actionInfo.Type == "toggle" then
 					local checked = false
 					
@@ -320,6 +324,51 @@ function GCAD.UI.ContextMenuContextMenu (self)
 					if checked and not actionInfo.MenuIcon then
 						menuItem:SetIcon ("icon16/tick.png")
 					end
+				end
+				
+				-- Handle submenus
+				if actionInfo.MenuOpen then
+					-- Resolve single entity target
+					if not submenuTargetResolved then
+						for object in self.Selection:GetEnumerator () do
+							if object:IsValid () and
+							   object:Is (GCAD.VEntities.EntityReference) and
+							   actionInfo:Filter (object:GetEntity (), LocalPlayer ()) then
+								submenuTarget = object:GetEntity ()
+							end
+						end
+						
+						submenuTargetResolved = true
+					end
+					
+					-- Create a native DMenuOption and copy its children
+					local menuOption = vgui.Create ("DMenuOption")
+					xpcall (
+						function ()
+							actionInfo:MenuOpen (menuOption, submenuTarget, {})
+						end,
+						GLib.Error
+					)
+					
+					local function copyNativeSubmenu (menuItem, menuOption)
+						if not menuOption.SubMenu then return end
+						
+						local submenu = menuItem:CreateSubMenu ()
+						for i = 1, menuOption.SubMenu:ChildCount () do
+							local childMenuOption = menuOption.SubMenu:GetChild (i)
+							if childMenuOption.Class == "DMenuOption" then
+								local handler = childMenuOption.DoClick
+								local childMenuItem = submenu:AddItem (childMenuOption:GetText (), handler)
+								childMenuItem:SetChecked (childMenuOption:GetChecked ())
+								
+								copyNativeSubmenu (childMenuItem, childMenuOption)
+							else
+								submenu:AddSeparator ()
+							end
+						end
+					end
+					copyNativeSubmenu (menuItem, menuOption)
+					menuOption:Remove ()
 				end
 			end
 		end
