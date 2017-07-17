@@ -57,7 +57,7 @@ end
 function self:SetControl (control)
 	if self.Control == control then return self end
 	
-	if self.Control then
+	if self.Control and self.Control:IsValid () then
 		self.Control:SetWorldClicker (true)
 		for _, child in ipairs (self.Control:GetChildren ()) do
 			if child.ClassName == "DIconLayout" then
@@ -74,7 +74,7 @@ function self:SetControl (control)
 	
 	self.Control = control
 	
-	if self.Control then
+	if self.Control and self.Control:IsValid () then
 		self.Control:SetWorldClicker (false)
 		self.Control.Canvas:SetWorldClicker (false)
 		for _, child in ipairs (self.Control:GetChildren ()) do
