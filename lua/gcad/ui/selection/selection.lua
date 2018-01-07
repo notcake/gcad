@@ -5,6 +5,8 @@ GCAD.UI.Selection = GCAD.MakeConstructor (self)
 	Events:
 		Cleared ()
 			Fired when this selection is cleared.
+		Changed ()
+			Fired when this selection's items have changed.
 		ItemAdded (item)
 			Fired when an item has been added to this selection.
 		ItemRemoved (item)
@@ -162,18 +164,21 @@ function self:HookSelectionSet (selectionSet)
 	selectionSet:AddEventListener ("Cleared", "GCAD.Selection." .. self:GetHashCode (),
 		function (_)
 			self:DispatchEvent ("Cleared")
+			self:DispatchEvent ("Changed")
 		end
 	)
 	
 	selectionSet:AddEventListener ("ItemAdded", "GCAD.Selection." .. self:GetHashCode (),
 		function (_, item)
 			self:DispatchEvent ("ItemAdded", item)
+			self:DispatchEvent ("Changed")
 		end
 	)
 	
 	selectionSet:AddEventListener ("ItemRemoved", "GCAD.Selection." .. self:GetHashCode (),
 		function (_, item)
 			self:DispatchEvent ("ItemRemoved", item)
+			self:DispatchEvent ("Changed")
 		end
 	)
 end

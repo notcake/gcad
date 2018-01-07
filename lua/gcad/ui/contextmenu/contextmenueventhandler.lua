@@ -8,6 +8,23 @@ function self:ctor ()
 	GCAD.UI.EventedCollectionCuller (self.Selection)
 	self.SelectionTemporary = false
 	
+	-- Hacky setting of _G._0
+	self.Selection:AddEventListener ("Changed",
+		function ()
+			if self.Selection:GetCount () == 0 then
+				_G._0 = nil
+			elseif self.Selection:GetCount () == 1 then
+				local item = self.Selection:GetEnumerator () ()
+				_G._0 = item.Part or item.Entity or item
+			else
+				_G._0 = {}
+				for item in self.Selection:GetEnumerator () do
+					_G._0 [#_G._0 + 1] = item.Part or item.Entity or item
+				end
+			end
+		end
+	)
+	
 	self.TemporarySelectionSet = GLib.Containers.EventedSet ()
 	self.SelectionPreviewSet   = GLib.Containers.EventedSet ()
 	
