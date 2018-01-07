@@ -23,15 +23,18 @@ function self:GetObject (objectHandle)
 end
 
 function self:GetObjectHandles (out)
-	GCAD.Profiler:Begin ("ents.GetAll")
-	local parts = pac and pac.GetParts () or {}
-	GCAD.Profiler:End ()
+	if not pac or not pac.GetLocalParts then return out end
 	
-	GCAD.Profiler:Begin ("PACPartList : Filter parts", #parts)
-	for _, part in pairs (parts) do
-		if part.ClassName == "model" and
-		   Entity_IsValid (part.Entity) then
-			out [#out + 1] = part
+	local _, uniqueIdParts = debug.getupvalue (pac.GetLocalParts, 1)
+	if not uniqueIdParts then return out end
+	
+	GCAD.Profiler:Begin ("PACPartList : Filter parts")
+	for _, parts in pairs (uniqueIdParts) do
+		for _, part in pairs (parts) do
+			if part.ClassName == "model" and
+			   Entity_IsValid (part.Entity) then
+				out [#out + 1] = part
+			end
 		end
 	end
 	GCAD.Profiler:End ()
