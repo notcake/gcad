@@ -15,7 +15,11 @@ function self:ctor ()
 				_G._0 = nil
 			elseif self.Selection:GetCount () == 1 then
 				local item = self.Selection:GetEnumerator () ()
-				_G._0 = item.Part or item.Entity or item
+				if item then
+					_G._0 = item.Part or item.Entity or item
+				else
+					_G._0 = nil
+				end
 			else
 				_G._0 = {}
 				for item in self.Selection:GetEnumerator () do
