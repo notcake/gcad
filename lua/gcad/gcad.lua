@@ -11,6 +11,9 @@ GLib.AddCSLuaPackSystem ("GCAD")
 GLib.AddCSLuaPackFile ("autorun/gcad.lua")
 GLib.AddCSLuaPackFolderRecursive ("gcad")
 
+-- LuaJIT
+include ("luajit/jitinfo.lua")
+
 -- Profiling
 include ("profiling/profiling.lua")
 include ("profiling/profilersectionentry.lua")
